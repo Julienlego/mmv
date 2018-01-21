@@ -6,6 +6,8 @@ import pyglet
 import math
 import wx
 import src.VizManager as vm
+import src.MidiParser as mp
+import os
 
 CONST_WINDOW_TITLE = "Midi Music Visualizer"
 CONST_WINDOW_WIDTH = 800
@@ -19,15 +21,15 @@ class MainFrame(wx.Frame):
     """
 
     def __init__(self, parent, title):
-
         super(MainFrame, self).__init__(parent, title=title, size=(800, 600))
         self.InitUI()
 
         # Viz manager object.
         self.viz_manager = vm.VizManager()
+        self.midi_parser = mp.MidiParser()
 
         # Draw a circle
-        #self.make_circle(25, 100)
+        # self.make_circle(25, 100)
 
         # make the button here???
         # app = wx.App()
@@ -59,9 +61,16 @@ class MainFrame(wx.Frame):
     def OnOpen(self, e):
         self.Open()
 
+    # opens a file explorer
     def Open(self):
-        print("opening")
+        wildcard = "MIDI file (*.mid)|"  # only .mid files
+        dialog = wx.FileDialog(None, "Choose a file", os.getcwd(), "", wildcard, wx.ID_OPEN)
 
+        if dialog.ShowModal() == wx.ID_OK:
+            print(dialog.GetPath())
+            self.midi_parser.parse_file(dialog.GetPath())  # send the file to midi parser
+
+        dialog.Destroy()
 
     # BUTTON TEST
     def onButton(event):

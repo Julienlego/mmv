@@ -10,10 +10,10 @@ class MidiBlock:
 
     """
 
-    def __init__(self, song_path):
+    def __init__(self, song_path=""):
 
         # Path of the song loaded, default is empty string.
-        self.song_path = ""
+        self.song_path = song_path
 
         # Mido object of the song.
         self.file_mido = None

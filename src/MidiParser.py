@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import src.MidiBlock
+import src.MidiBlock as mb
 
 class MidiParser:
     """
@@ -21,7 +21,7 @@ class MidiParser:
             String of the path of the file (in the C: drive)
 
         """
-        self.song_block = src.MidiBlock(string_path)
+        self.song_block = mb.MidiBlock(string_path)
 
     def get_song_block(self):
         """
