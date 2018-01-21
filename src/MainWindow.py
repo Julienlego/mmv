@@ -1,27 +1,46 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonx
+
+# simple.py
+
 import pyglet
 import math
+import wx
 import src.VizManager as vm
 
 CONST_WINDOW_TITLE = "Midi Music Visualizer"
 CONST_WINDOW_WIDTH = 800
 CONST_WINDOW_HEIGHT = 600
 
-class MainFrame(pyglet.window.Window):
+
+class MainFrame(wx.Frame):
     """
     This class is the main window class.
-
+    All of the setup is done in the init function.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.set_minimum_size(400, 300)
+    def __init__(self, parent, title):
+
+        super(MainFrame, self).__init__(parent, title=title, size=(800, 600))
+        self.Show()
 
         # Viz manager object.
         self.viz_manager = vm.VizManager()
 
         # Draw a circle
         #self.make_circle(25, 100)
+
+        # make the button here???
+        # app = wx.App()
+
+        # frame = wx.Frame(None, -1, 'Sample Text')
+        # frame.Show()
+
+        # app.MainLoop()
+
+
+    # BUTTON TEST
+    def onButton(event):
+        print("button pressed")
 
     """
     def make_circle(self, num_points, radius):
@@ -60,7 +79,6 @@ class MainFrame(pyglet.window.Window):
         Main loop.
 
         """
-        self.clear()
 
     def on_key_press(self, symbol, modifiers):
         """
@@ -86,8 +104,14 @@ class MainFrame(pyglet.window.Window):
         """
         pass
 
-
+"""
 if __name__ == "__main__":
    window = MainFrame(width=CONST_WINDOW_WIDTH, height=CONST_WINDOW_HEIGHT,
                       caption=CONST_WINDOW_TITLE)
    pyglet.app.run()
+"""
+
+if __name__ == '__main__':
+    app = wx.App()
+    MainFrame(None, title='Sample Text')
+    app.MainLoop()
