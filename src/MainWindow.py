@@ -50,7 +50,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnQuit, fileQuit)
         self.Bind(wx.EVT_MENU, self.OnOpen, fileOpen)
 
-        self.SetSize((300, 200))
+        self.SetSize((800, 600))
         self.SetTitle('Simple menu')
         self.Centre()
         self.Show(True)
