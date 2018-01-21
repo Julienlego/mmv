@@ -21,7 +21,7 @@ class MainFrame(wx.Frame):
     def __init__(self, parent, title):
 
         super(MainFrame, self).__init__(parent, title=title, size=(800, 600))
-        self.Show()
+        self.InitUI()
 
         # Viz manager object.
         self.viz_manager = vm.VizManager()
@@ -36,6 +36,31 @@ class MainFrame(wx.Frame):
         # frame.Show()
 
         # app.MainLoop()
+
+    def InitUI(self):
+        menubar = wx.MenuBar()
+        fileMenu = wx.Menu()
+        fileOpen = fileMenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
+        fileQuit = fileMenu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
+        menubar.Append(fileMenu, '&File')
+        self.SetMenuBar(menubar)
+
+        self.Bind(wx.EVT_MENU, self.OnQuit, fileQuit)
+        self.Bind(wx.EVT_MENU, self.OnOpen, fileOpen)
+
+        self.SetSize((300, 200))
+        self.SetTitle('Simple menu')
+        self.Centre()
+        self.Show(True)
+
+    def OnQuit(self, e):
+        self.Close()
+
+    def OnOpen(self, e):
+        self.Open()
+
+    def Open(self):
+        print("opening")
 
 
     # BUTTON TEST
@@ -104,14 +129,12 @@ class MainFrame(wx.Frame):
         """
         pass
 
-"""
-if __name__ == "__main__":
-   window = MainFrame(width=CONST_WINDOW_WIDTH, height=CONST_WINDOW_HEIGHT,
-                      caption=CONST_WINDOW_TITLE)
-   pyglet.app.run()
-"""
 
-if __name__ == '__main__':
+def main():
     app = wx.App()
     MainFrame(None, title='Sample Text')
     app.MainLoop()
+
+
+if __name__ == '__main__':
+    main()
