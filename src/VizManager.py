@@ -11,7 +11,9 @@ class VizManager:
 
     """
 
-    def __init__(self):
+    def __init__(self, panel):
+
+        self.pygame_panel = panel
 
         # Preset of visualization being used.
         self.preset = None
@@ -28,20 +30,12 @@ class VizManager:
         # Preset Manager
         self.preset_manager = pm.PresetManager()
 
-    def load_preset(self):
+    def LoadPreset(self):
         pass
 
-    def load_song(self, path):
+    def LoadSong(self, path):
         print("Loading song from path %s", path)
         self.song_parser.parse_file(path)
-
-    def __generate_frame(self):
-        """
-        Private method that uses the current preset to draw the frame of
-        a midi message and capture its framebuffer.
-
-        """
-        pass
 
     def generate_viz(self):
         """
@@ -52,6 +46,14 @@ class VizManager:
 
     def goto_frame(self, frame_id):
         """
+
+        """
+        pass
+
+    def __generate_frame(self):
+        """
+        Private method that uses the current preset to draw the frame of
+        a midi message and capture its framebuffer.
 
         """
         pass
