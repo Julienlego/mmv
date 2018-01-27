@@ -4,17 +4,19 @@ import pygame
 import wx
 import src.VizManager as vm
 import os
+import sys
 
 class PygameDisplay(wx.Window):
     def __init__(self, parent, ID):
         wx.Window.__init__(self, parent, ID)
         self.parent = parent
         self.hwnd = self.GetHandle()
-        os.environ['SDL_VIDEODRIVER'] = 'windib'
+        if sys.platform == "win32":
+            os.environ['SDL_VIDEODRIVER'] = 'windib'
         os.environ['SDL_WINDOWID'] = str(self.hwnd)
 
         pygame.display.init()
-        self.screen = pygame.display.set_mode()
+        self.screen = pygame.display.set_mode((400,600))
         self.size = self.GetSizeTuple()
 
         self.timer = wx.Timer(self)
@@ -35,12 +37,7 @@ class PygameDisplay(wx.Window):
     def Redraw(self):
         self.screen.fill((0, 0, 0))
 
-        cur = 0
-
-        while cur <= self.size[1]:
-            pygame.draw.aaline(self.screen, (255, 255, 255), (0, self.size[1] - cur), (cur, 0))
-
-            cur += self.linespacing
+        pygame.draw.circle(self.screen,(0,255,0), (250, 250), 125)
 
         pygame.display.update()
 
@@ -65,8 +62,8 @@ class MainFrame(wx.Frame):
 
     def __init__(self, parent):
         super(MainFrame, self).__init__(parent, title="Midi Music Visualizer", size=(800, 600))
-        panel = wx.Panel(self)
-        self.InitUI(panel)
+        self.panel = wx.Panel(self)
+        self.InitUI(self.panel)
         self.vizmanager = vm.VizManager()
         self.Centre()
         self.Show(True)
@@ -75,8 +72,6 @@ class MainFrame(wx.Frame):
         """
         Setup the main frame with all the panels, file menu, and status bar
         """
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-
         self.display = PygameDisplay(self, -1)
 
         # Create menu bar
@@ -95,11 +90,16 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnOpen, fileopen)
 
         # Add panels to sizer and set to panel
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.display, 0, flag=wx.EXPAND|wx.ALL, border=2)
         sizer.Add(self.debugbox, 1, flag=wx.EXPAND|wx.ALL, border=2)
+
+        self.SetAutoLayout(True)
         panel.SetSizerAndFit(sizer)
 
     def OnQuit(self, e):
+        self.display.Kill(e)
+        pygame.quit()
         self.Destroy()
 
     def OnSize(self):
@@ -119,12 +119,6 @@ class MainFrame(wx.Frame):
             self.vizmanager.LoadSongFromPath(dialog.GetPath())  # send the file to midi parser
 
         dialog.Destroy()
-
-    def OnDraw(self):
-        pass
-
-    def Update(self, event):
-        pass
 
 
 class App(wx.App):
