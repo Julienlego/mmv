@@ -2,17 +2,44 @@
 
 # simple.py
 
-import pyglet
-import math
-import wx
+import pygame, wx, os
 import src.VizManager as vm
 import src.MidiParser as mp
-import os
 
-CONST_WINDOW_TITLE = "Midi Music Visualizer"
-CONST_WINDOW_WIDTH = 800
-CONST_WINDOW_HEIGHT = 600
 
+class PyGameDisplay(wx.Window):
+    def __init__(self, parent, ID):
+        wx.Window.__init__(self, parent, ID)
+        self.parent = parent
+        self.hwnd = self.GetHandle()
+        os.environ['SDL_VIDEODRIVER'] = 'windib'
+        os.environ['SDL_WINDOWID'] = str(self.hwnd)
+
+        pygame.display.init()
+        self.screen = pygame.display.set_mode()
+        self.size = self.GetSizeTuple()
+
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_TIMER, self.Update, self.timer)
+
+    def Update(self, event):
+        # Any update tasks would go here (moving sprites, advancing animation frames etc.)
+        self.Redraw()
+
+    def Redraw(self):
+        self.screen.fill((0, 0, 0))
+        pygame.display.update()
+
+    def OnPaint(self, event):
+        self.Redraw()
+
+    def Kill(self, event):
+        # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
+        # call the Redraw() method
+        # (Otherwise wx seems to call Draw between quitting Pygame and destroying the frame)
+        self.Unbind(event=wx.EVT_PAINT, handler=self.OnPaint)
+        self.Unbind(event=wx.EVT_TIMER, handler=self.Update, source=self.timer)
 
 class MainFrame(wx.Frame):
     """
@@ -20,130 +47,108 @@ class MainFrame(wx.Frame):
     All of the setup is done in the init function.
     """
 
-    def __init__(self, parent, title):
-        super(MainFrame, self).__init__(parent, title=title, size=(800, 600))
-        self.InitUI()
+    def __init__(self, parent, title, width, height):
+        super(MainFrame, self).__init__(parent, title=title, size=(width, height))
 
-        # Viz manager object.
-        self.viz_manager = vm.VizManager()
-        self.midi_parser = mp.MidiParser()
+        self.panel = wx.Panel(self)
 
-        # Draw a circle
-        # self.make_circle(25, 100)
+        self.frame_width = width
+        self.frame_height = height
 
-        # make the button here???
-        # app = wx.App()
+        self.viz_manager = vm.VizManager(self.panel)
 
-        # frame = wx.Frame(None, -1, 'Sample Text')
-        # frame.Show()
+        #self.display = PyGameDisplay(self, -1)
 
-        # app.MainLoop()
-
-    def InitUI(self):
+        # Create menu bar
         menubar = wx.MenuBar()
-        fileMenu = wx.Menu()
-        fileOpen = fileMenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
-        fileQuit = fileMenu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
-        menubar.Append(fileMenu, '&File')
+        filemenu = wx.Menu()
+        fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
+        filequit = filemenu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
+        menubar.Append(filemenu, '&File')
         self.SetMenuBar(menubar)
 
-        self.Bind(wx.EVT_MENU, self.OnQuit, fileQuit)
-        self.Bind(wx.EVT_MENU, self.OnOpen, fileOpen)
+        # Bind events
+        self.Bind(wx.EVT_MENU, self.OnQuit, filequit)
+        self.Bind(wx.EVT_MENU, self.OnOpen, fileopen)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
-        self.SetSize((800, 600))
-        self.SetTitle('Simple menu')
-        self.Centre()
-        self.Show(True)
+        # Create the sizer
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        self.debugbox = wx.TextCtrl(panel,
+                                    size=(self.frame_width/4, self.frame_height),
+                                    style=wx.TE_MULTILINE|wx.TE_READONLY
+                                    )
+
+        #sizer.Add(self.display, 0, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5)
+        sizer.Add(self.debugbox, 1, wx.EXPAND|wx.ALIGN_RIGHT|wx.ALL, 5)
+
+        #self.SetAutoLayout(True)
+
+        # Use the sizers to set the frame
+        self.SetSizer(sizer)
+
+        self.Layout()
+        self.Center()
+        self.Show()
+        self.Fit()
+
+    """
+    Quits the frame
+    
+    """
     def OnQuit(self, e):
-        self.Close()
+        self.display
+        pygame.quit()
 
+    """
+    Opens a file explorer to select a .mid file
+    
+    """
     def OnOpen(self, e):
-        self.Open()
+        wildcard = "MIDI file (*.mid)|*.mid"  # only .mid files
 
-    # opens a file explorer
-    def Open(self):
-        wildcard = "MIDI file (*.mid)|"  # only .mid files
-        dialog = wx.FileDialog(None, "Choose a file", os.getcwd(), "", wildcard, wx.ID_OPEN)
+        # Create and show the open filedialog
+        dialog = wx.FileDialog(None, message="Open MIDI file",
+                               defaultDir=os.getcwd(),
+                               defaultFile="",
+                               wildcard=wildcard,
+                               style=wx.ID_OPEN
+                               )
 
         if dialog.ShowModal() == wx.ID_OK:
             print(dialog.GetPath())
-            self.midi_parser.parse_file(dialog.GetPath())  # send the file to midi parser
+            # send the file to midi parser
+            self.viz_manager.LoadSong(dialog.GetPath())
 
         dialog.Destroy()
 
-    # BUTTON TEST
-    def onButton(event):
-        print("button pressed")
+    def OnKeyTyped(self, event):
+        print(event.GetString())
 
-    """
-    def make_circle(self, num_points, radius):
-        verts = []
-        for i in range(num_points):
-            angle = math.radians(float(i) / num_points * 360.0)
-            x = radius * math.cos(angle) + 300
-            y = radius * math.sin(angle) + 200
-            verts += [x,y]
-        global circle
-        circle = pyglet.graphics.vertex_list(num_points, ('v2f', verts))
-    """
+    def OnSize(self, event):
+        self.Layout()
 
     def on_draw(self):
-        """
-        Called by pyglet to draw the canvas.
-
-        window.clear()
-        label = pyglet.text.Label('HELLO WORLD!!!',
-                          font_size=42,
-                          x=window.width//2, y=window.height//2,
-                          anchor_x='center', anchor_y='center')
-        label.draw()
-
-        global circle
-        pyglet.gl.glClear(pyglet.gl.GL_COLOR_BUFFER_BIT)
-        #pyglet.gl.glColor3f(0,10,0)
-        circle.draw(pyglet.gl.GL_LINE_LOOP)
-        """
         pass
 
     def update(self):
-        """
-        Called repeatedly by the pyglet clock.
-
-        Main loop.
-
-        """
-
-    def on_key_press(self, symbol, modifiers):
-        """
-        Called when the end user modifies a key that was pressed.
-
-        :param symbol: int
-            Number representing the key that was pressed
-        :param modifiers: int
-            Number representing any modified keys that were pressed
-
-        """
         pass
 
-    def on_key_release(self, symbol, modifiers):
-        """
-        Called when the end user releases a key.
+"""
+Main App for software.
 
-        :param symbol: int
-            Number representing the key that was pressed.
-        :param modifiers: int
-            Number representing any modifying keys that were pressed.
-
-        """
-        pass
-
-
-def main():
-    app = wx.App()
-    MainFrame(None, title='Sample Text')
-    app.MainLoop()
-
+"""
+class App(wx.App):
+    def OnInit(self):
+        self.frame = MainFrame(parent=None,
+                               title="Midi Music Visualizer",
+                               width=800, height=600
+                               )
+        self.frame.Show()
+        self.SetTopWindow(self.frame)
+        return True
 
 if __name__ == '__main__':
-    main()
+    app = App()
+    app.MainLoop()
