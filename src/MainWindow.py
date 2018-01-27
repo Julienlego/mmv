@@ -73,7 +73,7 @@ class Frame(wx.Frame):
         # Viz manager object.
         self.viz_manager = vm.VizManager()
         self.midi_parser = mp.MidiParser()
-        self.graphics_system = gs.GraphicsSystem()
+        self.graphics_system = gs.GraphicsSystem(self.display)
 
         # self.statusbar = self.CreateStatusBar()
         # self.statusbar.SetFieldsCount(3)
