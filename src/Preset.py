@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import src.MidiBlock
 import pyglet
 
 class BasePreset:
@@ -11,10 +10,8 @@ class BasePreset:
 
     def __init__(self, panel):
         self.main_panel = panel
-        #self.OnFirstLoad(self)
 
-
-    def OnFirstLoad(self):
+    def OnFirstLoad(self, panel):
         """
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
@@ -42,7 +39,7 @@ class BasicPreset(BasePreset):
 
     """
 
-    def OnFirstLoad(self):
+    def OnFirstLoad(self, panel):
         pass
 
     def PerMessage(self, message):

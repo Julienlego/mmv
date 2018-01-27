@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import src.MidiBlock as mb
+import music21
 
 class MidiParser:
     """
@@ -10,29 +10,46 @@ class MidiParser:
 
     def __init__(self):
 
-        # Memory block of whatever song is currently loaded, None if no song is loaded.
-        self.song_block = None
+        # Path of the song loaded, default is empty string.
+        self.path = ""
 
-    def parse_file(self, string_path):
+        # Mido object of the song.
+        self.file_mido = None
+
+        # Music21 object of the song.
+        self.score = None
+
+    def ParseFile(self, path):
         """
         Reads file at given path, if possible, and saves as an object.
 
-        :param string_path: string
+        :param path: string
             String of the path of the file (in the C: drive)
 
         """
-        self.song_block = mb.MidiBlock(string_path)
+        self.path = path
+        self.score = music21.midi.translate.midiFilePathToStream(path)
 
-    def get_song_block(self):
+    def GetSongPath(self):
         """
-        Returns song block.
-
-        """
-        return self.song_block
-
-    def del_block(self):
-        """
-        Removes song block from memory.
+        Returns song file path.
 
         """
-        pass
+        return self.path
+
+    def GetScore(self):
+        """
+        Returns the music21 score object of the song, if possible.
+
+        """
+        return self.score
+
+    def IsEmpty(self):
+        """
+        Returns true if no song is loaded, false if there is.
+
+        """
+        if self.path == (None or ""):
+            return bool(True)
+        else:
+            return bool(False)

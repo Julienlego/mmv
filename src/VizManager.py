@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+import time
+import fluidsynth
 import src.MidiParser as mp
 import src.PresetManager as pm
-
-CONST_DEFAULT_SONG_PATH = "" #"C:\Users\Jules\Desktop\midifiles"
 
 class VizManager:
     """
@@ -11,49 +11,35 @@ class VizManager:
 
     """
 
-    def __init__(self, panel):
-
-        self.pygame_panel = panel
+    def __init__(self):
 
         # Preset of visualization being used.
         self.preset = None
 
-        # Path of the midi song being used.
-        self.song_path = None
-
-        # List of each frame of the visualization.
-        self.frames = []
+        # Stores all presets
+        self.presets = {}
 
         # Midi Parser
-        self.song_parser = mp.MidiParser()
+        self.parser = mp.MidiParser()
 
         # Preset Manager
         self.preset_manager = pm.PresetManager()
 
     def LoadPreset(self):
+        """
+
+        """
         pass
 
-    def LoadSong(self, path):
+    def LoadSongFromPath(self, path):
+        """
+        Load and filepath to parser
+        """
         print("Loading song from path %s", path)
-        self.song_parser.parse_file(path)
+        self.parser.ParseFile(path)
 
-    def generate_viz(self):
+    def Play(self):
         """
-        Generate and capture each frame of the visualization
-
-        """
-        pass
-
-    def goto_frame(self, frame_id):
-        """
-
-        """
-        pass
-
-    def __generate_frame(self):
-        """
-        Private method that uses the current preset to draw the frame of
-        a midi message and capture its framebuffer.
-
+        Starts playing the vizualization from the beginning
         """
         pass
