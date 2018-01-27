@@ -1,17 +1,19 @@
 #!/usr/bin/env python
+import src.Preset
 
 class PresetManager:
     """
     This class manages all the presets. It loads all the presets in the
     current directory into memory to be later be called by the VizManager.
-
     """
 
     def __init__(self):
 
         # Keeps all presets in memory with an integer key to access them.
-        self.presets = {}
+        self.presets = []
         self.load_presets()
+
+        self.num_presets = 0
 
     def get_preset(self, preset_id):
         """
@@ -27,18 +29,17 @@ class PresetManager:
     def load_presets(self):
         """
         Loads all presets into storage.
-
         """
-
         pass
 
     def load_preset_from_path(self, path):
         """
         Load preset .py file from given path to the preset dictionary.
-
         """
-
         pass
 
     def add_preset(self, preset):
-        pass
+        """
+        Adds preset to storage.
+        """
+        self.presets.append(preset)

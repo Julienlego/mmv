@@ -9,11 +9,12 @@ class BasePreset:
 
     """
 
-    def __init__(self):
-        self.on_first_load(self)
+    def __init__(self, panel):
+        self.main_panel = panel
+        #self.OnFirstLoad(self)
 
 
-    def on_first_load(self):
+    def OnFirstLoad(self):
         """
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
@@ -22,7 +23,7 @@ class BasePreset:
         """
         pass
 
-    def per_message(self, message):
+    def PerMessage(self, message):
         """
         Draws given message.
 
@@ -41,11 +42,9 @@ class BasicPreset(BasePreset):
 
     """
 
-    def on_first_load(self):
+    def OnFirstLoad(self):
         pass
 
-    def per_message(self, message):
+    def PerMessage(self, message):
         pass
 
-    def draw_circle(self, xpos, ypos, radius, color):
-        pass

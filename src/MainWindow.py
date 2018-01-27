@@ -1,17 +1,11 @@
 #!/usr/bin/env pythonx
 
-# simple.py
-
 import pyglet
 import math
 import wx
 import src.VizManager as vm
 import src.MidiParser as mp
 import os
-
-CONST_WINDOW_TITLE = "Midi Music Visualizer"
-CONST_WINDOW_WIDTH = 800
-CONST_WINDOW_HEIGHT = 600
 
 
 class MainFrame(wx.Frame):
@@ -20,26 +14,21 @@ class MainFrame(wx.Frame):
     All of the setup is done in the init function.
     """
 
-    def __init__(self, parent, title):
-        super(MainFrame, self).__init__(parent, title=title, size=(800, 600))
-        self.InitUI()
+    def __init__(self, parent):
+        super(MainFrame, self).__init__(parent, title="Midi Music Visualizer", size=(800, 600))
+        panel = wx.Panel(self)
+        self.InitUI(panel)
+        self.vizmanager = vm.VizManager(panel)
+        self.Centre()
+        self.Show(True)
 
-        # Viz manager object.
-        self.viz_manager = vm.VizManager()
-        self.midi_parser = mp.MidiParser()
+    def InitUI(self, panel):
+        """
+        Setup the main frame with all the panels, file menu, and status bar
+        """
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        # Draw a circle
-        # self.make_circle(25, 100)
-
-        # make the button here???
-        # app = wx.App()
-
-        # frame = wx.Frame(None, -1, 'Sample Text')
-        # frame.Show()
-
-        # app.MainLoop()
-
-    def InitUI(self):
+        # Create menu bar
         menubar = wx.MenuBar()
         fileMenu = wx.Menu()
         fileOpen = fileMenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
@@ -47,13 +36,16 @@ class MainFrame(wx.Frame):
         menubar.Append(fileMenu, '&File')
         self.SetMenuBar(menubar)
 
+        # Create debug text box
+        debugbox = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY)
+
+        # Bind events
         self.Bind(wx.EVT_MENU, self.OnQuit, fileQuit)
         self.Bind(wx.EVT_MENU, self.OnOpen, fileOpen)
 
-        self.SetSize((800, 600))
-        self.SetTitle('Simple menu')
-        self.Centre()
-        self.Show(True)
+        # Add panels to sizer and set to panel
+        sizer.Add(debugbox, 0, flag=wx.EXPAND|wx.ALIGN_RIGHT|wx.ALL, border=2)
+        panel.SetSizerAndFit(sizer)
 
     def OnQuit(self, e):
         self.Close()
@@ -63,85 +55,28 @@ class MainFrame(wx.Frame):
 
     # opens a file explorer
     def Open(self):
-        wildcard = "MIDI file (*.mid)|"  # only .mid files
+        """
+        Opens a file explorer to select a midi file
+        """
+        wildcard = "MIDI file (*.mid)|*.mid"  # only .mid files
         dialog = wx.FileDialog(None, "Choose a file", os.getcwd(), "", wildcard, wx.ID_OPEN)
 
         if dialog.ShowModal() == wx.ID_OK:
             print(dialog.GetPath())
-            self.midi_parser.parse_file(dialog.GetPath())  # send the file to midi parser
+            self.vizmanager.LoadSong(dialog.GetPath())  # send the file to midi parser
 
         dialog.Destroy()
 
-    # BUTTON TEST
-    def onButton(event):
-        print("button pressed")
-
-    """
-    def make_circle(self, num_points, radius):
-        verts = []
-        for i in range(num_points):
-            angle = math.radians(float(i) / num_points * 360.0)
-            x = radius * math.cos(angle) + 300
-            y = radius * math.sin(angle) + 200
-            verts += [x,y]
-        global circle
-        circle = pyglet.graphics.vertex_list(num_points, ('v2f', verts))
-    """
-
     def on_draw(self):
-        """
-        Called by pyglet to draw the canvas.
-
-        window.clear()
-        label = pyglet.text.Label('HELLO WORLD!!!',
-                          font_size=42,
-                          x=window.width//2, y=window.height//2,
-                          anchor_x='center', anchor_y='center')
-        label.draw()
-
-        global circle
-        pyglet.gl.glClear(pyglet.gl.GL_COLOR_BUFFER_BIT)
-        #pyglet.gl.glColor3f(0,10,0)
-        circle.draw(pyglet.gl.GL_LINE_LOOP)
-        """
         pass
 
     def update(self):
-        """
-        Called repeatedly by the pyglet clock.
-
-        Main loop.
-
-        """
-
-    def on_key_press(self, symbol, modifiers):
-        """
-        Called when the end user modifies a key that was pressed.
-
-        :param symbol: int
-            Number representing the key that was pressed
-        :param modifiers: int
-            Number representing any modified keys that were pressed
-
-        """
-        pass
-
-    def on_key_release(self, symbol, modifiers):
-        """
-        Called when the end user releases a key.
-
-        :param symbol: int
-            Number representing the key that was pressed.
-        :param modifiers: int
-            Number representing any modifying keys that were pressed.
-
-        """
         pass
 
 
 def main():
     app = wx.App()
-    MainFrame(None, title='Sample Text')
+    MainFrame(None)
     app.MainLoop()
 
 
