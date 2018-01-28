@@ -16,7 +16,7 @@ class PygameDisplay(wx.Window):
         os.environ['SDL_WINDOWID'] = str(self.hwnd)
 
         pygame.display.init()
-        self.screen = pygame.display.set_mode((400,600))
+        self.screen = pygame.display.set_mode((800,600))
         self.size = self.GetSize()
 
         self.timer = wx.Timer(self)
