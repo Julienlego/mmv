@@ -16,13 +16,16 @@ class PygameDisplay(wx.Window):
         os.environ['SDL_WINDOWID'] = str(self.hwnd)
 
         pygame.display.init()
-        self.screen = pygame.display.set_mode((800,600))
+        self.screen = pygame.display.set_mode()
         self.size = self.GetSize()
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_TIMER, self.Update, self.timer)
         self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+        self.resized = False
 
         self.fps = 60.0
         self.timespacing = 1000.0 / self.fps
@@ -35,9 +38,10 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def Redraw(self):
+        print ("redraw")
         self.screen.fill((0, 0, 0))
 
-        pygame.draw.circle(self.screen,(0,255,0), (250, 250), 125)
+        pygame.draw.circle(self.screen, (0, 255, 0), (250, 250), 125)
 
         pygame.display.update()
 
@@ -45,7 +49,15 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        self.size = self.GetSize()
+        print("resize")
+        self.size = event.GetSize()
+        self.resized = True
+
+    def OnIdle(self, event):
+        if self.resized:
+            print("New size: ", self.GetSize())
+            self.resized = False
+
 
     def Kill(self, event):
         # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
@@ -67,7 +79,7 @@ class MainFrame(wx.Frame):
         self.vizmanager = vm.VizManager()
         self.Centre()
         self.Show(True)
-        self.display.SetSizeWH(800, 600)
+        self.display.SetSize(800, 600)
 
     def InitUI(self, panel):
         """
@@ -89,6 +101,7 @@ class MainFrame(wx.Frame):
         # Bind events
         self.Bind(wx.EVT_MENU, self.OnQuit, filequit)
         self.Bind(wx.EVT_MENU, self.OnOpen, fileopen)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -103,8 +116,10 @@ class MainFrame(wx.Frame):
         pygame.quit()
         self.Destroy()
 
-    def OnSize(self):
+    def OnSize(self, event):
         self.Layout()
+        self.display.SetSize(event.GetSize())
+        print ("Size: ", self.display.size)
 
     def OnOpen(self, e):
         self.Open()
