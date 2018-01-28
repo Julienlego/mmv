@@ -11,13 +11,13 @@ class PygameDisplay(wx.Window):
         wx.Window.__init__(self, parent, ID)
         self.parent = parent
         self.hwnd = self.GetHandle()
-        if sys.platform == "win32":
-            os.environ['SDL_VIDEODRIVER'] = 'windib'
+        # if sys.platform == "win32":
+        os.environ['SDL_VIDEODRIVER'] = 'windib'
         os.environ['SDL_WINDOWID'] = str(self.hwnd)
 
         pygame.display.init()
         self.screen = pygame.display.set_mode((400,600))
-        self.size = self.GetSizeTuple()
+        self.size = self.GetSize()
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -45,7 +45,7 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        self.size = self.GetSizeTuple()
+        self.size = self.GetSize()
 
     def Kill(self, event):
         # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
@@ -67,6 +67,7 @@ class MainFrame(wx.Frame):
         self.vizmanager = vm.VizManager()
         self.Centre()
         self.Show(True)
+        self.display.SetSizeWH(800, 600)
 
     def InitUI(self, panel):
         """
