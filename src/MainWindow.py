@@ -88,6 +88,7 @@ class MainFrame(wx.Frame):
         menubar = wx.MenuBar()
         filemenu = wx.Menu()
         viewmenu = wx.Menu()
+
         self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
         self.toggledebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
         viewmenu.Check(self.toggledebug.GetId(), True)
@@ -96,7 +97,7 @@ class MainFrame(wx.Frame):
         self.statusbar = self.CreateStatusBar()
         self.statusbar.SetFieldsCount(3)
         self.statusbar.SetStatusWidths([-3, -4, -2])
-        self.statusbar.SetStatusText("wxPython", 0)
+        self.statusbar.SetStatusText("No file detected", 0)
         self.statusbar.SetStatusText("Look, it's a nifty status bar!!!", 1)
 
         menubar.Append(filemenu, '&File')
@@ -138,13 +139,14 @@ class MainFrame(wx.Frame):
 
     def OpenFile(self, event):
         """
-        Opens a file explorer to select a midi file and loads it into the viz manager
+        Opens a file explorer to select a midi file and loads it
         """
         wildcard = "MIDI file (*.mid)|*.mid"  # only .mid files
         dialog = wx.FileDialog(None, "Choose a file", os.getcwd(), "", wildcard, wx.ID_OPEN)
 
         if dialog.ShowModal() == wx.ID_OK:
-            self.vizmanager.LoadSongFromPath(dialog.GetPath())  # send the file to midi parser
+            self.statusbar.SetStatusText(dialog.GetPath(), 0)
+            self.vizmanager.LoadSongFromPath(dialog.GetPath())
 
         dialog.Destroy()
 

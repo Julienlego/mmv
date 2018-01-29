@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import pyglet
+import pygame
 
 class BasePreset:
     """
@@ -43,5 +43,5 @@ class BasicPreset(BasePreset):
         pass
 
     def PerMessage(self, message):
-        pass
+        pygame.draw.circle(self.screen, (0, 255, 0), (250, 250), 125)
 
