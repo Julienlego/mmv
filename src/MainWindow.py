@@ -88,8 +88,9 @@ class MainFrame(wx.Frame):
         menubar = wx.MenuBar()
         filemenu = wx.Menu()
         viewmenu = wx.Menu()
-        fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
-        self.toggleDebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
+        self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
+        self.toggledebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
+        viewmenu.Check(self.toggledebug.GetId(), True)
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -107,8 +108,8 @@ class MainFrame(wx.Frame):
 
         # Bind everything!
         self.Bind(wx.EVT_MENU, self.OnQuit)
-        self.Bind(wx.EVT_MENU, self.OpenFile, fileopen)
-        self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggleDebug)
+        self.Bind(wx.EVT_MENU, self.OpenFile, self.fileopen)
+        self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
         # Add panels to sizer and set to panel
@@ -151,7 +152,7 @@ class MainFrame(wx.Frame):
         """
         Shows/Hides the debug textbox
         """
-        if self.toggleDebug.IsChecked():
+        if self.toggledebug.IsChecked():
             self.debugbox.Show()
         else:
             self.debugbox.Hide()
