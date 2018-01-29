@@ -1,10 +1,7 @@
-#!/usr/bin/env pythonx
+#!/usr/bin/env python
 
-import pygame
-import wx
+import pygame, wx, os, sys
 import src.VizManager as vm
-import os
-import sys
 
 class PygameDisplay(wx.Window):
     def __init__(self, parent, ID):
@@ -38,7 +35,6 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def Redraw(self):
-        print ("redraw")
         self.screen.fill((0, 0, 0))
 
         pygame.draw.circle(self.screen, (0, 255, 0), (250, 250), 125)
@@ -49,7 +45,6 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        print("resize")
         self.size = event.GetSize()
         self.resized = True
 
@@ -75,13 +70,15 @@ class MainFrame(wx.Frame):
     def __init__(self, parent):
         super(MainFrame, self).__init__(parent, title="Midi Music Visualizer", size=(800, 600))
         self.panel = wx.Panel(self)
-        self.InitUI(self.panel)
+
+        self.InitUI()
+
         self.vizmanager = vm.VizManager()
+
         self.Centre()
         self.Show(True)
-        self.display.SetSize(800, 600)
 
-    def InitUI(self, panel):
+    def InitUI(self):
         """
         Setup the main frame with all the panels, file menu, and status bar
         """
@@ -90,41 +87,55 @@ class MainFrame(wx.Frame):
         # Create menu bar
         menubar = wx.MenuBar()
         filemenu = wx.Menu()
+        viewmenu = wx.Menu()
         fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
-        filequit = filemenu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
+        self.toggleDebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
+
+        # Create status bar
+        self.statusbar = self.CreateStatusBar()
+        self.statusbar.SetFieldsCount(3)
+        self.statusbar.SetStatusWidths([-3, -4, -2])
+        self.statusbar.SetStatusText("wxPython", 0)
+        self.statusbar.SetStatusText("Look, it's a nifty status bar!!!", 1)
+
         menubar.Append(filemenu, '&File')
+        menubar.Append(viewmenu, '&View')
         self.SetMenuBar(menubar)
 
         # Create debug text box
-        self.debugbox = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.debugbox = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE|wx.TE_READONLY)
 
-        # Bind events
-        self.Bind(wx.EVT_MENU, self.OnQuit, filequit)
-        self.Bind(wx.EVT_MENU, self.OnOpen, fileopen)
+        # Bind everything!
+        self.Bind(wx.EVT_MENU, self.OnQuit)
+        self.Bind(wx.EVT_MENU, self.OpenFile, fileopen)
+        self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggleDebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.display, 0, flag=wx.EXPAND|wx.ALL, border=2)
-        sizer.Add(self.debugbox, 1, flag=wx.EXPAND|wx.ALL, border=2)
+        sizer.Add(self.display, 0, flag=wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, border=2)
+        sizer.Add(self.debugbox, 1, flag=wx.ALIGN_RIGHT|wx.EXPAND|wx.ALL, border=2)
 
         self.SetAutoLayout(True)
-        panel.SetSizerAndFit(sizer)
+        self.panel.SetSizerAndFit(sizer)
 
-    def OnQuit(self, e):
-        self.display.Kill(e)
+    def OnQuit(self, event):
+        """
+        Called when the exit
+        """
+        self.display.Kill(event)
         pygame.quit()
         self.Destroy()
 
     def OnSize(self, event):
+        """
+        Called whenever the main frame is re-sized
+        """
         self.Layout()
         self.display.SetSize(event.GetSize())
-        print ("Size: ", self.display.size)
+        print("Size: ", self.display.size)
 
-    def OnOpen(self, e):
-        self.Open()
-
-    def Open(self):
+    def OpenFile(self, event):
         """
         Opens a file explorer to select a midi file and loads it into the viz manager
         """
@@ -136,6 +147,14 @@ class MainFrame(wx.Frame):
 
         dialog.Destroy()
 
+    def ToggleDebugBox(self, event):
+        """
+        Shows/Hides the debug textbox
+        """
+        if self.toggleDebug.IsChecked():
+            self.debugbox.Show()
+        else:
+            self.debugbox.Hide()
 
 class App(wx.App):
     def OnInit(self):

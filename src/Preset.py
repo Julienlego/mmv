@@ -8,10 +8,10 @@ class BasePreset:
 
     """
 
-    def __init__(self, panel):
-        self.main_panel = panel
+    def __init__(self, pygame_screen=None):
+        self.screen = pygame_screen
 
-    def OnFirstLoad(self, panel):
+    def OnFirstLoad(self):
         """
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
@@ -39,7 +39,7 @@ class BasicPreset(BasePreset):
 
     """
 
-    def OnFirstLoad(self, panel):
+    def OnFirstLoad(self):
         pass
 
     def PerMessage(self, message):
