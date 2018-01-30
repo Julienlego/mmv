@@ -24,11 +24,6 @@ class PygameDisplay(wx.Window):
 
         self.resized = False
 
-        self.fps = 60.0
-        self.timespacing = 1000.0 / self.fps
-        self.timer.Start(self.timespacing, False)
-
-        self.linespacing = 5
 
     def Update(self, event):
         # Any update tasks would go here (moving sprites, advancing animation frames etc.)
@@ -45,8 +40,7 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        self.size = event.GetSize()
-        self.resized = True
+        self.size = self.GetSizeTuple()
 
     def OnIdle(self, event):
         if self.resized:
@@ -70,10 +64,10 @@ class MainFrame(wx.Frame):
     def __init__(self, parent):
         super(MainFrame, self).__init__(parent, title="Midi Music Visualizer", size=(800, 600))
         self.panel = wx.Panel(self)
+        self.display = PygameDisplay(self, -1)
+        self.vizmanager = vm.VizManager(self.display.screen)
 
         self.InitUI()
-
-        self.vizmanager = vm.VizManager()
 
         self.Centre()
         self.Show(True)
@@ -82,7 +76,6 @@ class MainFrame(wx.Frame):
         """
         Setup the main frame with all the panels, file menu, and status bar
         """
-        self.display = PygameDisplay(self, -1)
 
         # Create menu bar
         menubar = wx.MenuBar()
@@ -90,6 +83,7 @@ class MainFrame(wx.Frame):
         viewmenu = wx.Menu()
 
         self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
+        self.runviz = filemenu.Append(wx.ID_ANY, 'Run', 'Run Viz')
         self.toggledebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
         viewmenu.Check(self.toggledebug.GetId(), True)
 
@@ -97,12 +91,16 @@ class MainFrame(wx.Frame):
         self.statusbar = self.CreateStatusBar()
         self.statusbar.SetFieldsCount(3)
         self.statusbar.SetStatusWidths([-3, -4, -2])
-        self.statusbar.SetStatusText("No file detected", 0)
+        self.statusbar.SetStatusText(self.vizmanager.parser.path, 0)
         self.statusbar.SetStatusText("Look, it's a nifty status bar!!!", 1)
 
         menubar.Append(filemenu, '&File')
         menubar.Append(viewmenu, '&View')
-        self.SetMenuBar(menubar)
+
+        #qmi = wx.MenuItem(filemenu, wx.ID_EXIT, '&Open\tCtrl+O')
+        #run = wx.MenuItem(filemenu, wx.ID_EXIT, '&Run\tCtrl+R')
+        #filemenu.Append(qmi)
+        #filemenu.Append(run)
 
         # Create debug text box
         self.debugbox = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE|wx.TE_READONLY)
@@ -110,14 +108,16 @@ class MainFrame(wx.Frame):
         # Bind everything!
         self.Bind(wx.EVT_MENU, self.OnQuit)
         self.Bind(wx.EVT_MENU, self.OpenFile, self.fileopen)
+        self.Bind(wx.EVT_MENU, self.PlayVisualization, self.runviz)
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(self.display, 0, flag=wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, border=2)
-        sizer.Add(self.debugbox, 1, flag=wx.ALIGN_RIGHT|wx.EXPAND|wx.ALL, border=2)
+        sizer.Add(self.display, 0, flag=wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, border=3)
+        sizer.Add(self.debugbox, 1, flag=wx.ALIGN_RIGHT|wx.EXPAND|wx.ALL, border=3)
 
+        self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
         self.panel.SetSizerAndFit(sizer)
 
@@ -127,15 +127,16 @@ class MainFrame(wx.Frame):
         """
         self.display.Kill(event)
         pygame.quit()
+        self.Close()
         self.Destroy()
 
     def OnSize(self, event):
         """
         Called whenever the main frame is re-sized
         """
-        self.Layout()
         self.display.SetSize(event.GetSize())
         print("Size: ", self.display.size)
+        self.Layout()
 
     def OpenFile(self, event):
         """
@@ -158,6 +159,18 @@ class MainFrame(wx.Frame):
             self.debugbox.Show()
         else:
             self.debugbox.Hide()
+
+    def PlayVisualization(self, event):
+        """
+        Plays the whatever preset and song are currently loaded.
+        """
+        self.vizmanager.Play()
+
+    def PauseVisualization(self, event):
+        """
+        Pauses whatever visualization is running, if any.
+        """
+        pass
 
 class App(wx.App):
     def OnInit(self):

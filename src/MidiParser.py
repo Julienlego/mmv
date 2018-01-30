@@ -11,10 +11,7 @@ class MidiParser:
     def __init__(self):
 
         # Path of the song loaded, default is empty string.
-        self.path = ""
-
-        # Mido object of the song.
-        self.file_mido = None
+        self.path = "No file detected"
 
         # Music21 object of the song.
         self.score = None
