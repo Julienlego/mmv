@@ -8,10 +8,10 @@ class BasePreset:
 
     """
 
-    def __init__(self, pygame_screen=None):
-        self.screen = pygame_screen
+    def __init__(self, name=""):
+        self.name = name
 
-    def OnFirstLoad(self):
+    def OnFirstLoad(self, song):
         """
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
@@ -20,7 +20,7 @@ class BasePreset:
         """
         pass
 
-    def PerMessage(self, message):
+    def PerMessage(self, screen, message):
         """
         Draws given message.
 
@@ -39,8 +39,8 @@ class BasicPreset(BasePreset):
 
     """
 
-    def OnFirstLoad(self):
+    def OnFirstLoad(self, song):
         pass
 
-    def PerMessage(self, message):
-        pygame.draw.circle(self.screen, (0, 255, 0), (250, 250), 125)
+    def PerMessage(self, screen, message):
+        pygame.draw.circle(screen, (0, 255, 0), (250, 250), 125)

@@ -17,12 +17,17 @@ class VizManager:
         self.parser = mp.MidiParser()
         self.screen = pygame_screen
         self.curr_frame = None  # 0, if a song or preset is loaded
+        self.LoadPresets()
 
     def LoadPresets(self):
         """
         Loads all presets.
         """
-        self.presets["default"] = pr.BasicPreset()
+        # Create the preset!
+        default = pr.BasicPreset("Default")
+
+        # Add the preset to the dictionary!
+        self.presets.update({default.name: default})
 
     def LoadSongFromPath(self, path):
         """
