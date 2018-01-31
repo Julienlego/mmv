@@ -67,6 +67,8 @@ class MainFrame(wx.Frame):
         self.display = PygameDisplay(self, -1)
         self.vizmanager = vm.VizManager(self.display.screen)
 
+        self.SetMinSize((300, 200))  # the frame starts looking weird if it gets too small
+
         self.InitUI()
 
         self.Centre()
@@ -103,7 +105,7 @@ class MainFrame(wx.Frame):
         #filemenu.Append(run)
 
         # Create debug text box
-        self.debugbox = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE|wx.TE_READONLY)
+        # self.debugbox = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE|wx.TE_READONLY)
 
         # Bind everything!
         self.Bind(wx.EVT_MENU, self.OnQuit)
@@ -115,7 +117,7 @@ class MainFrame(wx.Frame):
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.display, 0, flag=wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, border=3)
-        sizer.Add(self.debugbox, 1, flag=wx.ALIGN_RIGHT|wx.EXPAND|wx.ALL, border=3)
+        # sizer.Add(self.debugbox, 1, flag=wx.ALIGN_RIGHT|wx.EXPAND|wx.ALL, border=3)
 
         self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
@@ -134,7 +136,7 @@ class MainFrame(wx.Frame):
         """
         Called whenever the main frame is re-sized
         """
-        self.display.SetSize(event.GetSize())
+        self.display.SetSize(event.GetSize() - (0, 85))  # magic number for now
         print("Size: ", self.display.size)
         self.Layout()
 
@@ -156,9 +158,9 @@ class MainFrame(wx.Frame):
         Shows/Hides the debug textbox
         """
         if self.toggledebug.IsChecked():
-            self.debugbox.Show()
+            print("debug show")
         else:
-            self.debugbox.Hide()
+            print("debug hide")
 
     def PlayVisualization(self, event):
         """
