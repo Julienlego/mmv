@@ -71,11 +71,14 @@ class MainFrame(wx.Frame):
 
         # Create the panels
         topPanel = wx.Panel(self, size=(800, 600))
-        panelPygame = wx.Panel(topPanel, -1, pos=(0,100), size=(250,250))
+        panelPygame = wx.Panel(topPanel, -1, pos=(0,100), size=(800,600))
         panelDebug = wx.Panel(topPanel, -1, pos=(100,0), size=(250,250))
 
         self.display = PygameDisplay(self, -1)
+        self.display.SetSize((800, 520))
         self.vizmanager = vm.VizManager(self.display.screen)
+
+        self.SetMinSize((300, 200))  # the frame starts looking weird if it gets too small
 
         # Create menu bar
         menubar = wx.MenuBar()
@@ -133,6 +136,7 @@ class MainFrame(wx.Frame):
         """
         #self.display.SetSize(event.GetSize())
         #print("Size: ", self.display.size)
+        self.display.SetSize(event.GetSize() - (0, 85))  # magic number for now
         self.Layout()
 
     def OpenFile(self, event):
@@ -153,9 +157,14 @@ class MainFrame(wx.Frame):
         Shows/Hides the debug textbox
         """
         if self.toggledebug.IsChecked():
-            self.child.Show()
+            if self.child:
+                self.child.Show()
+            else:
+                self.child = DebugFrame(self)
+                self.child.Show()
         else:
-            self.child.Hide()
+            if self.child:
+                self.child.Hide()
 
     def PlayVisualization(self, event):
         """
