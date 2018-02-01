@@ -54,10 +54,10 @@ class DebugFrame(wx.Frame):
         wx.Frame.__init__(self, None, title='Debug', size=(300,250))
         self.parent = parent
         pan = wx.Panel(self)
-        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer = wx.BoxSizer()
         # Create debug text box
         self.textbox = wx.TextCtrl(pan, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        sizer.Add(self.textbox, 0, flag=wx.EXPAND, border=2)
+        sizer.Add(self.textbox, proportion=1, flag=wx.EXPAND, border=2)
         pan.SetSizer(sizer)
 
 class MainFrame(wx.Frame):
@@ -108,7 +108,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
         # Add panels to sizer and set to panel
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer = wx.BoxSizer()
         sizer.Add(panelPygame, 0, flag=wx.EXPAND|wx.ALL, border=10)
         sizer.Add(panelDebug, 1, flag=wx.EXPAND|wx.ALL, border=10)
 
