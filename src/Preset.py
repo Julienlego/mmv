@@ -8,10 +8,11 @@ class BasePreset:
 
     """
 
-    def __init__(self, name=""):
+    def __init__(self, name="", description=""):
         self.name = name
+        self.description = description
 
-    def OnFirstLoad(self, song):
+    def OnFirstLoad(self, score):
         """
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
@@ -39,7 +40,7 @@ class BasicPreset(BasePreset):
 
     """
 
-    def OnFirstLoad(self, song):
+    def OnFirstLoad(self, score):
         pass
 
     def PerMessage(self, screen, message):

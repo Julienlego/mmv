@@ -39,7 +39,7 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        self.size = self.GetSizeTuple()
+        self.size = self.GetSize()
 
     def Kill(self, event):
         # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
@@ -51,11 +51,11 @@ class PygameDisplay(wx.Window):
 
 class DebugFrame(wx.Frame):
     """
-
+    Debug frame with textbox to display info relevant to the preset.
     """
     def __init__(self, parent, title):
         wx.Frame.__init__(self, None, title=title, size=(300, 400))
-        self.parent = parent
+        #self.parent = parent
         self.SetMinSize((250, 400))
         self.SetMaxSize((300, 400))
         pan = wx.Panel(self)
@@ -64,6 +64,13 @@ class DebugFrame(wx.Frame):
         self.textbox = wx.TextCtrl(pan, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
         sizer.Add(self.textbox, proportion=1, flag=wx.EXPAND, border=2)
         pan.SetSizer(sizer)
+
+    def WriteLine(self, line):
+        """
+        Writes line to the text-box.
+        """
+        self.textbox.AppendText(str(line))
+
 
 class PresetDialog(wx.Dialog):
     """
@@ -81,7 +88,6 @@ class PresetDialog(wx.Dialog):
         #self.Bind(wx.EVT_LISTBOX, self.OnListBox, self.lst)
         self.Bind(wx.EVT_BUTTON, self.OnSelect)
 
-
     def OnListBox(self, event):
         """
         What to do when a preset is highlighted.
@@ -95,6 +101,7 @@ class PresetDialog(wx.Dialog):
         name = self.lst_presets[preset]
         print("Preset selected: ", name)
         self.parent.statusbar.SetStatusText(name, 1)
+        self.parent.vizmanager.LoadPreset(name)
         self.Destroy()
 
     def OnClose(self, event):
@@ -112,24 +119,25 @@ class MainFrame(wx.Frame):
         self.SetMinSize((300, 200))  # the frame starts looking weird if it gets too small
 
         # Create the panels
-        topPanel = wx.Panel(self, size=(800, 600))
-        panelPygame = wx.Panel(topPanel, -1, pos=(0, 100), size=size)
-        panelDebug = wx.Panel(topPanel, -1, pos=(100, 0), size=(250, 250))
-        panelDebug.SetMinSize((300, 200))
+        top_panel = wx.Panel(self, size=(800, 600))
+        panel_pygame = wx.Panel(top_panel, -1, pos=(0, 100), size=size)
+        self.panelDebug = wx.Panel(top_panel, -1, pos=(100, 0), size=(250, 250))
+        self.panelDebug.SetMinSize((300, 200))
 
+        self.debugger = DebugFrame(self, "Debugger")
         self.display = PygameDisplay(self, -1)
         self.display.SetSize((800, 520))
-        self.vizmanager = vm.VizManager(self.display.screen)
+        self.vizmanager = vm.VizManager(self, self.display.screen)
 
         # Create menu bar
         menubar = wx.MenuBar()
         filemenu = wx.Menu()
         viewmenu = wx.Menu()
 
-        self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open', 'Open a file')
+        self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File', 'Open a file')
         self.runviz = filemenu.Append(wx.ID_ANY, 'Run', 'Run Viz')
         self.toggledebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
-        self.preset = viewmenu.Append(wx.ID_ANY, 'Load Preset')
+        self.ldp = viewmenu.Append(wx.ID_ANY, 'Load Preset')
 
         viewmenu.Check(self.toggledebug.GetId(), True)
 
@@ -149,21 +157,19 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.PlayVisualization, self.runviz)
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_MENU, self.LoadPreset)
+        self.Bind(wx.EVT_MENU, self.LoadPreset, self.ldp)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer()
-        sizer.Add(panelPygame, 0, flag=wx.EXPAND|wx.ALL, border=10)
-        sizer.Add(panelDebug, 1, flag=wx.EXPAND|wx.ALL, border=10)
+        sizer.Add(panel_pygame, 0, flag=wx.EXPAND | wx.ALL, border=10)
+        sizer.Add(self.panelDebug, 1, flag=wx.EXPAND | wx.ALL, border=10)
 
-        self.child = DebugFrame(self, "Debugger")
-        self.child.Show()
-
-        topPanel.SetSizerAndFit(sizer)
+        top_panel.SetSizerAndFit(sizer)
         self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
         self.Centre()
         self.Show(True)
+        self.debugger.Show()
 
     def OnQuit(self, event):
         """
@@ -207,20 +213,25 @@ class MainFrame(wx.Frame):
         Shows/Hides the debug textbox
         """
         if self.toggledebug.IsChecked():
-            if self.child:
-                self.child.Show()
+            if self.debugger:
+                self.debugger.Show()
             else:
-                self.child = DebugFrame(self, "Debugger")
-                self.child.Show()
+                self.debugger = DebugFrame(self, "Debugger")
+                self.debugger.Show()
         else:
-            if self.child:
-                self.child.Hide()
+            if self.debugger:
+                self.debugger.Hide()
 
     def PlayVisualization(self, event):
         """
         Plays the whatever preset and song are currently loaded.
         """
-        self.vizmanager.Play()
+        if self.vizmanager.preset is None:
+            wx.MessageBox("No preset was selected", "Missing Preset!", wx.OK | wx.ICON_ERROR)
+        elif self.vizmanager.IsSongLoaded() is True:
+            wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
+        else:
+            self.vizmanager.Play()
 
     def PauseVisualization(self, event):
         """
