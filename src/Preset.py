@@ -8,9 +8,11 @@ class BasePreset:
 
     """
 
-    def __init__(self, name="", description=""):
+    def __init__(self, name="", desc="A description goes here."):
+        # Name of preset. Also used as the key for the preset in the dict.
         self.name = name
-        self.description = description
+        # Description of the visualization preset.
+        self.desc = desc
 
     def OnFirstLoad(self, score):
         """
@@ -44,4 +46,4 @@ class BasicPreset(BasePreset):
         pass
 
     def PerMessage(self, screen, message):
-        pygame.draw.circle(screen, (0, 255, 0), (250, 250), 125)
+        screen.draw.circle(screen, (0, 255, 0), (250, 250), 125)

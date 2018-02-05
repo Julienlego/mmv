@@ -31,7 +31,7 @@ class PygameDisplay(wx.Window):
     def Redraw(self):
         self.screen.fill((0, 0, 0))
 
-        pygame.draw.circle(self.screen, (0, 255, 0), (10, 10), 125)
+        # pygame.draw.circle(self.screen, (0, 255, 0), (10, 10), 125)
 
         pygame.display.update()
 
@@ -55,7 +55,7 @@ class DebugFrame(wx.Frame):
     """
     def __init__(self, parent, title):
         wx.Frame.__init__(self, None, title=title, size=(300, 400))
-        #self.parent = parent
+        self.parent = parent
         self.SetMinSize((250, 400))
         self.SetMaxSize((300, 400))
         pan = wx.Panel(self)
@@ -77,12 +77,13 @@ class PresetDialog(wx.Dialog):
     This frame
     """
     def __init__(self, parent, title, presets):
-        wx.Dialog.__init__(self, parent, title=title, size=(350, 310))
+        wx.Dialog.__init__(self, parent, title=title, size=(500, 250))
         self.lst_presets = presets
         self.parent = parent
         wx.StaticText(self, -1, 'Select a preset to load', (20, 20))
-        self.lst = wx.ListBox(self, pos=(20, 50), size=(200, -1), choices=presets, style=wx.LB_SINGLE)
-        btn = wx.Button(self, 1, 'Select', (70, 150))
+        self.lst = wx.ListBox(self, pos=(20, 50), size=(150, -1), choices=presets, style=wx.LB_SINGLE)
+        self.pdesc = wx.TextCtrl(self, pos=(200, 50), size=(270, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        btn = wx.Button(self, 1, 'Select', (70, 150), style=wx.Center)
         btn.SetFocus()
 
         #self.Bind(wx.EVT_LISTBOX, self.OnListBox, self.lst)
@@ -100,6 +101,7 @@ class PresetDialog(wx.Dialog):
         preset = self.lst.GetSelection()    # gets int pos of preset
         name = self.lst_presets[preset]
         print("Preset selected: ", name)
+        desc = self.parent.vizmanager.presets[name].desc
         self.parent.statusbar.SetStatusText(name, 1)
         self.parent.vizmanager.LoadPreset(name)
         self.Destroy()
@@ -184,7 +186,7 @@ class MainFrame(wx.Frame):
         """
         Called whenever the main frame is re-sized
         """
-        self.display.SetSize(event.GetSize() - (0, 85))  # magic number for now
+        self.display.SetSize(event.GetSize() - (0, 82))  # magic number for now
         self.Layout()
 
     def OpenFile(self, event):
