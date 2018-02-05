@@ -27,6 +27,8 @@ class VizManager:
 
         self.LoadPresets()
 
+        self.LoadPreset("Default")     # load the default preset by default (so we don't have to select it manually)
+
     def LoadPresets(self):
         """
         Loads all presets.
@@ -68,14 +70,15 @@ class VizManager:
         self.preset.OnFirstLoad(self.score)
 
         data = self.score.parts[0]
-        self.main_frame.debugger.WriteLine("Note/Rest, Octave, Len, Offset\n")
-        notes = [i for i in data.notesAndRests]
+        self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
+        notes = [i for i in data.flat.notesAndRests]
+        separator = "\t"
         for n in notes:
             if isinstance(n, note.Note):
-                line = str(n.pitch.name) + str(n.pitch.octave) + str(n.quarterLength) + str(n.offset) + "\n"
+                line = str(n.pitch.name) + separator + str(n.pitch.octave) + separator + str(n.quarterLength) + separator + str(n.offset) + "\n"
                 self.main_frame.debugger.WriteLine(line)
             elif isinstance(n, note.Rest):
-                line = "Rest" + str(n.quarterLength) + str(n.offset) + "\n"
+                line = "Rest" + separator + str(n.quarterLength) + separator + str(n.offset) + "\n"
                 self.main_frame.debugger.WriteLine(line)
 
     def Pause(self):
