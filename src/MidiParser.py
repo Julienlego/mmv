@@ -27,8 +27,6 @@ class MidiParser:
         print("parsing file")
         self.path = path
         self.score = music21.midi.translate.midiFilePathToStream(path)
-        print(len(self.score.flat.notesAndRests.notes.notes.notes.notes.notes.notes))
-        print(len(self.score.notes))
         for part in self.score.parts:
             print(part)
         for note in self.score.flat.notes:

@@ -27,6 +27,8 @@ class VizManager:
 
         self.LoadPresets()
 
+        self.LoadPreset("Default")     # load the default preset by default (so we don't have to select it manually)
+
     def LoadPresets(self):
         """
         Loads all presets.
