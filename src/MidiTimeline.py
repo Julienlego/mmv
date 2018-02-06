@@ -10,6 +10,7 @@ class MidiTimeline:
     def __init__(self):
         self.length = 0
         self.frames = None  # list of MidiFrame objects
+        self.tempo = None
         self.message_length = None
 
 

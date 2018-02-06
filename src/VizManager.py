@@ -3,6 +3,7 @@ import time
 import fluidsynth
 from music21 import *
 import src.Preset as pr
+from src.Imports import *
 
 class VizManager:
     """
@@ -24,6 +25,8 @@ class VizManager:
         self.main_frame = main_frame
         # Current frame of the visualization
         self.curr_frame = None  # 0, if a song or preset is loaded
+
+        self.midi_parser = src.MidiParser.MidiParser(self)      # the parser for the midi file
 
         self.LoadPresets()
 
@@ -53,6 +56,7 @@ class VizManager:
         self.path = path
         self.score = midi.translate.midiFilePathToStream(path)
         print(type(self.score))
+        self.midi_parser.ParseFile(path)
 
     def IsSongLoaded(self):
         """
@@ -86,3 +90,8 @@ class VizManager:
         Stops the visualization at wherever it is.
         """
         pass
+
+    def SetStatusText(self, text, pos):
+        self.main_frame.statusbar.SetStatusText(text, pos)
+
+

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import pygame, wx, os, sys
-import src.VizManager as vm
+from src.Imports import *
+
+frame = None
 
 class PygameDisplay(wx.Window):
     def __init__(self, parent, ID):
@@ -129,7 +131,7 @@ class MainFrame(wx.Frame):
         self.debugger = DebugFrame(self, "Debugger")
         self.display = PygameDisplay(self, -1)
         self.display.SetSize((800, 520))
-        self.vizmanager = vm.VizManager(self, self.display.screen)
+        self.vizmanager = src.VizManager.VizManager(self, self.display.screen)
 
         # Create menu bar
         menubar = wx.MenuBar()
