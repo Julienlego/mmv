@@ -34,7 +34,7 @@ class VizManager:
         Loads all presets.
         """
         # Create the preset!
-        default = pr.BasicPreset("Default")
+        default = pr.BasicPreset("Default", "This is a default visualization preset.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
@@ -47,7 +47,7 @@ class VizManager:
 
     def LoadSongFromPath(self, path):
         """
-        Load and filepath to parser.
+        Reads file at given path, if possible, and saves as an object.
         """
         print("Loading song from path: ", path)
         self.path = path
