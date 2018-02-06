@@ -23,6 +23,10 @@ class PygameDisplay(wx.Window):
 
         self.resized = False
 
+        self.fps = 60.0
+        self.timespacing = 1000.0 / self.fps
+        self.timer.Start(self.timespacing, False)
+
 
     def Update(self, event):
         # Any update tasks would go here (moving sprites, advancing animation frames etc.)
@@ -31,7 +35,7 @@ class PygameDisplay(wx.Window):
     def Redraw(self):
         self.screen.fill((0, 0, 0))
 
-        # pygame.draw.circle(self.screen, (0, 255, 0), (10, 10), 125)
+        pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
         pygame.display.update()
 
