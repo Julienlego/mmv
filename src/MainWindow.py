@@ -35,9 +35,9 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def Redraw(self):
-        self.screen.fill((0, 0, 0))
+        # self.screen.fill((0, 0, 0))
 
-        pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
+        # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
         pygame.display.update()
 

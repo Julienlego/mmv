@@ -2,6 +2,7 @@
 import music21
 import src.MidiTimeline as mt
 from src.Imports import *
+import pygame
 
 class MidiParser:
     """
@@ -33,16 +34,36 @@ class MidiParser:
         self.path = path
         self.score = music21.midi.translate.midiFilePathToStream(path)
         # print(self.score.secondsMap)
-        self.viz_manager.SetStatusText("Tempo: " + str(self.GetTempo(self.score)) + " bpm", 2)
+        tempo = self.GetTempo(self.score)
+        self.viz_manager.SetStatusText("Tempo: " + str(tempo) + " bpm", 2)
 
 
         timeline = mt.MidiTimeline()
-        timeline.tempo = None
+        timeline.tempo = tempo
+
 
         for part in self.score.parts:
             print(part)
+
+        # get the highest and lowest notes for position normalization
+        highest_note = 0
+        lowest_note = float("inf")
         for note in self.score.flat.notes:
-            print(str(note) + str(note.offset))
+            if isinstance(note, music21.note.Note):
+                if note.pitch.midi > highest_note:
+                    highest_note = note.pitch.midi
+                if note.pitch.midi < lowest_note:
+                    lowest_note = note.pitch.midi
+
+        # graph each note on the screen based off of pitch, offset, and length
+        for note in self.score.flat.notes:
+            # print(str(note) + str(note.offset))
+            largest_offset = self.score.flat.notes[len(self.score.flat.notes) - 1].offset
+            number = note.pitch.midi
+            x = self.viz_manager.main_frame.display.size.x * float(note.offset / largest_offset)
+            y = self.viz_manager.main_frame.display.size.y - (((number - lowest_note) / (highest_note - lowest_note)) * self.viz_manager.main_frame.display.size.y)
+            print(str(x) + ", " + str(y))
+            pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), (x, y, (self.viz_manager.main_frame.display.size.x * float(note.quarterLength / self.score.flat.notes[len(self.score.flat.notes) - 1].offset)), 20))
         print("debug")
 
     def GetSongPath(self):
