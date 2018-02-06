@@ -46,4 +46,4 @@ class BasicPreset(BasePreset):
         pass
 
     def PerMessage(self, screen, message):
-        screen.draw.circle(screen, (0, 255, 0), (250, 250), 125)
+        pygame.draw.circle(screen, (0, 255, 0), (250, 250), 125)

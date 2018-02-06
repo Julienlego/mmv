@@ -25,6 +25,10 @@ class PygameDisplay(wx.Window):
 
         self.resized = False
 
+        self.fps = 60.0
+        self.timespacing = 1000.0 / self.fps
+        self.timer.Start(self.timespacing, False)
+
 
     def Update(self, event):
         # Any update tasks would go here (moving sprites, advancing animation frames etc.)
@@ -33,7 +37,7 @@ class PygameDisplay(wx.Window):
     def Redraw(self):
         self.screen.fill((0, 0, 0))
 
-        # pygame.draw.circle(self.screen, (0, 255, 0), (10, 10), 125)
+        pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
         pygame.display.update()
 
@@ -76,7 +80,7 @@ class DebugFrame(wx.Frame):
 
 class PresetDialog(wx.Dialog):
     """
-    This frame
+    Dialog to browse and select a preset to load to the system.
     """
     def __init__(self, parent, title, presets):
         wx.Dialog.__init__(self, parent, title=title, size=(500, 250))
@@ -84,26 +88,31 @@ class PresetDialog(wx.Dialog):
         self.parent = parent
         wx.StaticText(self, -1, 'Select a preset to load', (20, 20))
         self.lst = wx.ListBox(self, pos=(20, 50), size=(150, -1), choices=presets, style=wx.LB_SINGLE)
-        self.pdesc = wx.TextCtrl(self, pos=(200, 50), size=(270, -1), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.text = wx.StaticText(self, wx.ID_ANY, pos=(200, 50), size=(270, -1), label="No description.", style=wx.TE_MULTILINE | wx.TE_READONLY)
         btn = wx.Button(self, 1, 'Select', (70, 150), style=wx.Center)
         btn.SetFocus()
 
-        #self.Bind(wx.EVT_LISTBOX, self.OnListBox, self.lst)
+        self.Bind(wx.EVT_LISTBOX, self.OnListBox, self.lst)
         self.Bind(wx.EVT_BUTTON, self.OnSelect)
+
+    def GetNameSelect(self, event):
+        preset = self.lst.GetSelection()  # gets int pos of preset
+        return self.lst_presets[preset]
 
     def OnListBox(self, event):
         """
         What to do when a preset is highlighted.
-
-        Might be useful to make a preset description textbox.
         """
-        pass
+        name = self.GetNameSelect(self)
+        desc = self.parent.vizmanager.presets[name].desc
+        self.text.SetLabel(desc)
 
     def OnSelect(self, event):
-        preset = self.lst.GetSelection()    # gets int pos of preset
-        name = self.lst_presets[preset]
+        """
+        Loads selected preset to the vizmanager and writes name to statusbar.
+        """
+        name = self.GetNameSelect(self)
         print("Preset selected: ", name)
-        desc = self.parent.vizmanager.presets[name].desc
         self.parent.statusbar.SetStatusText(name, 1)
         self.parent.vizmanager.LoadPreset(name)
         self.Destroy()

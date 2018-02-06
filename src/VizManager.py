@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import time
 import fluidsynth
+import time
 from music21 import *
 import src.Preset as pr
 from src.Imports import *
@@ -37,7 +38,7 @@ class VizManager:
         Loads all presets.
         """
         # Create the preset!
-        default = pr.BasicPreset("Default")
+        default = pr.BasicPreset("Default", "This is a default visualization preset.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
@@ -50,7 +51,7 @@ class VizManager:
 
     def LoadSongFromPath(self, path):
         """
-        Load and filepath to parser.
+        Reads file at given path, if possible, and saves as an object.
         """
         print("Loading song from path: ", path)
         self.path = path
@@ -77,6 +78,7 @@ class VizManager:
         self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
         notes = [i for i in data.flat.notesAndRests]
         separator = "\t"
+        # Iterates through all notes and rests
         for n in notes:
             if isinstance(n, note.Note):
                 line = str(n.pitch.name) + separator + str(n.pitch.octave) + separator + str(n.quarterLength) + separator + str(n.offset) + "\n"
@@ -84,6 +86,8 @@ class VizManager:
             elif isinstance(n, note.Rest):
                 line = "Rest" + separator + str(n.quarterLength) + separator + str(n.offset) + "\n"
                 self.main_frame.debugger.WriteLine(line)
+            msg = ""
+            self.preset.PerMessage(self.screen, msg)
 
     def Pause(self):
         """
