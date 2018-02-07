@@ -38,12 +38,10 @@ class VizManager:
         Loads all presets.
         """
         # Create the preset!
-        default = pr.BasicPreset(self, "Default", "This is a default visualization preset.")
-        piano_static = pr.StaticPianoRollPreset(self, "Piano Roll Static", "This is a static piano roll preset.")
+        default = pr.BasicPreset("Default", "This is a default visualization preset.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
-        self.presets.update({piano_static.name: piano_static})
 
     def LoadPreset(self, key):
         """

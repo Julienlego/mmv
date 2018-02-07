@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 import pygame, wx, os, sys
-from src.Imports import *
+import src.VizManager as vm
 
-frame = None
 
 class PygameDisplay(wx.Window):
     def __init__(self, parent, ID):
@@ -35,9 +34,9 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def Redraw(self):
-        # self.screen.fill((0, 0, 0))
+        #self.screen.fill((0, 0, 0))
 
-        # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
+        #pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 75)
 
         pygame.display.update()
 
@@ -129,7 +128,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self, parent, title, size):
         wx.Frame.__init__(self, parent, title=title, size=size)
-        self.SetMinSize((300, 200))  # the frame starts looking weird if it gets too small
+        self.SetMinSize((600, 400))  # the frame starts looking weird if it gets too small
 
         # Create the panels
         top_panel = wx.Panel(self, size=(800, 600))
@@ -140,7 +139,6 @@ class MainFrame(wx.Frame):
         self.debugger = DebugFrame(self, "Debugger")
         self.display = PygameDisplay(self, -1)
         self.display.SetSize((800, 520))
-        self.vizmanager = src.VizManager.VizManager(self, self.display.screen)
 
         # Create menu bar
         menubar = wx.MenuBar()
@@ -177,12 +175,14 @@ class MainFrame(wx.Frame):
         sizer.Add(panel_pygame, 0, flag=wx.EXPAND | wx.ALL, border=10)
         sizer.Add(self.panelDebug, 1, flag=wx.EXPAND | wx.ALL, border=10)
 
+        self.vizmanager = vm.VizManager(self, self.display.screen)
         top_panel.SetSizerAndFit(sizer)
         self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
         self.Centre()
         self.Show(True)
         self.debugger.Show()
+
 
     def OnQuit(self, event):
         """
