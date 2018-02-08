@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pygame
+import music21
 
 class BasePreset:
     """
@@ -8,11 +9,12 @@ class BasePreset:
 
     """
 
-    def __init__(self, name="", desc="A description goes here."):
+    def __init__(self, viz_manager, name="", desc="A description goes here."):
         # Name of preset. Also used as the key for the preset in the dict.
         self.name = name
         # Description of the visualization preset.
         self.desc = desc
+        self.viz_manager = viz_manager
 
     def OnFirstLoad(self, score):
         """
@@ -47,3 +49,46 @@ class BasicPreset(BasePreset):
 
     def PerMessage(self, screen, message):
         pygame.draw.circle(screen, (0, 255, 0), (250, 250), 125)
+
+
+class PianoRollPreset(BasePreset):
+    """
+    This is a basic piano roll preset.
+    Each note is drawn onto the screen in a piano roll fashion.
+    Notes with greater pitch go higher on the screen, lower notes go lower.
+    """
+
+    def OnFirstLoad(self, score):
+        pass
+
+    def PerMessage(self, screen, message):
+        pass
+
+
+class StaticPianoRollPreset(BasePreset):
+    """
+    This is a static preset that graphs the entire song onto the screen in a piano roll fashion.
+    This preset is good for looking at the whole song as a whole.
+    """
+
+    def OnFirstLoad(self, score):
+
+        # graph each note on the screen based off of pitch, offset, and length
+        self.viz_manager.screen.fill((0, 0, 0))
+        notes = []
+        for notea in score.flat.notes:
+            if isinstance(notea, music21.note.Note):
+                notes.append(notea)
+
+        print(notes)
+        print(len(score.flat.notes))
+        for note in notes:
+            if isinstance(note, music21.note.Note):
+                screen_x = self.viz_manager.main_frame.display.size.x
+                screen_y = self.viz_manager.main_frame.display.size.y
+                rect = self.viz_manager.GraphNoteRect(score, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
+                print(rect)
+                pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+
+    def PerMessage(self, screen, message):
+        pass
