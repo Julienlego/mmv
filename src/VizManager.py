@@ -5,6 +5,7 @@ import time
 from music21 import *
 import src.Preset as pr
 from src.Imports import *
+import music21
 
 class VizManager:
     """
@@ -99,5 +100,38 @@ class VizManager:
 
     def SetStatusText(self, text, pos):
         self.main_frame.statusbar.SetStatusText(text, pos)
+
+    def GraphNoteRect(self, score, notee, dest):
+        """
+        Graphs a note onto a destination rect. Used for the static piano roll preset.
+        :param score:   the score object of the song the note belongs to
+        :param notee:   the note that is being graphed
+        :param dest:    the destination rect to graph the note onto
+        :return:        the rect that will represent the note within the destination rect
+        """
+
+        if not isinstance(notee, music21.note.Note):
+            return None
+
+        # get the highest and lowest notes for position normalization
+        highest_note = 0
+        lowest_note = float("inf")
+        for n in score.flat.notes:
+            if isinstance(n, music21.note.Note):
+                if n.pitch.midi > highest_note:
+                    highest_note = n.pitch.midi
+                if n.pitch.midi < lowest_note:
+                    lowest_note = n.pitch.midi
+
+        largest_offset = score.flat.notes[len(score.flat.notes) - 1].offset
+        number = notee.pitch.midi
+        x = dest.left + dest.width * float(notee.offset / largest_offset)
+        y = dest.top + (dest.height - (((number - lowest_note) / (highest_note - lowest_note)) * dest.height))
+        print(str(x) + ", " + str(y))
+        width = (dest.left + dest.width * float(notee.quarterLength / score.flat.notes[len(score.flat.notes) - 1].offset))
+        height = 20
+
+        rect = (x, y, width, height)
+        return rect
 
 
