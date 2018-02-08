@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import music21
 import src.MidiTimeline as mt
+from src.Imports import *
 import pygame
-
 
 class MidiParser:
     """
-    This class is responsible for reading a given compatible MIDI file and storing it.
+    This class is responsible for reading a given compatible MIDI file and
+    storing it in memory as a MidiBlock object.
+
     """
 
     def __init__(self, viz_manager):
@@ -23,6 +25,10 @@ class MidiParser:
     def ParseFile(self, path):
         """
         Reads file at given path, if possible, and saves as an object.
+
+        :param path: string
+            String of the path of the file (in the C: drive)
+
         """
         print("parsing file")
         self.path = path
@@ -55,10 +61,10 @@ class MidiParser:
         Returns true if no song is loaded, false if there is.
 
         """
-        if (self.path is (None or "")) or (self.score is None):
-            return True
+        if self.path == (None or ""):
+            return bool(True)
         else:
-            return False
+            return bool(False)
 
     def GetTempo(self, score):
         """
