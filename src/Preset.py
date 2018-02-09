@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import pygame
 import music21
+import src.Utilities as util
+
 
 class BasePreset:
     """
@@ -34,13 +36,35 @@ class BasePreset:
         pass
 
 
-class BasicPreset(BasePreset):
+class JustTextPreset(BasePreset):
+    """
+
+    """
+    def OnFirstLoad(self, score):
+        """
+        Runs once to gather and store any information relative to the
+        song before each frame of the visualization is made.
+
+        YOUR CODE GOES BELOW
+        """
+        pass
+
+    def PerMessage(self, screen, message):
+        """
+        Draws given message.
+
+        YOUR CODE GOES BELOW
+        """
+        pass
+
+
+class SimpleCirclePreset(BasePreset):
     """
     This is a basic preset that draws a circle randomly on the screen for each midi event.
 
     For each event:
         - color is determined by note
-        - radius of circle is determind by velocity
+        - radius of circle is determined by velocity
 
     """
 
@@ -48,7 +72,17 @@ class BasicPreset(BasePreset):
         pass
 
     def PerMessage(self, screen, message):
-        pygame.draw.circle(screen, (0, 255, 0), (250, 250), 125)
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+
+        if isinstance(message, music21.note.Note):
+            c = util.NoteToColor(message)
+            color = (c[0], c[1], c[2])
+            radius = 75
+            y = int(screen_y / message.octave)
+            pos = (int(screen_x / 2), y)
+
+            pygame.draw.circle(screen, color, pos, radius)
 
 
 class PianoRollPreset(BasePreset):

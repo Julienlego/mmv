@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import pygame, wx, os, sys
-from src.Imports import *
+import src.VizManager as vm
 
 frame = None
 
@@ -140,7 +140,7 @@ class MainFrame(wx.Frame):
         self.debugger = DebugFrame(self, "Debugger")
         self.display = PygameDisplay(self, -1)
         self.display.SetSize((800, 520))
-        self.vizmanager = src.VizManager.VizManager(self, self.display.screen)
+        self.vizmanager = vm.VizManager(self, self.display.screen)
 
         # Create menu bar
         menubar = wx.MenuBar()
@@ -241,7 +241,7 @@ class MainFrame(wx.Frame):
         """
         if self.vizmanager.preset is None:
             wx.MessageBox("No preset was selected", "Missing Preset!", wx.OK | wx.ICON_ERROR)
-        elif self.vizmanager.IsSongLoaded() is True:
+        elif self.vizmanager.parser.IsEmpty() is True:
             wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
         else:
             self.vizmanager.Play()
