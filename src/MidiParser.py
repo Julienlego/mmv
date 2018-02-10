@@ -23,18 +23,6 @@ class MidiParser:
         self.score = music21.midi.translate.midiFilePathToStream(path)
         return self.score
 
-    def GetSongPath(self):
-        """
-        Returns song file path.
-        """
-        return self.path
-
-    def GetScore(self):
-        """
-        Returns the music21 score object of the song, if possible.
-        """
-        return self.score
-
     def IsEmpty(self):
         """
         Returns true if no song is loaded, false if there is.
