@@ -112,17 +112,25 @@ class StaticPianoRollPreset(BasePreset):
         # graph each note on the screen based off of pitch, offset, and length
         self.viz_manager.screen.fill((0, 0, 0))
         notes = []
-        for notea in score.flat.notes:
-            if isinstance(notea, music21.note.Note):
-                notes.append(notea)
+        for note in score.flat.notes:
+            if isinstance(note, music21.note.Note):
+                notes.append(note)
+            if isinstance(note, music21.chord.Chord):
+                chord_notes = note._notes
+                for chord_note in chord_notes:
+                    if isinstance(chord_note, music21.note.Note):
+                        new_note = chord_note
+                        new_note.offset += note.offset
+                        new_note.quarterLength = note.quarterLength
+                        notes.append(new_note)
 
         print(notes)
-        print(len(score.flat.notes))
+
         for note in notes:
             if isinstance(note, music21.note.Note):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
-                rect = self.viz_manager.GraphNoteRect(score, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
+                rect = self.viz_manager.GraphNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
                 print(rect)
                 note_rect = Unit.NoteRect(rect, note)
                 random.seed()

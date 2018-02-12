@@ -100,7 +100,7 @@ class VizManager:
         """
         pass
 
-    def GraphNoteRect(self, score, notee, dest):
+    def GraphNoteRect(self, notes, the_note, dest):
         """
         Graphs a note onto a destination rect. Used for the static piano roll preset.
 
@@ -110,25 +110,26 @@ class VizManager:
         :return:        the rect that will represent the note within the destination rect
         """
 
-        if not isinstance(notee, music21.note.Note):
+        if not isinstance(the_note, music21.note.Note):
             return None
 
         # get the highest and lowest notes for position normalization
         highest_note = 0
         lowest_note = float("inf")
-        for n in score.flat.notes:
+        for n in notes:
             if isinstance(n, music21.note.Note):
                 if n.pitch.midi > highest_note:
                     highest_note = n.pitch.midi
                 if n.pitch.midi < lowest_note:
                     lowest_note = n.pitch.midi
 
-        largest_offset = score.flat.notes[len(score.flat.notes) - 1].offset
-        number = notee.pitch.midi
-        x = dest.left + dest.width * float(notee.offset / largest_offset)
+        last_note = notes[len(notes) - 1]
+        largest_offset = last_note.offset
+        number = the_note.pitch.midi
+        x = dest.left + dest.width * float(the_note.offset / (largest_offset + last_note.quarterLength))
         y = dest.top + (dest.height - (((number - lowest_note) / (highest_note - lowest_note)) * dest.height))
         print(str(x) + ", " + str(y))
-        w = (dest.left + dest.width * float(notee.quarterLength / score.flat.notes[len(score.flat.notes) - 1].offset))
+        w = (dest.left + dest.width * float(the_note.quarterLength / (largest_offset + last_note.quarterLength)))
         h = 20
         rect = pygame.Rect(x, y, w, h)
         return rect
