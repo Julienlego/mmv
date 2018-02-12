@@ -2,6 +2,7 @@
 
 import pygame, wx, os, sys
 import src.VizManager as vm
+import src.Unit as Unit
 
 frame = None
 
@@ -23,6 +24,8 @@ class PygameDisplay(wx.Window):
         self.Bind(wx.EVT_TIMER, self.Update, self.timer)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
+        self.viz_manager = None
+
         self.resized = False
 
         self.fps = 60.0
@@ -35,7 +38,11 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def Redraw(self):
-        # self.screen.fill((0, 0, 0))
+        self.screen.fill((0, 0, 0))
+
+        for unit in self.viz_manager.units:
+            if isinstance(unit, Unit.NoteRect):
+                pygame.draw.rect(self.screen, unit.color, unit.rect)
 
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
@@ -141,6 +148,9 @@ class MainFrame(wx.Frame):
         self.display = PygameDisplay(self, -1)
         self.display.SetSize((800, 520))
         self.vizmanager = vm.VizManager(self, self.display.screen)
+
+        # give the PygameDisplay access to the viz manager for drawing
+        self.display.viz_manager = self.vizmanager
 
         # Create menu bar
         menubar = wx.MenuBar()

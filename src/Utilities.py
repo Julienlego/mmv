@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import music21
+import pygame
 
 
 def NoteToColor(note):
@@ -55,3 +56,8 @@ def NoteToColor(note):
 
         color = (int(SSS * r), int(SSS * g), int(SSS * b))
         return color
+
+
+def ToRect(x, y, w, h):
+    rect = pygame.Rect(x, y, w, h)
+    return rect

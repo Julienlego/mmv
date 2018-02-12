@@ -2,6 +2,7 @@
 import pygame
 import music21
 import src.Utilities as util
+import src.Unit as Unit
 
 
 class BasePreset:
@@ -122,7 +123,14 @@ class StaticPianoRollPreset(BasePreset):
                 screen_y = self.viz_manager.main_frame.display.size.y
                 rect = self.viz_manager.GraphNoteRect(score, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
                 print(rect)
-                pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+                note_rect = Unit.NoteRect(rect, note)
+                self.viz_manager.units.append(note_rect)
+                print(self.viz_manager.units)
+                # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+
+
+    def OnPlay(self, score):
+        pass
 
     def PerMessage(self, screen, message):
         pass

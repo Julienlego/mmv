@@ -7,6 +7,7 @@ import src.Preset as pr
 import src.MidiParser as mp
 import music21
 import wx
+import pygame
 
 class VizManager:
     """
@@ -26,6 +27,12 @@ class VizManager:
         self.curr_frame = None  # 0, if a song or preset is loaded
         # the parser for the midi file
         self.parser = mp.MidiParser()
+
+        # a string to hold the path of the file that is currently open
+        self.file_path = None
+
+        # the list of units to draw to the screen
+        self.units = []
 
         # Init and load all presets
         self.LoadPresets()
@@ -55,6 +62,7 @@ class VizManager:
         """
         bsy = wx.BusyInfo("Loading song from path: " + path)
         self.parser.ParseFile(path)
+        self.file_path = path
         tempo = self.parser.GetTempo()
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(tempo) + " bpm", 2)
         bsy = None
@@ -82,6 +90,8 @@ class VizManager:
                        + str(n.offset) + "\n"
                 self.main_frame.debugger.WriteLine(line)
             self.preset.PerMessage(self.screen, n)
+
+        # self.parser.PlayFile(self.file_path)
 
     def Pause(self):
         """
@@ -119,5 +129,5 @@ class VizManager:
         print(str(x) + ", " + str(y))
         w = (dest.left + dest.width * float(notee.quarterLength / score.flat.notes[len(score.flat.notes) - 1].offset))
         h = 20
-        rect = (x, y, w, h)
+        rect = pygame.Rect(x, y, w, h)
         return rect

@@ -46,3 +46,9 @@ class MidiParser:
         beats = (total_length - (total_length % 4)) + 4
         tempo = int(60.0 / float(seconds / beats))
         return tempo
+
+    def PlayFile(self, file):
+        b = music21.converter.parse(file)
+        print("s")
+        sp = music21.midi.realtime.StreamPlayer(b)
+        sp.play()
