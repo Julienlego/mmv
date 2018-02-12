@@ -63,6 +63,7 @@ class VizManager:
         bsy = wx.BusyInfo("Loading song from path: " + path)
         self.parser.ParseFile(path)
         self.file_path = path
+        self.units.clear()
         tempo = self.parser.GetTempo()
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(tempo) + " bpm", 2)
         bsy = None
