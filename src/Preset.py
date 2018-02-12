@@ -3,6 +3,7 @@ import pygame
 import music21
 import src.Utilities as util
 import src.Unit as Unit
+import random
 
 
 class BasePreset:
@@ -124,6 +125,9 @@ class StaticPianoRollPreset(BasePreset):
                 rect = self.viz_manager.GraphNoteRect(score, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
                 print(rect)
                 note_rect = Unit.NoteRect(rect, note)
+                random.seed()
+                color = (0, random.randint(50, 100), random.randint(150, 200))
+                note_rect.color = color
                 self.viz_manager.units.append(note_rect)
                 print(self.viz_manager.units)
                 # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
