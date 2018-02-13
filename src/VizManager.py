@@ -8,6 +8,8 @@ import src.MidiParser as mp
 import music21
 import wx
 import pygame
+import pygame.midi
+import src.Utilities as Util
 
 class VizManager:
     """
@@ -28,11 +30,34 @@ class VizManager:
         # the parser for the midi file
         self.parser = mp.MidiParser()
 
+        # the tempo of the song
+        self.tempo = 0
+
+        # the start time of the song, in ticks
+        self.start_time = 0
+
+        # bool for if the song is playing
+        self.playing = False
+
+        # bool for if the song should play
+        self.should_play = False
+
         # a string to hold the path of the file that is currently open
         self.file_path = None
 
         # the list of units to draw to the screen
         self.units = []
+
+        # the list of notes in the currently open file
+        self.notes = []
+
+        # the list of the currently playing notes
+        # it is a tuple. first value is note, second is the tick it was played on
+        self.current_notes = []
+
+        # the list of the next notes to be played (more than 1 if they occur simultaneously)
+        # it is a tuple. first value is note, second is time in ticks when it should play
+        self.next_notes = []
 
         # Init and load all presets
         self.LoadPresets()
@@ -64,8 +89,8 @@ class VizManager:
         self.parser.ParseFile(path)
         self.file_path = path
         self.units.clear()
-        tempo = self.parser.GetTempo()
-        self.main_frame.statusbar.SetStatusText("Tempo: " + str(tempo) + " bpm", 2)
+        self.tempo = self.parser.GetTempo()
+        self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
 
     def Play(self):
@@ -82,15 +107,44 @@ class VizManager:
             if isinstance(n, note.Note):
                 line = str(n.pitch.name) + "\t" \
                        + str(n.pitch.octave) + "\t" \
-                       + str(n.quarterLength) + "\t" \
+                       + str(n.duration.quarterLength) + "\t" \
                        + str(n.offset) + "\n"
                 self.main_frame.debugger.WriteLine(line)
+                self.notes.append(n)
             elif isinstance(n, note.Rest):
                 line = "Rest" + "\t" \
-                       + str(n.quarterLength) + "\t" \
+                       + str(n.duration.quarterLength) + "\t" \
                        + str(n.offset) + "\n"
                 self.main_frame.debugger.WriteLine(line)
+            elif isinstance(n, chord.Chord):
+                chord_notes = n._notes
+                line = "=============chord=============\n"
+                for chord_note in chord_notes:
+                    if isinstance(chord_note, note.Note):
+                        new_note = chord_note
+                        new_note.offset += n.offset
+                        new_note.quarterLength = n.quarterLength
+                        line += str(new_note.pitch.name) + "\t" \
+                            + str(new_note.pitch.octave) + "\t" \
+                            + str(new_note.duration.quarterLength) + "\t" \
+                            + str(new_note.offset) + "\n"
+                        self.notes.append(new_note)
+                line += "=============chord=============\n"
+                print(line)
+                self.main_frame.debugger.WriteLine(line)
+
             self.preset.PerMessage(self.screen, n)
+
+        pygame.midi.init()
+        player = pygame.midi.Output(0)
+
+        self.should_play = True
+
+        first_offset = self.notes[0].offset
+        for n in self.notes:
+            if n.offset == first_offset:
+                self.next_notes.append((n, Util.OffsetMS(n.offset, self.tempo)))
+
 
         # self.parser.PlayFile(self.file_path)
 
@@ -99,6 +153,16 @@ class VizManager:
         Stops the visualization at wherever it is.
         """
         pass
+
+    def Update(self):
+        if not self.playing:
+            if self.should_play:
+                self.should_play = False
+                self.playing = True
+                self.start_time = pygame.time.get_ticks()
+            return
+
+
 
     def GraphNoteRect(self, notes, the_note, dest):
         """

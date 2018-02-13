@@ -15,6 +15,7 @@ class PygameDisplay(wx.Window):
             os.environ['SDL_VIDEODRIVER'] = 'windib'
         os.environ['SDL_WINDOWID'] = str(self.hwnd)
 
+        pygame.init()
         pygame.display.init()
         self.screen = pygame.display.set_mode()
         self.size = self.GetSize()
@@ -45,6 +46,8 @@ class PygameDisplay(wx.Window):
                 pygame.draw.rect(self.screen, unit.color, unit.rect)
 
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
+
+        self.viz_manager.main_frame.statusbar.SetStatusText("t: " + str(pygame.time.get_ticks()), 3)
 
         pygame.display.update()
 
@@ -166,8 +169,8 @@ class MainFrame(wx.Frame):
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
-        self.statusbar.SetFieldsCount(3)
-        self.statusbar.SetStatusWidths([-3, -4, -2])
+        self.statusbar.SetFieldsCount(4)
+        self.statusbar.SetStatusWidths([-3, -4, -2, -2])
         self.statusbar.SetStatusText("No file selected", 0)
         self.statusbar.SetStatusText("No preset selected", 1)
 

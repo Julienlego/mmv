@@ -61,3 +61,9 @@ def NoteToColor(note):
 def ToRect(x, y, w, h):
     rect = pygame.Rect(x, y, w, h)
     return rect
+
+def OffsetMS(offset, tempo):
+    seconds_per_beat = 60.0 / tempo
+    ms_per_beat = seconds_per_beat * 1000
+    offset_ms = ms_per_beat * offset
+    return offset_ms
