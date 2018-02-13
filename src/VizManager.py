@@ -72,10 +72,12 @@ class VizManager:
         """
         # Create the preset!
         default = pr.SimpleCirclePreset(self, "Default", "This is a default visualization preset.")
+        piano_roll = pr.PianoRollPreset(self, "Piano Roll", "This is a piano roll preset")
         piano_static = pr.StaticPianoRollPreset(self, "Piano Roll Static", "This is a static piano roll preset.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
+        self.presets.update({piano_roll.name: piano_roll})
         self.presets.update({piano_static.name: piano_static})
 
     def LoadPreset(self, key):
@@ -199,6 +201,8 @@ class VizManager:
                                     new_next_note.append(ticks + Util.OffsetMS((m.offset - current_offset), self.tempo))
                                     self.next_notes.append(new_next_note)
                             break
+
+                # if we have reached the last note(s), set next_notes to none so we know not to keep checking for more
                 else:
                     self.next_notes = None
 
@@ -244,3 +248,8 @@ class VizManager:
         h = 20
         rect = pygame.Rect(x, y, w, h)
         return rect
+
+    def GraphNoteY(self, note, highest_note, lowest_note, dest):
+        the_pitch = note.pitch.midi
+        y = dest.top + (dest.height - (((the_pitch - lowest_note) / (highest_note - lowest_note)) * dest.height))
+        return y

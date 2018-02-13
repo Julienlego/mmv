@@ -43,7 +43,11 @@ class PygameDisplay(wx.Window):
 
         for unit in self.viz_manager.units:
             if isinstance(unit, Unit.NoteRect):
-                pygame.draw.rect(self.screen, unit.color, unit.rect)
+                if unit.should_delete:
+                    self.viz_manager.units.remove(unit)
+                else:
+                    unit.update()
+                    pygame.draw.rect(self.screen, unit.color, unit.rect)
 
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
