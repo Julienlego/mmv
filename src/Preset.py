@@ -112,8 +112,7 @@ class PianoRollPreset(BasePreset):
                         if chord_note.pitch.midi < self.lowest_pitch:
                             self.lowest_pitch = chord_note.pitch.midi
 
-
-    def PerMessage(self, screen, note):
+    def PerMessage(self, screen, note, player):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
@@ -127,6 +126,8 @@ class PianoRollPreset(BasePreset):
         note_rect.color = color
         self.viz_manager.units.append(note_rect)
         print(self.viz_manager.units)
+        player.note_on(note.pitch.midi, 100)
+
         # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
 
 

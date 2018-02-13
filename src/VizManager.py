@@ -60,7 +60,12 @@ class VizManager:
         self.next_notes = []
 
         # the offset of the last note in the song
-        self.last_offset = 0.0
+        self.last_offset = 0.
+
+        # the midi player
+        pygame.midi.init()
+        self.player = pygame.midi.Output(0)
+
 
         # Init and load all presets
         self.LoadPresets()
@@ -142,9 +147,6 @@ class VizManager:
         self.main_frame.debugger.WriteLine("\n\n")
         self.main_frame.debugger.WriteLine("===============================")
 
-        pygame.midi.init()
-        player = pygame.midi.Output(0)
-
         self.should_play = True
 
         # get the offset of the first note in the song
@@ -211,7 +213,7 @@ class VizManager:
                     length = n[0].quarterLength
                     length_ms = Util.OffsetMS(length, self.tempo)
                     n.append(length_ms)
-                    self.preset.PerMessage(self.screen, n[0])
+                    self.preset.PerMessage(self.screen, n[0], self.player)
                 self.current_notes.clear()
 
 
