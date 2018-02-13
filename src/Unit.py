@@ -16,6 +16,7 @@ class NoteRect:
         self.rect = rect
         self.color = [0, 50, 200]
         self.fade = False
+        self.fade_speed = 5
         self.delete_after_fade = False
         self.should_delete = False
 
@@ -34,9 +35,9 @@ class NoteRect:
 
     def update(self):
         if self.fade:
-            self.color[0] -= 2
-            self.color[1] -= 2
-            self.color[2] -= 2
+            self.color[0] -= self.fade_speed
+            self.color[1] -= self.fade_speed
+            self.color[2] -= self.fade_speed
             if self.color[0] < 0:
                 self.color[0] = 0
             if self.color[1] < 0:
