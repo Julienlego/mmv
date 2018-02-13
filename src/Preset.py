@@ -145,4 +145,4 @@ class StaticPianoRollPreset(BasePreset):
         pass
 
     def PerMessage(self, screen, message):
-        pass
+        print("NOTE DOWN " + str(message.name))

@@ -49,6 +49,8 @@ class PygameDisplay(wx.Window):
 
         self.viz_manager.main_frame.statusbar.SetStatusText("t: " + str(pygame.time.get_ticks()), 3)
 
+        self.viz_manager.Update()
+
         pygame.display.update()
 
     def OnPaint(self, event):

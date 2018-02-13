@@ -56,8 +56,11 @@ class VizManager:
         self.current_notes = []
 
         # the list of the next notes to be played (more than 1 if they occur simultaneously)
-        # it is a tuple. first value is note, second is time in ticks when it should play
+        # it is a tuple. first value is note, second is the tick it should play on
         self.next_notes = []
+
+        # the offset of the last note in the song
+        self.last_offset = 0.0
 
         # Init and load all presets
         self.LoadPresets()
@@ -122,7 +125,7 @@ class VizManager:
                 for chord_note in chord_notes:
                     if isinstance(chord_note, note.Note):
                         new_note = chord_note
-                        new_note.offset += n.offset
+                        new_note.offset = n.offset
                         new_note.quarterLength = n.quarterLength
                         line += str(new_note.pitch.name) + "\t" \
                             + str(new_note.pitch.octave) + "\t" \
@@ -133,17 +136,27 @@ class VizManager:
                 print(line)
                 self.main_frame.debugger.WriteLine(line)
 
-            self.preset.PerMessage(self.screen, n)
+            # self.preset.PerMessage(self.screen, n)
+        self.main_frame.debugger.WriteLine("\n\n")
+        self.main_frame.debugger.WriteLine("===============================")
 
         pygame.midi.init()
         player = pygame.midi.Output(0)
 
         self.should_play = True
 
+        # get the offset of the first note in the song
+        # so we can put it in next_notes
         first_offset = self.notes[0].offset
         for n in self.notes:
             if n.offset == first_offset:
-                self.next_notes.append((n, Util.OffsetMS(n.offset, self.tempo)))
+                ticks = pygame.time.get_ticks()
+                new_next_note = [n]
+                new_next_note.append(ticks + Util.OffsetMS(n.offset, self.tempo))
+                self.next_notes.append(new_next_note)
+            if n.offset > self.last_offset:
+                self.last_offset = n.offset
+
 
 
         # self.parser.PlayFile(self.file_path)
@@ -161,7 +174,41 @@ class VizManager:
                 self.playing = True
                 self.start_time = pygame.time.get_ticks()
             return
+        # determine whether or not to play something
+        ticks = pygame.time.get_ticks()
+        if self.next_notes != None:
+            if ticks >= self.next_notes[0][1]:
+                print("NEXT NOTES AMOUNT: " + str(len(self.next_notes)))
+                # move next_notes to current_notes
+                for n in self.next_notes:
+                    new_current_note = [n[0]]
+                    # new_current_note.append(None)
+                    self.current_notes.append(new_current_note)
+                self.next_notes.clear()
 
+                # get the next new notes
+                current_offset = self.current_notes[0][0].offset
+                if current_offset < self.last_offset:
+                    for n in self.notes:
+                        if n.offset > current_offset:
+                            new_offset = n.offset
+                            for m in self.notes:
+                                if m.offset == new_offset:
+                                    ticks = pygame.time.get_ticks()
+                                    new_next_note = [m]
+                                    new_next_note.append(ticks + Util.OffsetMS((m.offset - current_offset), self.tempo))
+                                    self.next_notes.append(new_next_note)
+                            break
+                else:
+                    self.next_notes = None
+
+                # set the ticks length of each current note
+                for n in self.current_notes:
+                    length = n[0].quarterLength
+                    length_ms = Util.OffsetMS(length, self.tempo)
+                    n.append(length_ms)
+                    self.preset.PerMessage(self.screen, n[0])
+                self.current_notes.clear()
 
 
     def GraphNoteRect(self, notes, the_note, dest):
