@@ -9,7 +9,7 @@ import music21
 import wx
 import pygame
 import pygame.midi
-import src.Utilities as Util
+import src.Utilities as util
 
 class VizManager:
     """
@@ -66,14 +66,12 @@ class VizManager:
         pygame.midi.init()
         self.player = pygame.midi.Output(0)
 
-
         # Init and load all presets
         self.LoadPresets()
-        self.LoadPreset("Default")     # load the default preset by default (so we don't have to select it manually)
 
     def LoadPresets(self):
         """
-        Loads all presets.
+        Create and loads all presets.
         """
         # Create the preset!
         default = pr.SimpleCirclePreset(self, "Default", "This is a default visualization preset.")
@@ -87,7 +85,7 @@ class VizManager:
 
     def LoadPreset(self, key):
         """
-        Loads preset with key.
+        Load preset with given key.
         """
         self.preset = self.presets[key]
 
@@ -107,25 +105,26 @@ class VizManager:
         """
         Starts playing the visualization from the beginning.
         """
+        bsy = wx.BusyInfo("Initial Loading...")
         self.preset.OnFirstLoad(self.parser.score)
+        bsy = None
 
-        data = self.parser.score.parts[0]
-        self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
-        notes = [i for i in data.flat.notesAndRests]
+        part = self.parser.score.parts[0]   # Gets first track/part of song
+
+        # Prints all notes/rests in part to debug panel
+        #self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
+        notes = [i for i in part.flat.notesAndRests]
         # Iterates through all notes and rests
         for n in notes:
             if isinstance(n, note.Note):
-                line = str(n.pitch.name) + "\t" \
-                       + str(n.pitch.octave) + "\t" \
-                       + str(n.duration.quarterLength) + "\t" \
-                       + str(n.offset) + "\n"
-                self.main_frame.debugger.WriteLine(line)
+                util.PrintNoteToPanel(self.main_frame.debugger, n)
+                #self.main_frame.debugger.WriteLine(line)
                 self.notes.append(n)
             elif isinstance(n, note.Rest):
                 line = "Rest" + "\t" \
                        + str(n.duration.quarterLength) + "\t" \
                        + str(n.offset) + "\n"
-                self.main_frame.debugger.WriteLine(line)
+                #self.main_frame.debugger.WriteLine(line)
             elif isinstance(n, chord.Chord):
                 chord_notes = n._notes
                 line = "=============chord=============\n"
@@ -134,18 +133,19 @@ class VizManager:
                         new_note = chord_note
                         new_note.offset = n.offset
                         new_note.quarterLength = n.quarterLength
-                        line += str(new_note.pitch.name) + "\t" \
-                            + str(new_note.pitch.octave) + "\t" \
-                            + str(new_note.duration.quarterLength) + "\t" \
-                            + str(new_note.offset) + "\n"
+                        #line += str(new_note.pitch.name) + "\t" \
+                        #    + str(new_note.pitch.octave) + "\t" \
+                        #    + str(new_note.duration.quarterLength) + "\t" \
+                        #    + str(new_note.offset) + "\n"
                         self.notes.append(new_note)
-                line += "=============chord=============\n"
-                print(line)
-                self.main_frame.debugger.WriteLine(line)
-
+                #line += "=============chord=============\n"
+                util.PrintChordToPanel(self.main_frame.debugger, n)
+                #print(line)
+                #self.main_frame.debugger.WriteLine(line)
             # self.preset.PerMessage(self.screen, n)
-        self.main_frame.debugger.WriteLine("\n\n")
-        self.main_frame.debugger.WriteLine("===============================")
+        #self.main_frame.debugger.WriteLine("\n\n")
+        #self.main_frame.debugger.WriteLine("===============================")
+
 
         self.should_play = True
 
@@ -156,14 +156,10 @@ class VizManager:
             if n.offset == first_offset:
                 ticks = pygame.time.get_ticks()
                 new_next_note = [n]
-                new_next_note.append(ticks + Util.OffsetMS(n.offset, self.tempo))
+                new_next_note.append(ticks + util.OffsetMS(n.offset, self.tempo))
                 self.next_notes.append(new_next_note)
             if n.offset > self.last_offset:
                 self.last_offset = n.offset
-
-
-
-        # self.parser.PlayFile(self.file_path)
 
     def Pause(self):
         """
@@ -182,7 +178,7 @@ class VizManager:
         ticks = pygame.time.get_ticks()
         if self.next_notes != None:
             if ticks >= self.next_notes[0][1]:
-                print("NEXT NOTES AMOUNT: " + str(len(self.next_notes)))
+                #print("NEXT NOTES AMOUNT: " + str(len(self.next_notes)))
                 # move next_notes to current_notes
                 for n in self.next_notes:
                     new_current_note = [n[0]]
@@ -200,7 +196,7 @@ class VizManager:
                                 if m.offset == new_offset:
                                     ticks = pygame.time.get_ticks()
                                     new_next_note = [m]
-                                    new_next_note.append(ticks + Util.OffsetMS((m.offset - current_offset), self.tempo))
+                                    new_next_note.append(ticks + util.OffsetMS((m.offset - current_offset), self.tempo))
                                     self.next_notes.append(new_next_note)
                             break
 
@@ -208,50 +204,12 @@ class VizManager:
                 else:
                     self.next_notes = None
 
-                # set the ticks length of each current note
+                # set the ticks length of each current note and
+                # play the note and draw it to the screen (via preset)
                 for n in self.current_notes:
                     length = n[0].quarterLength
-                    length_ms = Util.OffsetMS(length, self.tempo)
+                    length_ms = util.OffsetMS(length, self.tempo)
                     n.append(length_ms)
-                    self.preset.PerMessage(self.screen, n[0], self.player)
+                    self.player.note_on(n[0].pitch.midi, n[0].volume.velocity)
+                    self.preset.PerMessage(self.screen, n[0])
                 self.current_notes.clear()
-
-
-    def GraphNoteRect(self, notes, the_note, dest):
-        """
-        Graphs a note onto a destination rect. Used for the static piano roll preset.
-
-        :param score:   the score object of the song the note belongs to
-        :param notee:   the note that is being graphed
-        :param dest:    the destination rect to graph the note onto
-        :return:        the rect that will represent the note within the destination rect
-        """
-
-        if not isinstance(the_note, music21.note.Note):
-            return None
-
-        # get the highest and lowest notes for position normalization
-        highest_note = 0
-        lowest_note = float("inf")
-        for n in notes:
-            if isinstance(n, music21.note.Note):
-                if n.pitch.midi > highest_note:
-                    highest_note = n.pitch.midi
-                if n.pitch.midi < lowest_note:
-                    lowest_note = n.pitch.midi
-
-        last_note = notes[len(notes) - 1]
-        largest_offset = last_note.offset
-        number = the_note.pitch.midi
-        x = dest.left + dest.width * float(the_note.offset / (largest_offset + last_note.quarterLength))
-        y = dest.top + (dest.height - (((number - lowest_note) / (highest_note - lowest_note)) * dest.height))
-        print(str(x) + ", " + str(y))
-        w = (dest.left + dest.width * float(the_note.quarterLength / (largest_offset + last_note.quarterLength)))
-        h = 20
-        rect = pygame.Rect(x, y, w, h)
-        return rect
-
-    def GraphNoteY(self, note, highest_note, lowest_note, dest):
-        the_pitch = note.pitch.midi
-        y = dest.top + (dest.height - (((the_pitch - lowest_note) / (highest_note - lowest_note)) * dest.height))
-        return y

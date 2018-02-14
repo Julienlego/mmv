@@ -2,7 +2,7 @@
 Originally inspired by Stephen Malinowski's Music Animation Machine
 http://www.musanim.com/
 
-`MMV` is a MIDI music visualization software that provides meaningful
+`MMV` (name pending..) is a MIDI music visualization software that provides meaningful
 visualizations based off of musical data contained within MIDI files.
 
 We find there is a general lack of music visualizer programs that
@@ -27,4 +27,12 @@ provide useful visual interpretations of songs for musical analysis.
     + Tension and Pitch Space
 
 # License
-Licensed under MIT License. (https://opensource.org/licenses/MIT)
+`MMV` is under the MIT License. (https://opensource.org/licenses/MIT)
+
+# How-To
+`MMV` is powered by `Python 3.X` and thus requires the subsequent libraries to operate:
++ Pygame - (for graphics display)
++ wxPython - (for GUI)
++ music21 - (for computational music analysis)
++ fluidsynth - (for audio playback)
+

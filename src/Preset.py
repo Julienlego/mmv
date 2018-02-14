@@ -2,7 +2,7 @@
 import pygame
 import music21
 import src.Utilities as util
-import src.Unit as Unit
+import src.Unit as unit
 import random
 
 
@@ -112,21 +112,20 @@ class PianoRollPreset(BasePreset):
                         if chord_note.pitch.midi < self.lowest_pitch:
                             self.lowest_pitch = chord_note.pitch.midi
 
-    def PerMessage(self, screen, note, player):
+    def PerMessage(self, screen, message):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
-        y = self.viz_manager.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, rect)
+        y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
         new_rect = pygame.Rect(300, y, 200, 20)
-        note_rect = Unit.NoteRect(new_rect, note)
+        note_rect = unit.NoteRect(new_rect, message)
         note_rect.fade = True
         note_rect.delete_after_fade = True
         random.seed()
         color = [0, random.randint(50, 100), random.randint(150, 200)]
         note_rect.color = color
         self.viz_manager.units.append(note_rect)
-        print(self.viz_manager.units)
-        player.note_on(note.pitch.midi, 100)
+        #print(self.viz_manager.units)
 
         # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
 
@@ -154,20 +153,20 @@ class StaticPianoRollPreset(BasePreset):
                         new_note.quarterLength = note.quarterLength
                         notes.append(new_note)
 
-        print(notes)
+        #print(notes)
 
         for note in notes:
             if isinstance(note, music21.note.Note):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
-                rect = self.viz_manager.GraphNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
-                print(rect)
-                note_rect = Unit.NoteRect(rect, note)
+                rect = util.GraphNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
+                #print(rect)
+                note_rect = unit.NoteRect(rect, note)
                 random.seed()
                 color = (0, random.randint(50, 100), random.randint(150, 200))
                 note_rect.color = color
                 self.viz_manager.units.append(note_rect)
-                print(self.viz_manager.units)
+                #print(self.viz_manager.units)
                 # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
 
 
@@ -175,4 +174,5 @@ class StaticPianoRollPreset(BasePreset):
         pass
 
     def PerMessage(self, screen, message):
-        print("NOTE DOWN " + str(message.name))
+        #print("NOTE DOWN " + str(message.name))
+        pass
