@@ -160,14 +160,11 @@ class StaticPianoRollPreset(BasePreset):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
                 rect = util.GraphNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
-                #print(rect)
                 note_rect = unit.NoteRect(rect, note)
                 random.seed()
                 color = (0, random.randint(50, 100), random.randint(150, 200))
                 note_rect.color = color
                 self.viz_manager.units.append(note_rect)
-                #print(self.viz_manager.units)
-                # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
 
 
     def OnPlay(self, score):

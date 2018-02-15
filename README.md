@@ -18,8 +18,6 @@ provide useful visual interpretations of songs for musical analysis.
 + Easy-to-use GUI to select and load preset visualizations and MIDI
 (*.mid) files
 + Real-time video and sound playback
-+ Audio playback playback powered by soundfounts (*.sf2)
-+ Many color options
 + API for making custom visualizations
 + Visualizations included out-of-box:
     + Piano Roll (and variations)
@@ -31,8 +29,10 @@ provide useful visual interpretations of songs for musical analysis.
 
 # How-To
 `MMV` is powered by `Python 3.X` and thus requires the subsequent libraries to operate:
-+ Pygame - (for graphics display)
++ Pygame - (for graphics display and audio playback)
 + wxPython - (for GUI)
 + music21 - (for computational music analysis)
-+ fluidsynth - (for audio playback)
 
+# Notes
+So far `MMV` uses pygame for audio playback, but one of our goals is
+to use fluidsynth and soundfonts (*.sf2) files for much better audio playback.

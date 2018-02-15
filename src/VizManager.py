@@ -5,11 +5,11 @@ import mingus
 from music21 import *
 import src.Preset as pr
 import src.MidiParser as mp
-import music21
 import wx
 import pygame
 import pygame.midi
 import src.Utilities as util
+
 
 class VizManager:
     """
@@ -27,7 +27,7 @@ class VizManager:
         self.main_frame = main_frame
         # Current frame of the visualization
         self.curr_frame = None  # 0, if a song or preset is loaded
-        # the parser for the midi file
+        # Midi file parser. This contains the actual file path and musc21 score.
         self.parser = mp.MidiParser()
 
         # the tempo of the song
@@ -37,13 +37,10 @@ class VizManager:
         self.start_time = 0
 
         # bool for if the song is playing
-        self.playing = False
+        self.isPlaying = False
 
         # bool for if the song should play
         self.should_play = False
-
-        # a string to hold the path of the file that is currently open
-        self.file_path = None
 
         # the list of units to draw to the screen
         self.units = []
@@ -95,7 +92,6 @@ class VizManager:
         """
         bsy = wx.BusyInfo("Loading song from path: " + path)
         self.parser.ParseFile(path)
-        self.file_path = path
         self.units.clear()
         self.tempo = self.parser.GetTempo()
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
@@ -108,43 +104,36 @@ class VizManager:
         bsy = wx.BusyInfo("Initial Loading...")
         self.preset.OnFirstLoad(self.parser.score)
         bsy = None
+        dbg = self.main_frame.debugger
 
         part = self.parser.score.parts[0]   # Gets first track/part of song
 
         # Prints all notes/rests in part to debug panel
-        #self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
+        util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
+
         notes = [i for i in part.flat.notesAndRests]
-        # Iterates through all notes and rests
+        # Iterates through all notes, rests, and chords
         for n in notes:
             if isinstance(n, note.Note):
-                util.PrintNoteToPanel(self.main_frame.debugger, n)
-                #self.main_frame.debugger.WriteLine(line)
+                util.PrintNoteToPanel(dbg, n)
                 self.notes.append(n)
+
             elif isinstance(n, note.Rest):
-                line = "Rest" + "\t" \
-                       + str(n.duration.quarterLength) + "\t" \
-                       + str(n.offset) + "\n"
-                #self.main_frame.debugger.WriteLine(line)
+                util.PrintRestToPanel(dbg, n)
+
             elif isinstance(n, chord.Chord):
+                util.PrintChordToPanel(dbg, n)
                 chord_notes = n._notes
-                line = "=============chord=============\n"
                 for chord_note in chord_notes:
+                    util.PrintChordToPanel(dbg, n)
                     if isinstance(chord_note, note.Note):
                         new_note = chord_note
                         new_note.offset = n.offset
                         new_note.quarterLength = n.quarterLength
-                        #line += str(new_note.pitch.name) + "\t" \
-                        #    + str(new_note.pitch.octave) + "\t" \
-                        #    + str(new_note.duration.quarterLength) + "\t" \
-                        #    + str(new_note.offset) + "\n"
                         self.notes.append(new_note)
-                #line += "=============chord=============\n"
-                util.PrintChordToPanel(self.main_frame.debugger, n)
-                #print(line)
-                #self.main_frame.debugger.WriteLine(line)
-            # self.preset.PerMessage(self.screen, n)
-        #self.main_frame.debugger.WriteLine("\n\n")
-        #self.main_frame.debugger.WriteLine("===============================")
+                util.PrintChordToPanel(dbg, n)
+
+        util.PrintLineToPanel(dbg, "\n\n===============================")
 
 
         self.should_play = True
@@ -168,17 +157,16 @@ class VizManager:
         pass
 
     def Update(self):
-        if not self.playing:
+        if not self.isPlaying:
             if self.should_play:
                 self.should_play = False
-                self.playing = True
+                self.isPlaying = True
                 self.start_time = pygame.time.get_ticks()
             return
         # determine whether or not to play something
         ticks = pygame.time.get_ticks()
         if self.next_notes != None:
             if ticks >= self.next_notes[0][1]:
-                #print("NEXT NOTES AMOUNT: " + str(len(self.next_notes)))
                 # move next_notes to current_notes
                 for n in self.next_notes:
                     new_current_note = [n[0]]

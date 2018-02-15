@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import music21
-import pygame
 
 
 class NoteRect:
@@ -48,8 +46,3 @@ class NoteRect:
         if self.delete_after_fade:
             if self.color[0] + self.color[1] + self.color[2] == 0:
                 self.should_delete = True
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
-
-

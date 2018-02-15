@@ -61,16 +61,22 @@ def ToRect(x, y, w, h):
     rect = pygame.Rect(x, y, w, h)
     return rect
 
+
 def OffsetMS(offset, tempo):
     seconds_per_beat = 60.0 / tempo
     ms_per_beat = seconds_per_beat * 1000
     offset_ms = ms_per_beat * offset
     return offset_ms
 
+
 def GraphNoteY(note, highest_note, lowest_note, dest):
+    """
+    Returns the height position
+    """
     the_pitch = note.pitch.midi
     y = dest.top + (dest.height - (((the_pitch - lowest_note) / (highest_note - lowest_note)) * dest.height))
     return y
+
 
 def GraphNoteRect(self, notes, the_note, dest):
     """
@@ -106,55 +112,18 @@ def GraphNoteRect(self, notes, the_note, dest):
     rect = pygame.Rect(x, y, w, h)
     return rect
 
-def PrintPartToPanel(txt_panel, part):
-    """
-    Write all notes in part to TextCtrl panel
-    """
-    if isinstance(txt_panel, wx.TextCtrl):
-        txt_panel.AppendText("Note/Rest\tOctave\tLen\tOffset\n")
-        notes = [i for i in part.flat.notesAndRests]
-        # Iterates through all notes and rests
-        for n in notes:
-            if isinstance(n, music21.note.Note):
-                line = str(n.pitch.name) + "\t" \
-                       + str(n.pitch.octave) + "\t" \
-                       + str(n.duration.quarterLength) + "\t" \
-                       + str(n.offset) + "\n"
-                txt_panel.AppendText(line)
-            elif isinstance(n, music21.note.Rest):
-                line = "Rest" + "\t" \
-                       + str(n.duration.quarterLength) + "\t" \
-                       + str(n.offset) + "\n"
-                txt_panel.AppendText(line)
-            elif isinstance(n, music21.chord.Chord):
-                chord_notes = n._notes
-                line = "=============chord=============\n"
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, music21.note.Note):
-                        new_note = chord_note
-                        new_note.offset = n.offset
-                        new_note.quarterLength = n.quarterLength
-                        line += str(new_note.pitch.name) + "\t" \
-                                + str(new_note.pitch.octave) + "\t" \
-                                + str(new_note.duration.quarterLength) + "\t" \
-                                + str(new_note.offset) + "\n"
-                line += "=============chord=============\n"
-                print(line)
-                txt_panel.AppendText(line)
-            # self.preset.PerMessage(self.screen, n)
-            txt_panel.AppendText("\n\n")
-            txt_panel.AppendText("===============================")
 
 def PrintLineToPanel(txt_panel, line):
     """
-    Write line to TextCtrl panel
+    Write line to TextCtrl (debug) panel
     """
     if isinstance(txt_panel, wx.TextCtrl):
         txt_panel.AppendText(line)
 
+
 def PrintNoteToPanel(panel, n):
     """
-
+    Prints note's name, octave, quarterLength, and offset to the (debug) panel
     """
     if isinstance(panel, wx.TextCtrl):
         line = str(n.pitch.name) + "\t" \
@@ -163,17 +132,35 @@ def PrintNoteToPanel(panel, n):
                + str(n.offset) + "\n"
         panel.AppendText(line)
 
+
+def PrintRestToPanel(panel, r):
+    """
+    Prints rest to the (debug) panel
+    """
+    if isinstance(panel, wx.TextCtrl):
+        if isinstance(r, music21.note.Rest):
+            line = "Rest" + "\t" \
+                   + str(r.duration.quarterLength) + "\t" \
+                   + str(r.offset) + "\n"
+            panel.AppendText(line)
+
+
 def PrintChordToPanel(panel, n):
-    if isinstance(n, music21.chord.Chord):
-        chord_notes = n._notes
-        line = "=============chord=============\n"
-        for chord_note in chord_notes:
-            if isinstance(chord_note, music21.note.Note):
-                new_note = chord_note
-                new_note.offset = n.offset
-                new_note.quarterLength = n.quarterLength
-                line += str(new_note.pitch.name) + "\t" \
-                        + str(new_note.pitch.octave) + "\t" \
-                        + str(new_note.duration.quarterLength) + "\t" \
-                        + str(new_note.offset) + "\n"
-        line += "=============chord=============\n"
+    """
+    Prints chord, with all its notes, to the (debug) panel
+    """
+    if isinstance(panel, wx.TextCtrl):
+        if isinstance(n, music21.chord.Chord):
+            chord_notes = n._notes
+            line = "=============chord=============\n"
+            for chord_note in chord_notes:
+                if isinstance(chord_note, music21.note.Note):
+                    new_note = chord_note
+                    new_note.offset = n.offset
+                    new_note.quarterLength = n.quarterLength
+                    line += str(new_note.pitch.name) + "\t" \
+                            + str(new_note.pitch.octave) + "\t" \
+                            + str(new_note.duration.quarterLength) + "\t" \
+                            + str(new_note.offset) + "\n"
+            line += "=============chord=============\n"
+            panel.AppendText(line)

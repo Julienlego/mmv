@@ -80,18 +80,25 @@ class DebugFrame(wx.Frame):
         self.parent = parent
         self.SetMinSize((250, 400))
         self.SetMaxSize((300, 400))
-        pan = wx.Panel(self)
+        self.isEnabled = False
+        panel = wx.Panel(self)
         sizer = wx.BoxSizer()
         # Create debug text box
-        self.textbox = wx.TextCtrl(pan, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.textbox = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE | wx.TE_READONLY)
         sizer.Add(self.textbox, proportion=1, flag=wx.EXPAND, border=2)
-        pan.SetSizer(sizer)
+        panel.SetSizer(sizer)
 
     def WriteLine(self, line):
         """
         Writes line to the text-box.
         """
         self.textbox.AppendText(str(line))
+
+    def OnClose(self):
+        self.parent.viewmenu.Check(self.parent.toggledebug.GetId(), True)
+        self.Close()
+        self.Destroy()
+
 
 
 class PresetDialog(wx.Dialog):
@@ -134,6 +141,7 @@ class PresetDialog(wx.Dialog):
         self.Destroy()
 
     def OnClose(self, event):
+        self.Close()
         self.Destroy()
 
 
@@ -164,14 +172,12 @@ class MainFrame(wx.Frame):
         # Create menu bar
         menubar = wx.MenuBar()
         filemenu = wx.Menu()
-        viewmenu = wx.Menu()
+        self.viewmenu = wx.Menu()
 
         self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File', 'Open a file')
         self.runviz = filemenu.Append(wx.ID_ANY, 'Run', 'Run Viz')
-        self.toggledebug = viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
-        self.ldp = viewmenu.Append(wx.ID_ANY, 'Load Preset')
-
-        viewmenu.Check(self.toggledebug.GetId(), True)
+        self.toggledebug = self.viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
+        self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset')
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -181,7 +187,7 @@ class MainFrame(wx.Frame):
         self.statusbar.SetStatusText("No preset selected", 1)
 
         menubar.Append(filemenu, '&File')
-        menubar.Append(viewmenu, '&View')
+        menubar.Append(self.viewmenu, '&View')
 
         # Bind everything!
         self.Bind(wx.EVT_MENU, self.OnQuit)
@@ -196,16 +202,18 @@ class MainFrame(wx.Frame):
         sizer.Add(panel_pygame, 0, flag=wx.EXPAND | wx.ALL, border=10)
         sizer.Add(self.panelDebug, 1, flag=wx.EXPAND | wx.ALL, border=10)
 
+        if self.debugger.isEnabled is True:
+            self.debugger.Show()
+
         top_panel.SetSizerAndFit(sizer)
         self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
         self.Centre()
         self.Show(True)
-        self.debugger.Show()
 
     def OnQuit(self, event):
         """
-        Called when the exit
+        Called when the program exits.
         """
         self.display.Kill(event)
         pygame.quit()
@@ -246,12 +254,17 @@ class MainFrame(wx.Frame):
         """
         if self.toggledebug.IsChecked():
             if self.debugger:
+                self.debugger.isEnabled = True
+                self.viewmenu.Check(self.toggledebug.GetId(), True)
                 self.debugger.Show()
             else:
                 self.debugger = DebugFrame(self, "Debugger")
+                self.debugger.isEnabled = True
+                self.viewmenu.Check(self.toggledebug.GetId(), True)
                 self.debugger.Show()
         else:
             if self.debugger:
+                self.debugger.isEnabled = False
                 self.debugger.Hide()
 
     def PlayVisualization(self, event):
