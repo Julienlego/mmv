@@ -71,9 +71,12 @@ class VizManager:
         Create and loads all presets.
         """
         # Create the preset!
-        default = pr.SimpleCirclePreset(self, "Default", "This is a default visualization preset.")
-        piano_roll = pr.PianoRollPreset(self, "Piano Roll", "This is a piano roll preset")
+        default = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
+        piano_roll = pr.PresetPianoRoll(self, "Piano Roll", "This is a piano roll preset")
         piano_static = pr.StaticPianoRollPreset(self, "Piano Roll Static", "This is a static piano roll preset.")
+        piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano "
+                                                                             "roll preset except it determines the "
+                                                                             "color by the note.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})

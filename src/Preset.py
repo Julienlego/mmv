@@ -40,7 +40,7 @@ class BasePreset:
         pass
 
 
-class JustTextPreset(BasePreset):
+class PresetJustText(BasePreset):
     """
 
     """
@@ -62,7 +62,7 @@ class JustTextPreset(BasePreset):
         pass
 
 
-class SimpleCirclePreset(BasePreset):
+class PresetSimpleCircle(BasePreset):
     """
     This is a basic preset that draws a circle randomly on the screen for each midi event.
 
@@ -89,7 +89,7 @@ class SimpleCirclePreset(BasePreset):
             pygame.draw.circle(screen, color, pos, radius)
 
 
-class PianoRollPreset(BasePreset):
+class PresetPianoRoll(BasePreset):
     """
     This is a basic piano roll preset.
     Each note is drawn onto the screen in a piano roll fashion.
@@ -128,6 +128,45 @@ class PianoRollPreset(BasePreset):
         #print(self.viz_manager.units)
 
         # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+
+
+class PresetColorPianoRoll(BasePreset):
+    """
+    This is a basic piano roll preset.
+    Each note is drawn onto the screen in a piano roll fashion.
+    Notes with greater pitch go higher on the screen, lower notes go lower.
+    """
+
+    def OnFirstLoad(self, score):
+        for note in score.flat.notes:
+            if isinstance(note, music21.note.Note):
+                if note.pitch.midi > self.highest_pitch:
+                    self.highest_pitch = note.pitch.midi
+                if note.pitch.midi < self.lowest_pitch:
+                    self.lowest_pitch = note.pitch.midi
+            if isinstance(note, music21.chord.Chord):
+                chord_notes = note._notes
+                for chord_note in chord_notes:
+                    if isinstance(chord_note, music21.note.Note):
+                        if chord_note.pitch.midi > self.highest_pitch:
+                            self.highest_pitch = chord_note.pitch.midi
+                        if chord_note.pitch.midi < self.lowest_pitch:
+                            self.lowest_pitch = chord_note.pitch.midi
+
+    def PerMessage(self, screen, message):
+        if isinstance(message, music21.note.Note):
+            screen_x = self.viz_manager.main_frame.display.size.x
+            screen_y = self.viz_manager.main_frame.display.size.y
+            rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
+            y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
+            new_rect = pygame.Rect(300, y, 200, 20)
+            note_rect = unit.NoteRect(new_rect, message)
+            note_rect.fade = True
+            note_rect.delete_after_fade = True
+            random.seed()
+            color = util.NoteToColor(message)# [0, random.randint(50, 100), random.randint(150, 200)]
+            note_rect.color = color
+            self.viz_manager.units.append(note_rect)
 
 
 class StaticPianoRollPreset(BasePreset):
