@@ -45,15 +45,15 @@ class VizManager:
         # the list of units to draw to the screen
         self.units = []
 
-        # the list of notes in the currently open file
+        # the list of notes in the currently open file, one after the other with chords broken down
         self.notes = []
 
         # the list of the currently playing notes
-        # it is a tuple. first value is note, second is the tick it was played on
+        # it is a list of tuples. first value is note, second is the tick it was played on
         self.current_notes = []
 
         # the list of the next notes to be played (more than 1 if they occur simultaneously)
-        # it is a tuple. first value is note, second is the tick it should play on
+        # it is a list of tuples. first value is note, second is the tick it should play on
         self.next_notes = []
 
         # the offset of the last note in the song
@@ -72,11 +72,13 @@ class VizManager:
         """
         # Create the preset!
         default = pr.SimpleCirclePreset(self, "Default", "This is a default visualization preset.")
-        piano_roll = pr.PianoRollPreset(self, "Piano Roll", "This is a piano roll preset")
+        piano_roll_fade = pr.PresetPianoRollFading(self, "Piano Roll Fading", "This is a fading piano roll preset")
+        piano_roll = pr.PresetPianoRoll(self, "Piano Roll", "This is a piano roll preset")
         piano_static = pr.StaticPianoRollPreset(self, "Piano Roll Static", "This is a static piano roll preset.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
+        self.presets.update({piano_roll_fade.name: piano_roll_fade})
         self.presets.update({piano_roll.name: piano_roll})
         self.presets.update({piano_static.name: piano_static})
 
@@ -125,13 +127,11 @@ class VizManager:
                 util.PrintChordToPanel(dbg, n)
                 chord_notes = n._notes
                 for chord_note in chord_notes:
-                    util.PrintChordToPanel(dbg, n)
                     if isinstance(chord_note, note.Note):
                         new_note = chord_note
                         new_note.offset = n.offset
                         new_note.quarterLength = n.quarterLength
                         self.notes.append(new_note)
-                util.PrintChordToPanel(dbg, n)
 
         util.PrintLineToPanel(dbg, "\n\n===============================")
 
@@ -157,6 +157,9 @@ class VizManager:
         pass
 
     def Update(self):
+        """
+
+        """
         if not self.isPlaying:
             if self.should_play:
                 self.should_play = False
@@ -165,17 +168,30 @@ class VizManager:
             return
         # determine whether or not to play something
         ticks = pygame.time.get_ticks()
+
+        # see if any current notes are done playing and must be set to off
+        # then remove them from current_notes
+        for n in self.current_notes:
+            if len(n) > 1:
+                if ticks >= n[1]:
+                    self.player.note_off(n[0].pitch.midi, n[0].volume.velocity)
+                    self.preset.PerNoteOff(self.screen, n[0])
+                    self.current_notes.remove(n)
+
         if self.next_notes != None:
             if ticks >= self.next_notes[0][1]:
                 # move next_notes to current_notes
+                # print("next notes: " + str(len(self.next_notes)))
                 for n in self.next_notes:
                     new_current_note = [n[0]]
                     # new_current_note.append(None)
                     self.current_notes.append(new_current_note)
+                    print("new current note added: " + str(new_current_note[0].name))
                 self.next_notes.clear()
+                print("next notes size: " + str(len(self.next_notes)))
 
-                # get the next new notes
-                current_offset = self.current_notes[0][0].offset
+                # get the new next notes
+                current_offset = self.current_notes[len(self.current_notes) - 1][0].offset
                 if current_offset < self.last_offset:
                     for n in self.notes:
                         if n.offset > current_offset:
@@ -191,13 +207,29 @@ class VizManager:
                 # if we have reached the last note(s), set next_notes to none so we know not to keep checking for more
                 else:
                     self.next_notes = None
+                    print("NEXT NOTES SET TO NONE")
 
                 # set the ticks length of each current note and
                 # play the note and draw it to the screen (via preset)
+                # print("current notes: " + str(len(self.current_notes)))
                 for n in self.current_notes:
-                    length = n[0].quarterLength
-                    length_ms = util.OffsetMS(length, self.tempo)
-                    n.append(length_ms)
-                    self.player.note_on(n[0].pitch.midi, n[0].volume.velocity)
-                    self.preset.PerMessage(self.screen, n[0])
-                self.current_notes.clear()
+                    if len(n) < 2:
+                        print("note " + str(n[0].name) + " had no tick value set")
+                        length = n[0].quarterLength
+                        length_ms = util.OffsetMS(length, self.tempo)
+                        n.append(ticks + length_ms)
+                        self.player.note_on(n[0].pitch.midi, n[0].volume.velocity)
+                        self.preset.PerNoteOn(self.screen, n[0])
+
+
+
+    def remove_unit(self, note):
+        """
+        Removes whichever units in the units list that are associated with that note.
+        :param note: the note with which to match to a unit
+        :return: none
+        """
+        for unit in self.units:
+            if unit.note == note:
+                self.units.remove(unit)
+                print("unit removed. list size: " + str(len(self.units)))

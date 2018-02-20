@@ -31,13 +31,21 @@ class BasePreset:
         """
         pass
 
-    def PerMessage(self, screen, message):
+    def PerNoteOn(self, screen, message):
         """
         Draws given message.
 
         YOUR CODE GOES BELOW
         """
         pass
+
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """
 
 
 class JustTextPreset(BasePreset):
@@ -53,13 +61,21 @@ class JustTextPreset(BasePreset):
         """
         pass
 
-    def PerMessage(self, screen, message):
+    def PerNoteOn(self, screen, message):
         """
         Draws given message.
 
         YOUR CODE GOES BELOW
         """
         pass
+
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """
 
 
 class SimpleCirclePreset(BasePreset):
@@ -75,7 +91,7 @@ class SimpleCirclePreset(BasePreset):
     def OnFirstLoad(self, score):
         pass
 
-    def PerMessage(self, screen, message):
+    def PerNoteOn(self, screen, message):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
 
@@ -88,8 +104,16 @@ class SimpleCirclePreset(BasePreset):
 
             pygame.draw.circle(screen, color, pos, radius)
 
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """
 
-class PianoRollPreset(BasePreset):
+
+class PresetPianoRollFading(BasePreset):
     """
     This is a basic piano roll preset.
     Each note is drawn onto the screen in a piano roll fashion.
@@ -112,13 +136,13 @@ class PianoRollPreset(BasePreset):
                         if chord_note.pitch.midi < self.lowest_pitch:
                             self.lowest_pitch = chord_note.pitch.midi
 
-    def PerMessage(self, screen, message):
+    def PerNoteOn(self, screen, message):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
         y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
         new_rect = pygame.Rect(300, y, 200, 20)
-        note_rect = unit.NoteRect(new_rect, message)
+        note_rect = unit.NoteRectFade(new_rect, message)
         note_rect.fade = True
         note_rect.delete_after_fade = True
         random.seed()
@@ -128,6 +152,67 @@ class PianoRollPreset(BasePreset):
         #print(self.viz_manager.units)
 
         # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """
+        print("NOTE OFF")
+
+
+class PresetPianoRoll(BasePreset):
+    """
+    This is a basic piano roll preset.
+    Each note is drawn onto the screen in a piano roll fashion.
+    Notes with greater pitch go higher on the screen, lower notes go lower.
+    """
+
+    def OnFirstLoad(self, score):
+        for note in score.flat.notes:
+            if isinstance(note, music21.note.Note):
+                if note.pitch.midi > self.highest_pitch:
+                    self.highest_pitch = note.pitch.midi
+                if note.pitch.midi < self.lowest_pitch:
+                    self.lowest_pitch = note.pitch.midi
+            if isinstance(note, music21.chord.Chord):
+                chord_notes = note._notes
+                for chord_note in chord_notes:
+                    if isinstance(chord_note, music21.note.Note):
+                        if chord_note.pitch.midi > self.highest_pitch:
+                            self.highest_pitch = chord_note.pitch.midi
+                        if chord_note.pitch.midi < self.lowest_pitch:
+                            self.lowest_pitch = chord_note.pitch.midi
+
+    def PerNoteOn(self, screen, message):
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
+        y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
+        new_rect = pygame.Rect(300, y, 200, 20)
+        note_rect = unit.NoteRectFade(new_rect, message)
+        note_rect.fade = False
+        note_rect.delete_after_fade = False
+        random.seed()
+        color = [0, random.randint(50, 100), random.randint(150, 200)]
+        note_rect.color = color
+        self.viz_manager.units.append(note_rect)
+        #print(self.viz_manager.units)
+
+        # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+        print("NOTE ON")
+
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """
+        self.viz_manager.remove_unit(message)
+        print("NOTE OFF")
 
 
 class StaticPianoRollPreset(BasePreset):
@@ -160,7 +245,7 @@ class StaticPianoRollPreset(BasePreset):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
                 rect = util.GraphNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
-                note_rect = unit.NoteRect(rect, note)
+                note_rect = unit.NoteRectFade(rect, note)
                 random.seed()
                 color = (0, random.randint(50, 100), random.randint(150, 200))
                 note_rect.color = color
@@ -170,6 +255,14 @@ class StaticPianoRollPreset(BasePreset):
     def OnPlay(self, score):
         pass
 
-    def PerMessage(self, screen, message):
+    def PerNoteOn(self, screen, message):
         #print("NOTE DOWN " + str(message.name))
         pass
+
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """

@@ -1,7 +1,20 @@
 #!/usr/bin/env python
+import pygame
+
+class BaseUnit:
+    """
+    This class serves as a base for graphical objects for note representations.
+    Only the basic data that inheritors will use are included here.
+    """
+
+    def __init__(self, x, y, note):
+        self.x = x
+        self.y = y
+        self.note = note
+        self.color = [0, 50, 200]
 
 
-class NoteRect:
+class NoteRectFade:
     """
     This class holds information about a graphical object.
     """
@@ -46,3 +59,6 @@ class NoteRect:
         if self.delete_after_fade:
             if self.color[0] + self.color[1] + self.color[2] == 0:
                 self.should_delete = True
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
