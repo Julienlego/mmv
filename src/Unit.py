@@ -24,6 +24,9 @@ class BaseUnit:
         """
         pass
 
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
+
 
 
 class NoteRect(BaseUnit):
@@ -32,7 +35,8 @@ class NoteRect(BaseUnit):
     """
 
     def __init__(self, rect, note):
-        super(NoteRect, self).__init__(x=rect.left, y=rect.top)
+        self.x = rect.left
+        self.y = rect.top
         self.w = rect.width
         self.h = rect.height
         self.rect = rect
@@ -70,6 +74,3 @@ class NoteRect(BaseUnit):
         if self.delete_after_fade:
             if self.color[0] + self.color[1] + self.color[2] == 0:
                 self.should_delete = True
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)

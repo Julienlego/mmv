@@ -43,7 +43,7 @@ class PygameDisplay(wx.Window):
         self.screen.fill((0, 0, 0))
 
         for unit in self.viz_manager.units:
-            if isinstance(unit, Unit.NoteRectFade):
+            if isinstance(unit, Unit.NoteRect):
                 if unit.should_delete:
                     self.viz_manager.units.remove(unit)
                 else:

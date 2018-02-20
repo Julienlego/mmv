@@ -142,7 +142,7 @@ class PresetPianoRollFading(BasePreset):
         rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
         y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
         new_rect = pygame.Rect(300, y, 200, 20)
-        note_rect = unit.NoteRectFade(new_rect, message)
+        note_rect = unit.NoteRect(new_rect, message)
         note_rect.fade = True
         note_rect.delete_after_fade = True
         random.seed()
@@ -192,7 +192,7 @@ class PresetPianoRoll(BasePreset):
         rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
         y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
         new_rect = pygame.Rect(300, y, 200, 20)
-        note_rect = unit.NoteRectFade(new_rect, message)
+        note_rect = unit.NoteRect(new_rect, message)
         note_rect.fade = False
         note_rect.delete_after_fade = False
         random.seed()
@@ -284,7 +284,7 @@ class StaticPianoRollPreset(BasePreset):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
                 rect = util.GraphNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y - 20))
-                note_rect = unit.NoteRectFade(rect, note)
+                note_rect = unit.NoteRect(rect, note)
                 random.seed()
                 color = (0, random.randint(50, 100), random.randint(150, 200))
                 note_rect.color = color
