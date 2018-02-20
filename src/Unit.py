@@ -1,27 +1,38 @@
 #!/usr/bin/env python
 import pygame
 
+
 class BaseUnit:
     """
-    This class serves as a base for graphical objects for note representations.
-    Only the basic data that inheritors will use are included here.
+    This is the base representation of a graphical object in a visualization preset.
     """
-
     def __init__(self, x, y, note):
         self.x = x
         self.y = y
         self.note = note
         self.color = [0, 50, 200]
 
+    def Move(self, x, y):
+        """
 
-class NoteRectFade:
+        """
+        pass
+
+    def Update(self):
+        """
+
+        """
+        pass
+
+
+
+class NoteRect(BaseUnit):
     """
     This class holds information about a graphical object.
     """
 
     def __init__(self, rect, note):
-        self.x = rect.left
-        self.y = rect.top
+        super(NoteRect, self).__init__(x=rect.left, y=rect.top)
         self.w = rect.width
         self.h = rect.height
         self.rect = rect

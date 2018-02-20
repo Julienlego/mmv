@@ -18,7 +18,7 @@ class PygameDisplay(wx.Window):
         pygame.init()
         pygame.display.init()
         self.screen = pygame.display.set_mode()
-        self.size = self.GetSize()
+        self.size = self.GetSizeTuple()
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -28,6 +28,7 @@ class PygameDisplay(wx.Window):
         self.viz_manager = None
 
         self.resized = False
+        self.is_fullscreen = False
 
         self.fps = 60.0
         self.timespacing = 1000.0 / self.fps
@@ -61,7 +62,19 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        self.size = self.GetSize()
+        self.size = self.GetSizeTuple()
+
+    def ToggleFullscreen(self, event):
+        if self.is_fullscreen is False:
+            self.is_fullscreen = True
+            pygame.display.quit()
+            pygame.display.init()
+            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        else:
+            self.is_fullscreen = False
+            pygame.display.quit()
+            pygame.display.init()
+            self.screen = pygame.display.set_mode(self.size)
 
     def Kill(self, event):
         # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
@@ -94,8 +107,8 @@ class DebugFrame(wx.Frame):
         """
         self.textbox.AppendText(str(line))
 
-    def OnClose(self):
-        self.parent.viewmenu.Check(self.parent.toggledebug.GetId(), True)
+    def OnDestroy(self):
+        self.parent.viewmenu.Check(self.parent.toggledebug.GetId(), False)
         self.Close()
         self.Destroy()
 
@@ -110,7 +123,7 @@ class PresetDialog(wx.Dialog):
         self.lst_presets = presets
         self.parent = parent
         wx.StaticText(self, -1, 'Select a preset to load', (20, 20))
-        self.lst = wx.ListBox(self, pos=(20, 50), size=(150, -1), choices=presets, style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self, pos=(20, 50), size=(150, -1), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
         self.text = wx.StaticText(self, wx.ID_ANY, pos=(200, 50), size=(270, -1), label="No description.", style=wx.TE_MULTILINE | wx.TE_READONLY)
         btn = wx.Button(self, 1, 'Select', (70, 150), style=wx.Center)
         btn.SetFocus()
@@ -155,15 +168,8 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent, title=title, size=size)
         self.SetMinSize((300, 200))  # the frame starts looking weird if it gets too small
 
-        # Create the panels
-        top_panel = wx.Panel(self, size=(800, 600))
-        panel_pygame = wx.Panel(top_panel, -1, pos=(0, 100), size=size)
-        self.panelDebug = wx.Panel(top_panel, -1, pos=(100, 0), size=(250, 250))
-        self.panelDebug.SetMinSize((300, 200))
-
         self.debugger = DebugFrame(self, "Debugger")
         self.display = PygameDisplay(self, -1)
-        self.display.SetSize((800, 520))
         self.vizmanager = vm.VizManager(self, self.display.screen)
 
         # give the PygameDisplay access to the viz manager for drawing
@@ -174,10 +180,12 @@ class MainFrame(wx.Frame):
         filemenu = wx.Menu()
         self.viewmenu = wx.Menu()
 
+        # Create menu items
         self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File', 'Open a file')
         self.runviz = filemenu.Append(wx.ID_ANY, 'Run', 'Run Viz')
-        self.toggledebug = self.viewmenu.Append(wx.ID_ANY, 'Show Debugger', 'Toggle debug box', kind=wx.ITEM_CHECK)
+        self.toggledebug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger', 'Toggle showing the debug box')
         self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset')
+        self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+f", "Fullscreen")
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -186,6 +194,7 @@ class MainFrame(wx.Frame):
         self.statusbar.SetStatusText("No file selected", 0)
         self.statusbar.SetStatusText("No preset selected", 1)
 
+        # Add file and menu options to menu bar
         menubar.Append(filemenu, '&File')
         menubar.Append(self.viewmenu, '&View')
 
@@ -196,18 +205,18 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadPreset, self.ldp)
+        self.Bind(wx.EVT_MENU, self.OnFullscreen, self.fullscreen)
+
 
         # Add panels to sizer and set to panel
-        sizer = wx.BoxSizer()
-        sizer.Add(panel_pygame, 0, flag=wx.EXPAND | wx.ALL, border=10)
-        sizer.Add(self.panelDebug, 1, flag=wx.EXPAND | wx.ALL, border=10)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(self.display, 1, flag=wx.EXPAND)
 
-        if self.debugger.isEnabled is True:
-            self.debugger.Show()
 
-        top_panel.SetSizerAndFit(sizer)
         self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
+        self.SetSizer(sizer)
+        self.Layout()
         self.Centre()
         self.Show(True)
 
@@ -224,7 +233,6 @@ class MainFrame(wx.Frame):
         """
         Called whenever the main frame is re-sized
         """
-        self.display.SetSize(event.GetSize() - (0, 82))  # magic number for now
         self.Layout()
 
     def OpenFile(self, event):
@@ -264,6 +272,7 @@ class MainFrame(wx.Frame):
                 self.debugger.Show()
         else:
             if self.debugger:
+                self.viewmenu.Check(self.toggledebug.GetId(), False)
                 self.debugger.isEnabled = False
                 self.debugger.Hide()
 
@@ -283,6 +292,18 @@ class MainFrame(wx.Frame):
         Pauses whatever visualization is running, if any.
         """
         pass
+
+    def OnButtonKeyEvent(self, event):
+        keycode = event.GetKeyCode()
+        print(keycode)
+
+    def OnFullscreen(self, event):
+        """
+
+        """
+        print("FULLSCREEN")
+        self.display.ToggleFullscreen(event)
+
 
 class App(wx.App):
     def OnInit(self):

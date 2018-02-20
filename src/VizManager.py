@@ -71,14 +71,16 @@ class VizManager:
         Create and loads all presets.
         """
         # Create the preset!
-        default = pr.SimpleCirclePreset(self, "Default", "This is a default visualization preset.")
-        piano_roll_fade = pr.PresetPianoRollFading(self, "Piano Roll Fading", "This is a fading piano roll preset")
+        default = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
         piano_roll = pr.PresetPianoRoll(self, "Piano Roll", "This is a piano roll preset")
         piano_static = pr.StaticPianoRollPreset(self, "Piano Roll Static", "This is a static piano roll preset.")
+        piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano "
+                                                                             "roll preset except it determines the "
+                                                                             "color by the note.")
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
-        self.presets.update({piano_roll_fade.name: piano_roll_fade})
+        self.presets.update({piano_roll_color.name: piano_roll_color})
         self.presets.update({piano_roll.name: piano_roll})
         self.presets.update({piano_static.name: piano_static})
 
@@ -127,11 +129,13 @@ class VizManager:
                 util.PrintChordToPanel(dbg, n)
                 chord_notes = n._notes
                 for chord_note in chord_notes:
+                    util.PrintChordToPanel(dbg, n)
                     if isinstance(chord_note, note.Note):
                         new_note = chord_note
                         new_note.offset = n.offset
                         new_note.quarterLength = n.quarterLength
                         self.notes.append(new_note)
+                util.PrintChordToPanel(dbg, n)
 
         util.PrintLineToPanel(dbg, "\n\n===============================")
 
@@ -181,14 +185,11 @@ class VizManager:
         if self.next_notes != None:
             if ticks >= self.next_notes[0][1]:
                 # move next_notes to current_notes
-                # print("next notes: " + str(len(self.next_notes)))
                 for n in self.next_notes:
                     new_current_note = [n[0]]
                     # new_current_note.append(None)
                     self.current_notes.append(new_current_note)
-                    print("new current note added: " + str(new_current_note[0].name))
                 self.next_notes.clear()
-                print("next notes size: " + str(len(self.next_notes)))
 
                 # get the new next notes
                 current_offset = self.current_notes[len(self.current_notes) - 1][0].offset
@@ -207,11 +208,9 @@ class VizManager:
                 # if we have reached the last note(s), set next_notes to none so we know not to keep checking for more
                 else:
                     self.next_notes = None
-                    print("NEXT NOTES SET TO NONE")
 
                 # set the ticks length of each current note and
                 # play the note and draw it to the screen (via preset)
-                # print("current notes: " + str(len(self.current_notes)))
                 for n in self.current_notes:
                     if len(n) < 2:
                         print("note " + str(n[0].name) + " had no tick value set")
