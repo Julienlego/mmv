@@ -108,12 +108,13 @@ class VizManager:
         bsy = wx.BusyInfo("Initial Loading...")
         self.preset.OnFirstLoad(self.parser.score)
         bsy = None
-        dbg = self.main_frame.debugger
+        dbg = self.main_frame.debugger.textbox
 
         part = self.parser.score.parts[0]   # Gets first track/part of song
 
         # Prints all notes/rests in part to debug panel
         util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
+        self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
 
         notes = [i for i in part.flat.notesAndRests]
         # Iterates through all notes, rests, and chords
@@ -129,13 +130,11 @@ class VizManager:
                 util.PrintChordToPanel(dbg, n)
                 chord_notes = n._notes
                 for chord_note in chord_notes:
-                    util.PrintChordToPanel(dbg, n)
                     if isinstance(chord_note, note.Note):
                         new_note = chord_note
                         new_note.offset = n.offset
                         new_note.quarterLength = n.quarterLength
                         self.notes.append(new_note)
-                util.PrintChordToPanel(dbg, n)
 
         util.PrintLineToPanel(dbg, "\n\n===============================")
 
@@ -213,7 +212,7 @@ class VizManager:
                 # play the note and draw it to the screen (via preset)
                 for n in self.current_notes:
                     if len(n) < 2:
-                        print("note " + str(n[0].name) + " had no tick value set")
+                        # print("note " + str(n[0].name) + " had no tick value set")
                         length = n[0].quarterLength
                         length_ms = util.OffsetMS(length, self.tempo)
                         n.append(ticks + length_ms)
@@ -231,4 +230,4 @@ class VizManager:
         for unit in self.units:
             if unit.note == note:
                 self.units.remove(unit)
-                print("unit removed. list size: " + str(len(self.units)))
+                # print("unit removed. list size: " + str(len(self.units)))

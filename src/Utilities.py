@@ -78,7 +78,7 @@ def GraphNoteY(note, highest_note, lowest_note, dest):
     return y
 
 
-def GraphNoteRect(self, notes, the_note, dest):
+def GraphNoteRect(notes, the_note, dest):
     """
     Graphs a note onto a destination rect. Used for the static piano roll preset.
 
@@ -111,6 +111,22 @@ def GraphNoteRect(self, notes, the_note, dest):
     h = 20
     rect = pygame.Rect(x, y, w, h)
     return rect
+
+
+def PrintSongToPanel(dbg, score):
+    notes = [i for i in score.flat.notesAndRests]
+    # Iterates through all notes, rests, and chords
+    for n in notes:
+        if isinstance(n, music21.note.Note):
+            PrintNoteToPanel(dbg, n)
+
+        elif isinstance(n, music21.note.Rest):
+            PrintRestToPanel(dbg, n)
+
+        elif isinstance(n, music21.chord.Chord):
+            PrintChordToPanel(dbg, n)
+
+    PrintLineToPanel(dbg, "\n\n===============================")
 
 
 def PrintLineToPanel(txt_panel, line):
@@ -162,5 +178,5 @@ def PrintChordToPanel(panel, n):
                             + str(new_note.pitch.octave) + "\t" \
                             + str(new_note.duration.quarterLength) + "\t" \
                             + str(new_note.offset) + "\n"
-            line += "=============chord=============\n"
+            line += "===============================\n"
             panel.AppendText(line)

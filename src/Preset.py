@@ -202,7 +202,7 @@ class PresetPianoRoll(BasePreset):
         #print(self.viz_manager.units)
 
         # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
-        print("NOTE ON")
+        # print("NOTE ON")
 
     def PerNoteOff(self, screen, message):
         """
@@ -212,7 +212,7 @@ class PresetPianoRoll(BasePreset):
         :return: none
         """
         self.viz_manager.remove_unit(message)
-        print("NOTE OFF")
+        # print("NOTE OFF")
 
 
 class PresetColorPianoRoll(BasePreset):
