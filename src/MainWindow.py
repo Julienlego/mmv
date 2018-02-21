@@ -65,16 +65,13 @@ class PygameDisplay(wx.Window):
         self.size = self.GetSizeTuple()
 
     def ToggleFullscreen(self, event):
+        """
+
+        """
         if self.is_fullscreen is False:
-            self.is_fullscreen = True
-            pygame.display.quit()
-            pygame.display.init()
-            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+            pygame.display.set_mode((self.size.height, self.size.width), pygame.FULLSCREEN)
         else:
-            self.is_fullscreen = False
-            pygame.display.quit()
-            pygame.display.init()
-            self.screen = pygame.display.set_mode(self.size)
+            pygame.display.set_mode(self.size)
 
     def Kill(self, event):
         # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
@@ -181,11 +178,11 @@ class MainFrame(wx.Frame):
         self.viewmenu = wx.Menu()
 
         # Create menu items
-        self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File', 'Open a file')
-        self.runviz = filemenu.Append(wx.ID_ANY, 'Run', 'Run Viz')
-        self.toggledebug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger', 'Toggle showing the debug box')
-        self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset')
-        self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+f", "Fullscreen")
+        self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
+        self.runviz = filemenu.Append(wx.ID_ANY, 'Run\tCtrl+R', 'Run Viz')
+        self.toggledebug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
+        self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset\tCtrl+P')
+        self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -205,7 +202,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadPreset, self.ldp)
-        self.Bind(wx.EVT_MENU, self.OnFullscreen, self.fullscreen)
+        self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
 
 
         # Add panels to sizer and set to panel
@@ -297,11 +294,10 @@ class MainFrame(wx.Frame):
         keycode = event.GetKeyCode()
         print(keycode)
 
-    def OnFullscreen(self, event):
+    def ToggleFullscreen(self, event):
         """
 
         """
-        print("FULLSCREEN")
         self.display.ToggleFullscreen(event)
 
 
