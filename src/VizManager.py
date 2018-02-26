@@ -140,6 +140,7 @@ class VizManager:
 
 
         self.should_play = True
+        self.next_notes = []
 
         # get the offset of the first note in the song
         # so we can put it in next_notes
@@ -148,7 +149,22 @@ class VizManager:
             if n.offset == first_offset:
                 ticks = pygame.time.get_ticks()
                 new_next_note = [n]
-                new_next_note.append(ticks + util.OffsetMS(n.offset, self.tempo))
+                # new_next_note.append(ticks + util.OffsetMS(n.offset, self.tempo))
+                try:
+                    mts = n.midiTickStart
+                except AttributeError:
+                    mts = util.OffsetMS(n.offset, self.tempo)
+
+
+                oq_error = 0
+                qlq_error = 0
+                try:
+                    oq_error = note.editorial.offsetQuantizationError
+                    mts += oq_error
+                except AttributeError:
+                    pass
+
+                new_next_note.append(ticks + mts)
                 self.next_notes.append(new_next_note)
             if n.offset > self.last_offset:
                 self.last_offset = n.offset
@@ -200,7 +216,24 @@ class VizManager:
                                 if m.offset == new_offset:
                                     ticks = pygame.time.get_ticks()
                                     new_next_note = [m]
-                                    new_next_note.append(ticks + util.OffsetMS((m.offset - current_offset), self.tempo))
+
+                                    oq_error = 0
+                                    qlq_error = 0
+                                    mts = 0
+                                    try:
+                                        oq_error = m.editorial.offsetQuantizationError
+                                    except AttributeError:
+                                        pass
+                                    try:
+                                        qlq_error = m.editorial.quarterLengthQuantizationError
+                                    except AttributeError:
+                                        pass
+                                    try:
+                                        mts = m.midiTickStart
+                                    except AttributeError:
+                                        pass
+
+                                    new_next_note.append(ticks + util.OffsetMS((m.offset - current_offset), self.tempo) + util.OffsetMS(oq_error, self.tempo))
                                     self.next_notes.append(new_next_note)
                             break
 
@@ -214,7 +247,13 @@ class VizManager:
                     if len(n) < 2:
                         # print("note " + str(n[0].name) + " had no tick value set")
                         length = n[0].quarterLength
-                        length_ms = util.OffsetMS(length, self.tempo)
+
+                        qlq_error = 0
+                        try:
+                            qlq_error = n.editorial.quarterLengthQuantizationError
+                        except AttributeError:
+                            pass
+                        length_ms = util.OffsetMS(length, self.tempo) + util.OffsetMS(qlq_error, self.tempo)
                         n.append(ticks + length_ms)
                         self.player.note_on(n[0].pitch.midi, n[0].volume.velocity)
                         self.preset.PerNoteOn(self.screen, n[0])

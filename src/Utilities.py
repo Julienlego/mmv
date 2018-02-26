@@ -106,7 +106,7 @@ def GraphNoteRect(notes, the_note, dest):
     number = the_note.pitch.midi
     x = dest.left + dest.width * float(the_note.offset / (largest_offset + last_note.quarterLength))
     y = dest.top + (dest.height - (((number - lowest_note) / (highest_note - lowest_note)) * dest.height))
-    print(str(x) + ", " + str(y))
+    # print(str(x) + ", " + str(y))
     w = (dest.left + dest.width * float(the_note.quarterLength / (largest_offset + last_note.quarterLength)))
     h = 20
     rect = pygame.Rect(x, y, w, h)
