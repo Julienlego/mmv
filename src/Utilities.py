@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import music21, pygame, wx
+import src.VizNote as vn
+import src.MidiParser as mp
 
 
 def NoteToColor(note):
@@ -180,3 +182,58 @@ def PrintChordToPanel(panel, n):
                             + str(new_note.offset) + "\n"
             line += "===============================\n"
             panel.AppendText(line)
+
+
+def GetNotesList(score):
+
+    current_offset = 0.0
+    last_offset = 0.0
+    track_num = 0
+    tracks = []
+    flat = []
+
+    for element in score:
+        print("ELEMENT")
+        print(element)
+        track_num += 1
+        new_track = []
+        for note in element.flat.notes:
+            if isinstance(note, music21.note.Note):
+                print(note)
+                new_viz_note = vn.VizNote(note)
+                new_viz_note.track = track_num
+                new_track.append(new_viz_note)
+
+                if note.offset > last_offset:
+                    last_offset = note.offset
+            if isinstance(note, music21.chord.Chord):
+                for n in note:
+                    if isinstance(n, music21.note.Note):
+                        print(note)
+                        new_viz_note = vn.VizNote(note)
+                        new_viz_note.track = track_num
+                        new_track.append(new_viz_note)
+
+                        if note.offset > last_offset:
+                            last_offset = note.offset
+        tracks.append(new_track)
+    print(last_offset)
+
+    for track in tracks:
+        for note in track:
+            flat.append(note)
+
+    print(len(flat))
+
+    flat.sort(key=lambda x: x.note.offset)
+
+    print(flat)
+
+    return flat
+
+
+
+
+
+
+

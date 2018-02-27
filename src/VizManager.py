@@ -9,6 +9,7 @@ import wx
 import pygame
 import pygame.midi
 import src.Utilities as util
+import src.VizNote as vn
 
 
 class VizManager:
@@ -115,6 +116,7 @@ class VizManager:
         # Prints all notes/rests in part to debug panel
         util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
         self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
+
 
         notes = [i for i in part.flat.notesAndRests]
         # Iterates through all notes, rests, and chords

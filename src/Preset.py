@@ -262,6 +262,11 @@ class StaticPianoRollPreset(BasePreset):
 
     def OnFirstLoad(self, score):
 
+        notes_list = util.GetNotesList(score)
+
+        print(len(notes_list))
+        print(notes_list)
+
         # graph each note on the screen based off of pitch, offset, and length
         self.viz_manager.screen.fill((0, 0, 0))
         notes = []
