@@ -78,12 +78,15 @@ class VizManager:
         piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano "
                                                                              "roll preset except it determines the "
                                                                              "color by the note.")
+        multi_piano = pr.MultiPianoRoll(self, "Multitrack Piano Roll", "This is a multitrack piano roll preset")
+
 
         # Add the preset to the dictionary!
         self.presets.update({default.name: default})
         self.presets.update({piano_roll_color.name: piano_roll_color})
         self.presets.update({piano_roll.name: piano_roll})
         self.presets.update({piano_static.name: piano_static})
+        self.presets.update({multi_piano.name: multi_piano})
 
     def LoadPreset(self, key):
         """
@@ -118,25 +121,29 @@ class VizManager:
         self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
 
 
-        notes = [i for i in part.flat.notesAndRests]
+        self.notes = util.GetNotesList(self.parser.score)
         # Iterates through all notes, rests, and chords
-        for n in notes:
-            if isinstance(n, note.Note):
-                util.PrintNoteToPanel(dbg, n)
-                self.notes.append(n)
 
-            elif isinstance(n, note.Rest):
-                util.PrintRestToPanel(dbg, n)
+        # for n in notes:
+        #     if isinstance(n, note.Note):
+        #         util.PrintNoteToPanel(dbg, n)
+        #         self.notes.append(n)
+        #
+        #     elif isinstance(n, note.Rest):
+        #         util.PrintRestToPanel(dbg, n)
+        #
+        #     elif isinstance(n, chord.Chord):
+        #         util.PrintChordToPanel(dbg, n)
+        #         chord_notes = n._notes
+        #         for chord_note in chord_notes:
+        #             if isinstance(chord_note, note.Note):
+        #                 new_note = chord_note
+        #                 new_note.offset = n.offset
+        #                 new_note.quarterLength = n.quarterLength
+        #                 self.notes.append(new_note)
 
-            elif isinstance(n, chord.Chord):
-                util.PrintChordToPanel(dbg, n)
-                chord_notes = n._notes
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, note.Note):
-                        new_note = chord_note
-                        new_note.offset = n.offset
-                        new_note.quarterLength = n.quarterLength
-                        self.notes.append(new_note)
+        for n in self.notes:
+            util.PrintNoteToPanel(dbg, n.note)
 
         util.PrintLineToPanel(dbg, "\n\n===============================")
 
@@ -146,30 +153,30 @@ class VizManager:
 
         # get the offset of the first note in the song
         # so we can put it in next_notes
-        first_offset = self.notes[0].offset
+        first_offset = self.notes[0].note.offset
         for n in self.notes:
-            if n.offset == first_offset:
+            if n.note.offset == first_offset:
                 ticks = pygame.time.get_ticks()
                 new_next_note = [n]
                 # new_next_note.append(ticks + util.OffsetMS(n.offset, self.tempo))
                 try:
-                    mts = n.midiTickStart
+                    mts = n.notes.midiTickStart
                 except AttributeError:
-                    mts = util.OffsetMS(n.offset, self.tempo)
+                    mts = util.OffsetMS(n.note.offset, self.tempo)
 
 
                 oq_error = 0
                 qlq_error = 0
                 try:
-                    oq_error = note.editorial.offsetQuantizationError
+                    oq_error = n.note.editorial.offsetQuantizationError
                     mts += oq_error
                 except AttributeError:
                     pass
 
                 new_next_note.append(ticks + mts)
                 self.next_notes.append(new_next_note)
-            if n.offset > self.last_offset:
-                self.last_offset = n.offset
+            if n.note.offset > self.last_offset:
+                self.last_offset = n.note.offset
 
     def Pause(self):
         """
@@ -195,7 +202,7 @@ class VizManager:
         for n in self.current_notes:
             if len(n) > 1:
                 if ticks >= n[1]:
-                    self.player.note_off(n[0].pitch.midi, n[0].volume.velocity)
+                    self.player.note_off(n[0].note.pitch.midi, n[0].note.volume.velocity)
                     self.preset.PerNoteOff(self.screen, n[0])
                     self.current_notes.remove(n)
 
@@ -209,13 +216,13 @@ class VizManager:
                 self.next_notes.clear()
 
                 # get the new next notes
-                current_offset = self.current_notes[len(self.current_notes) - 1][0].offset
+                current_offset = self.current_notes[len(self.current_notes) - 1][0].note.offset
                 if current_offset < self.last_offset:
                     for n in self.notes:
-                        if n.offset > current_offset:
-                            new_offset = n.offset
+                        if n.note.offset > current_offset:
+                            new_offset = n.note.offset
                             for m in self.notes:
-                                if m.offset == new_offset:
+                                if m.note.offset == new_offset:
                                     ticks = pygame.time.get_ticks()
                                     new_next_note = [m]
 
@@ -223,19 +230,19 @@ class VizManager:
                                     qlq_error = 0
                                     mts = 0
                                     try:
-                                        oq_error = m.editorial.offsetQuantizationError
+                                        oq_error = m.note.editorial.offsetQuantizationError
                                     except AttributeError:
                                         pass
                                     try:
-                                        qlq_error = m.editorial.quarterLengthQuantizationError
+                                        qlq_error = m.note.editorial.quarterLengthQuantizationError
                                     except AttributeError:
                                         pass
                                     try:
-                                        mts = m.midiTickStart
+                                        mts = m.note.midiTickStart
                                     except AttributeError:
                                         pass
 
-                                    new_next_note.append(ticks + util.OffsetMS((m.offset - current_offset), self.tempo) + util.OffsetMS(oq_error, self.tempo))
+                                    new_next_note.append(ticks + util.OffsetMS((m.note.offset - current_offset), self.tempo) + util.OffsetMS(oq_error, self.tempo))
                                     self.next_notes.append(new_next_note)
                             break
 
@@ -248,16 +255,16 @@ class VizManager:
                 for n in self.current_notes:
                     if len(n) < 2:
                         # print("note " + str(n[0].name) + " had no tick value set")
-                        length = n[0].quarterLength
+                        length = n[0].note.quarterLength
 
                         qlq_error = 0
                         try:
-                            qlq_error = n.editorial.quarterLengthQuantizationError
+                            qlq_error = n[0].note.editorial.quarterLengthQuantizationError
                         except AttributeError:
                             pass
                         length_ms = util.OffsetMS(length, self.tempo) + util.OffsetMS(qlq_error, self.tempo)
                         n.append(ticks + length_ms)
-                        self.player.note_on(n[0].pitch.midi, n[0].volume.velocity)
+                        self.player.note_on(n[0].note.pitch.midi, n[0].note.volume.velocity)
                         self.preset.PerNoteOn(self.screen, n[0])
 
 

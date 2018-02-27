@@ -187,12 +187,13 @@ class PresetPianoRoll(BasePreset):
                             self.lowest_pitch = chord_note.pitch.midi
 
     def PerNoteOn(self, screen, message):
+        note = message.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         rect = pygame.Rect(0, 0, screen_x, screen_y - 20)
-        y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, rect)
         new_rect = pygame.Rect(300, y, 200, 20)
-        note_rect = unit.NoteRect(new_rect, message)
+        note_rect = unit.NoteRect(new_rect, note)
         note_rect.fade = False
         note_rect.delete_after_fade = False
         random.seed()
@@ -211,7 +212,7 @@ class PresetPianoRoll(BasePreset):
         :param message: the midi message of the note off event
         :return: none
         """
-        self.viz_manager.remove_unit(message)
+        self.viz_manager.remove_unit(message.note)
         # print("NOTE OFF")
 
 
@@ -262,11 +263,6 @@ class StaticPianoRollPreset(BasePreset):
 
     def OnFirstLoad(self, score):
 
-        notes_list = util.GetNotesList(score)
-
-        print(len(notes_list))
-        print(notes_list)
-
         # graph each note on the screen based off of pitch, offset, and length
         self.viz_manager.screen.fill((0, 0, 0))
         notes = []
@@ -310,3 +306,62 @@ class StaticPianoRollPreset(BasePreset):
         :param message: the midi message of the note off event
         :return: none
         """
+
+class MultiPianoRoll(BasePreset):
+    """
+    This is a basic piano roll preset.
+    Each note is drawn onto the screen in a piano roll fashion.
+    Notes with greater pitch go higher on the screen, lower notes go lower.
+    """
+
+    def OnFirstLoad(self, score):
+        for note in score.flat.notes:
+            if isinstance(note, music21.note.Note):
+                if note.pitch.midi > self.highest_pitch:
+                    self.highest_pitch = note.pitch.midi
+                if note.pitch.midi < self.lowest_pitch:
+                    self.lowest_pitch = note.pitch.midi
+            if isinstance(note, music21.chord.Chord):
+                chord_notes = note._notes
+                for chord_note in chord_notes:
+                    if isinstance(chord_note, music21.note.Note):
+                        if chord_note.pitch.midi > self.highest_pitch:
+                            self.highest_pitch = chord_note.pitch.midi
+                        if chord_note.pitch.midi < self.lowest_pitch:
+                            self.lowest_pitch = chord_note.pitch.midi
+
+    def PerNoteOn(self, screen, message):
+        note = message.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        if message.track == 1:
+            rect = pygame.Rect(0, 0, screen_x / 2, screen_y - 20)
+        else:
+            rect = pygame.Rect(screen_x / 2, 0, screen_x / 2, screen_y - 20)
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, rect)
+        if message.track == 1:
+            new_rect = pygame.Rect(0, y, 200, 20)
+        else:
+            new_rect = pygame.Rect(300, y, 200, 20)
+        note_rect = unit.NoteRect(new_rect, note)
+        note_rect.fade = False
+        note_rect.delete_after_fade = False
+        random.seed()
+        color = [0, random.randint(50, 100), random.randint(150, 200)]
+        note_rect.color = color
+        self.viz_manager.units.append(note_rect)
+        #print(self.viz_manager.units)
+
+        # pygame.draw.rect(self.viz_manager.screen, (0, 50, 150), rect)
+        # print("NOTE ON")
+
+    def PerNoteOff(self, screen, message):
+        """
+        Event handler for note off event.
+        :param screen: the screen to draw to
+        :param message: the midi message of the note off event
+        :return: none
+        """
+        self.viz_manager.remove_unit(message.note)
+        # print("NOTE OFF")
+
