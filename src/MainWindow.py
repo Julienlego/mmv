@@ -7,8 +7,8 @@ import src.Unit as Unit
 frame = None
 
 class PygameDisplay(wx.Window):
-    def __init__(self, parent, ID):
-        wx.Window.__init__(self, parent, ID)
+    def __init__(self, parent, id):
+        super().__init__(parent, id)
         self.parent = parent
         self.hwnd = self.GetHandle()
         if sys.platform == "win32":
@@ -18,7 +18,7 @@ class PygameDisplay(wx.Window):
         pygame.init()
         pygame.display.init()
         self.screen = pygame.display.set_mode()
-        self.size = self.GetSizeTuple()
+        self.size = self.GetSize()
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -43,12 +43,12 @@ class PygameDisplay(wx.Window):
         self.screen.fill((0, 0, 0))
 
         for unit in self.viz_manager.units:
-            if isinstance(unit, Unit.NoteRect):
+            if isinstance(unit, Unit.RectNoteUnit):
                 if unit.should_delete:
                     self.viz_manager.units.remove(unit)
                 else:
-                    unit.update()
-                    unit.draw(self.screen)
+                    unit.Update()
+                    unit.Draw(self.screen)
 
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
@@ -62,7 +62,7 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
-        self.size = self.GetSizeTuple()
+        self.size = self.GetSize()
 
     def ToggleFullscreen(self, event):
         """
@@ -86,10 +86,10 @@ class DebugFrame(wx.Frame):
     Debug frame with textbox to display info relevant to the preset.
     """
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, None, title=title, size=(300, 400))
+        super().__init__(None, title=title, size=(300, 400))
         self.parent = parent
-        self.SetMinSize((250, 400))
-        self.SetMaxSize((300, 400))
+        self.SetMinSize((300, 400))
+        self.SetMaxSize((400, 600))
         self.isEnabled = False
         panel = wx.Panel(self)
         sizer = wx.BoxSizer()
@@ -116,12 +116,12 @@ class PresetDialog(wx.Dialog):
     Dialog to browse and select a preset to load to the system.
     """
     def __init__(self, parent, title, presets):
-        wx.Dialog.__init__(self, parent, title=title, size=(500, 250))
+        super().__init__(parent, title=title, size=(500, 250))
         self.lst_presets = presets
         self.parent = parent
         wx.StaticText(self, -1, 'Select a preset to load', (20, 20))
         self.lst = wx.ListBox(self, pos=(20, 50), size=(150, -1), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
-        self.text = wx.StaticText(self, wx.ID_ANY, pos=(200, 50), size=(270, -1), label="No description.", style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.text = wx.TextCtrl(self,-1, pos=(200, 50), size=(270, 100), style=wx.TE_MULTILINE | wx.TE_READONLY)
         btn = wx.Button(self, 1, 'Select', (70, 150), style=wx.Center)
         btn.SetFocus()
 
@@ -129,6 +129,9 @@ class PresetDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnSelect)
 
     def GetNameSelect(self, event):
+        """
+        Returns the name of the currently selected preset
+        """
         preset = self.lst.GetSelection()  # gets int pos of preset
         return self.lst_presets[preset]
 
@@ -136,9 +139,9 @@ class PresetDialog(wx.Dialog):
         """
         What to do when a preset is highlighted.
         """
+        self.text.Clear()
         name = self.GetNameSelect(self)
-        desc = self.parent.vizmanager.presets[name].desc
-        self.text.SetLabel(desc)
+        self.text.AppendText(self.parent.vizmanager.presets[name].desc)
 
     def OnSelect(self, event):
         """
@@ -162,7 +165,7 @@ class MainFrame(wx.Frame):
     """
 
     def __init__(self, parent, title, size):
-        wx.Frame.__init__(self, parent, title=title, size=size)
+        super().__init__(parent, title=title, size=size)
         self.SetMinSize((300, 200))  # the frame starts looking weird if it gets too small
 
         self.debugger = DebugFrame(self, "Debugger")

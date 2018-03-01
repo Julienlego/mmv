@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-import time
-import fluidsynth
-import mingus
-from music21 import *
 import src.Preset as pr
 import src.MidiParser as mp
 import wx
 import pygame
 import pygame.midi
 import src.Utilities as util
-import src.VizNote as vn
 
 
 class VizManager:
@@ -72,17 +67,16 @@ class VizManager:
         Create and loads all presets.
         """
         # Create the preset!
-        default = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
-        piano_roll = pr.PresetPianoRoll(self, "Piano Roll", "This is a piano roll preset")
-        piano_static = pr.StaticPianoRollPreset(self, "Piano Roll Static", "This is a static piano roll preset.")
-        piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano "
-                                                                             "roll preset except it determines the "
-                                                                             "color by the note.")
-        multi_piano = pr.MultiPianoRoll(self, "Multitrack Piano Roll", "This is a multitrack piano roll preset")
+        # simple_circle = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
+        piano_roll = pr.PresetPianoRoll(self, "Piano-Roll", "This is a basic piano roll preset. The height of the note is determined by its pitch.")
+        piano_static = pr.StaticPianoRollPreset(self, "Piano-Roll Static", "This is a static preset that draws the entire song onto the screen in a piano-roll fashion.")
+        piano_rading = pr.PresetPianoRollFading(self, "Fading Piano-Roll", "Similar to the Piano-Roll preset, but the notes fade over time.")
+        piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano roll preset except it determines the color by the note.")
+        multi_piano = pr.TwoTrackPianoRoll(self, "Two-track Piano Roll", "This is similar to .")
 
 
         # Add the preset to the dictionary!
-        self.presets.update({default.name: default})
+        # self.presets.update({simple_circle.name: simple_circle})
         self.presets.update({piano_roll_color.name: piano_roll_color})
         self.presets.update({piano_roll.name: piano_roll})
         self.presets.update({piano_static.name: piano_static})

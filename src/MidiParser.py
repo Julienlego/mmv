@@ -38,7 +38,7 @@ class MidiParser:
         This function assumes there are no tempo changes within the file.
         """
         seconds = self.score.secondsMap[0]['durationSeconds']
-        print(seconds)
+        # print(seconds)
         last_note = self.score.flat.notes[len(self.score.flat.notes) - 1]
         quarter_length = last_note.quarterLength
         offset = last_note.offset
