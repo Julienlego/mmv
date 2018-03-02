@@ -4,6 +4,7 @@ import src.MidiParser as mp
 import wx
 import pygame
 import pygame.midi
+import Unit
 import src.Utilities as util
 
 
@@ -67,20 +68,22 @@ class VizManager:
         Create and loads all presets.
         """
         # Create the preset!
-        # simple_circle = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
+        simple_circle = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
+        grid_text = pr.PresetJustText(self, "Just Text", "Draws a grid and text.")
         piano_roll = pr.PresetPianoRoll(self, "Piano-Roll", "This is a basic piano roll preset. The height of the note is determined by its pitch.")
         piano_static = pr.StaticPianoRollPreset(self, "Piano-Roll Static", "This is a static preset that draws the entire song onto the screen in a piano-roll fashion.")
         piano_rading = pr.PresetPianoRollFading(self, "Fading Piano-Roll", "Similar to the Piano-Roll preset, but the notes fade over time.")
         piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano roll preset except it determines the color by the note.")
         multi_piano = pr.TwoTrackPianoRoll(self, "Two-track Piano Roll", "This is similar to .")
 
-
         # Add the preset to the dictionary!
-        # self.presets.update({simple_circle.name: simple_circle})
+        self.presets.update({simple_circle.name: simple_circle})
         self.presets.update({piano_roll_color.name: piano_roll_color})
         self.presets.update({piano_roll.name: piano_roll})
         self.presets.update({piano_static.name: piano_static})
         self.presets.update({multi_piano.name: multi_piano})
+        self.presets.update({piano_rading.name: piano_rading})
+        self.presets.update({grid_text.name: grid_text})
 
     def LoadPreset(self, key):
         """
@@ -270,6 +273,8 @@ class VizManager:
         :return: none
         """
         for unit in self.units:
-            if unit.note == note:
-                self.units.remove(unit)
-                # print("unit removed. list size: " + str(len(self.units)))
+            # Check if unit is subclass of noteunit
+            if isinstance(unit, Unit.NoteUnit):
+                if unit.note == note:
+                    self.units.remove(unit)
+                    # print("unit removed. list size: " + str(len(self.units)))

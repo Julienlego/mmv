@@ -2,6 +2,7 @@
 import music21, pygame, wx
 import src.VizNote as vn
 
+
 def PrintSongToPanel(dbg, score):
     notes = [i for i in score.flat.notesAndRests]
     # Iterates through all notes, rests, and chords

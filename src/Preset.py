@@ -27,6 +27,8 @@ class BasePreset:
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
 
+        This will also draw anything that's static and is always displayed (i.e. grid lines).
+
         YOUR CODE GOES BELOW
         """
         pass
@@ -54,7 +56,21 @@ class PresetJustText(BasePreset):
 
     """
     def OnFirstLoad(self, score):
-        pass
+        # Draw gridlines
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        x_interval = screen_x // 4
+        color = (255, 255, 255)         # white
+        width = 5
+        for x in range(0, screen_x, x_interval):
+            # pygame.draw.line(self.viz_manager.screen, color, (x, 0), (x, screen_y), width)
+            line = unit.LineUnit(x, 0, x, screen_y, color, width)
+            self.viz_manager.units.append(line)
+        y_interval = screen_y // 4
+        for y in range(0, screen_y, y_interval):
+            # pygame.draw.line(self.viz_manager.screen, color, (0, y), (screen_x, y), width)
+            line = unit.LineUnit(0, y, screen_x, y, color, width)
+            self.viz_manager.units.append(line)
 
     def PerNoteOn(self, screen, message):
         pass
@@ -291,6 +307,19 @@ class TwoTrackPianoRoll(BasePreset):
         note_rect.fade = False
         note_rect.delete_after_fade = False
         self.viz_manager.units.append(note_rect)
+
+        x_interval = screen_x // 4
+        color = (255, 255, 255)  # white
+        width = 5
+        for x in range(0, screen_x, x_interval):
+            # pygame.draw.line(self.viz_manager.screen, color, (x, 0), (x, screen_y), width)
+            line = unit.LineUnit(x, 0, x, screen_y, color, width)
+            self.viz_manager.units.append(line)
+        y_interval = screen_y // 4
+        for y in range(0, screen_y, y_interval):
+            # pygame.draw.line(self.viz_manager.screen, color, (0, y), (screen_x, y), width)
+            line = unit.LineUnit(0, y, screen_x, y, color, width)
+            self.viz_manager.units.append(line)
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)

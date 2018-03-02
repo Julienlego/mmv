@@ -120,7 +120,7 @@ class PresetDialog(wx.Dialog):
         self.lst_presets = presets
         self.parent = parent
         wx.StaticText(self, -1, 'Select a preset to load', (20, 20))
-        self.lst = wx.ListBox(self, pos=(20, 50), size=(150, -1), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
+        self.lst = wx.ListBox(self, pos=(20, 50), size=(150, 80), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
         self.text = wx.TextCtrl(self,-1, pos=(200, 50), size=(270, 100), style=wx.TE_MULTILINE | wx.TE_READONLY)
         btn = wx.Button(self, 1, 'Select', (70, 150), style=wx.Center)
         btn.SetFocus()
