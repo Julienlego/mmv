@@ -105,21 +105,21 @@ def SimpleNoteToColorTuple(note):
         color = (255, 0, 0)         # red
     elif note_name == 'A':
         color = (255, 102, 0)       # orange-red
-    if note_name == 'B-':
+    elif note_name == 'B-':
         color = (255, 239, 0)       # yellow
-    if note_name == 'B':
+    elif note_name == 'B':
         color = (153, 255, 0)       # chartreuse
-    if note_name == 'C':
+    elif note_name == 'C':
         color = (40, 255, 0)        # lime
-    if note_name == 'C#':
+    elif note_name == 'C#':
         color = (0, 255, 242)       # aqua
-    if note_name == 'D':
+    elif note_name == 'D':
         color = (0, 122, 255)       # sky blue
-    if note_name == 'D#':
+    elif note_name == 'D#':
         color = (5, 0, 255)         # blue
-    if note_name == 'E' or note_name == 'E-':
+    elif note_name == 'E' or note_name == 'E-':
         color = (71, 0, 237)        # blue-ish
-    if note_name == 'F':
+    elif note_name == 'F':
         color = (99, 0, 178)        # indigo
     else:
         return [255, 255, 255]
