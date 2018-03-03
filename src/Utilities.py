@@ -209,6 +209,7 @@ def GetNotesList(score):
                 for n in note:
                     if isinstance(n, music21.note.Note):
                         # print(note)
+                        n.offset += note.offset
                         new_viz_note = vn.VizNote(n)
                         new_viz_note.track = track_num
                         new_track.append(new_viz_note)
