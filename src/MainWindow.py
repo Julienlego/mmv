@@ -119,10 +119,9 @@ class PresetDialog(wx.Dialog):
         super().__init__(parent, title=title, size=(500, 250))
         self.lst_presets = presets
         self.parent = parent
-        wx.StaticText(self, -1, 'Select a preset to load', (20, 20))
-        self.lst = wx.ListBox(self, pos=(20, 50), size=(150, 80), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
-        self.text = wx.TextCtrl(self,-1, pos=(200, 50), size=(270, 100), style=wx.TE_MULTILINE | wx.TE_READONLY)
-        btn = wx.Button(self, 1, 'Select', (70, 150), style=wx.Center)
+        self.lst = wx.ListBox(self, pos=(10, 10), size=(150, 150), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
+        self.text = wx.TextCtrl(self,-1, pos=(180, 10), size=(290, 190), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        btn = wx.Button(self, 1, 'Select', (10, 175), style=wx.Center)
         btn.SetFocus()
 
         self.Bind(wx.EVT_LISTBOX, self.OnListBox, self.lst)
@@ -252,7 +251,7 @@ class MainFrame(wx.Frame):
         """
         Load selected preset from the submenu
         """
-        frame = PresetDialog(self, "", list(self.vizmanager.presets.keys()))
+        frame = PresetDialog(self, "Select a preset to load", list(self.vizmanager.presets.keys()))
         frame.Show(True)
         frame.Centre()
 
