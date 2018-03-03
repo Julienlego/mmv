@@ -170,15 +170,15 @@ class PresetPianoRoll(BasePreset):
                         if chord_note.pitch.midi < self.lowest_pitch:
                             self.lowest_pitch = chord_note.pitch.midi
 
-    def PerNoteOn(self, screen, message):
-        note = message.note
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         rect = pygame.Rect(0, 0, screen_x, screen_y)
         y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, rect)
         random.seed()
         color = [0, random.randint(50, 100), random.randint(150, 200)]
-        note_rect = unit.RectNoteUnit(300, y, color, message, 200, 20)
+        note_rect = unit.RectNoteUnit(300, y, color, note, 200, 20)
         note_rect.fade = False
         note_rect.delete_after_fade = False
         self.viz_manager.units.append(note_rect)

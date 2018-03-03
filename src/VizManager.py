@@ -4,7 +4,7 @@ import src.MidiParser as mp
 import wx
 import pygame
 import pygame.midi
-import Unit
+import src.Unit as Unit
 import src.Utilities as util
 
 
@@ -274,7 +274,7 @@ class VizManager:
         """
         for unit in self.units:
             # Check if unit is subclass of noteunit
-            if isinstance(unit, Unit.NoteUnit):
+            if isinstance(unit, Unit.RectNoteUnit):
                 if unit.note == note:
                     self.units.remove(unit)
                     # print("unit removed. list size: " + str(len(self.units)))
