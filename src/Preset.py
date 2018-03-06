@@ -21,6 +21,7 @@ class BasePreset:
         self.viz_manager = viz_manager
         self.lowest_pitch = float("inf")
         self.highest_pitch = 0
+        self.notes_played = []
 
     def OnFirstLoad(self, score):
         """
@@ -226,7 +227,7 @@ class PresetColorPianoRoll(BasePreset):
         self.viz_manager.remove_unit(message.note)
 
 
-class StaticPianoRollPreset(BasePreset):
+class PresetStaticPianoRoll(BasePreset):
     """
     This is a static preset that graphs the entire song onto the screen in a piano roll fashion.
     This preset is good for looking at the whole song as a whole.
@@ -259,7 +260,7 @@ class StaticPianoRollPreset(BasePreset):
                 self.viz_manager.units.append(note_rect)
 
 
-class TwoTrackPianoRoll(BasePreset):
+class PresetTwoTrackPianoRoll(BasePreset):
     """
     This is a basic piano roll preset.
     Each note is drawn onto the screen in a piano roll fashion.
@@ -320,6 +321,52 @@ class TwoTrackPianoRoll(BasePreset):
             # pygame.draw.line(self.viz_manager.screen, color, (0, y), (screen_x, y), width)
             line = unit.LineUnit(0, y, screen_x, y, color, width)
             self.viz_manager.units.append(line)
+
+    def PerNoteOff(self, screen, message):
+        self.viz_manager.remove_unit(message.note)
+
+
+class PresetChordRoot(BasePreset):
+    """
+    This preset aims to detect chords being played and displays the root note of each chord.
+    It also draws a piano roll visualization of the notes, just like normal piano roll.
+    """
+
+    def OnFirstLoad(self, score):
+
+        notes = [music21.note.Note('A'), music21.note.Note('D'), music21.note.Note('F'), music21.note.Note('G')]
+        print(notes)
+        chord = util.GetChord(notes)
+        print(chord)
+        print("chord name: " + str(chord.commonName))
+        print("third: " + str(chord.third))
+        print("fifth: " + str(chord.fifth))
+        print("full name: " + str(chord.fullName))
+        print("pitched common name: " + str(chord.pitchedCommonName))
+        print("quality: " + str(chord.quality))
+        print("root: " + str(chord.root))
+
+
+        for note in score.flat.notes:
+            if isinstance(note, music21.note.Note):
+                if note.pitch.midi > self.highest_pitch:
+                    self.highest_pitch = note.pitch.midi
+                if note.pitch.midi < self.lowest_pitch:
+                    self.lowest_pitch = note.pitch.midi
+            if isinstance(note, music21.chord.Chord):
+                chord_notes = note._notes
+                for chord_note in chord_notes:
+                    if isinstance(chord_note, music21.note.Note):
+                        if chord_note.pitch.midi > self.highest_pitch:
+                            self.highest_pitch = chord_note.pitch.midi
+                        if chord_note.pitch.midi < self.lowest_pitch:
+                            self.lowest_pitch = chord_note.pitch.midi
+
+    def PerNoteOn(self, screen, message):
+        self.notes_played.append(message)
+        recent_notes = util.GetRecentNotes(self.notes_played)
+        chord = util.GetChord(recent_notes)
+        print("new chord: " + str(chord.pitchedCommonName))
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)

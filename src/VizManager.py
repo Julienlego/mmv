@@ -68,22 +68,25 @@ class VizManager:
         Create and loads all presets.
         """
         # Create the preset!
-        simple_circle = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
-        grid_text = pr.PresetJustText(self, "Just Text", "Draws a grid and text.")
-        piano_roll = pr.PresetPianoRoll(self, "Piano-Roll", "This is a basic piano roll preset. The height of the note is determined by its pitch.")
-        piano_static = pr.StaticPianoRollPreset(self, "Piano-Roll Static", "This is a static preset that draws the entire song onto the screen in a piano-roll fashion.")
-        piano_rading = pr.PresetPianoRollFading(self, "Fading Piano-Roll", "Similar to the Piano-Roll preset, but the notes fade over time.")
-        piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano roll preset except it determines the color by the note.")
-        multi_piano = pr.TwoTrackPianoRoll(self, "Two-track Piano Roll", "This is similar to .")
+        preset_simple_circle = pr.PresetSimpleCircle(self, "Default", "This is a default visualization preset.")
+        preset_grid_text = pr.PresetJustText(self, "Just Text", "Draws a grid and text.")
+        preset_piano_roll = pr.PresetPianoRoll(self, "Piano-Roll", "This is a basic piano roll preset. The height of the note is determined by its pitch.")
+        preset_piano_static = pr.PresetStaticPianoRoll(self, "Piano-Roll Static", "This is a static preset that draws the entire song onto the screen in a piano-roll fashion.")
+        preset_piano_rading = pr.PresetPianoRollFading(self, "Fading Piano-Roll", "Similar to the Piano-Roll preset, but the notes fade over time.")
+        preset_piano_roll_color = pr.PresetColorPianoRoll(self, "Color Piano Roll", "This preset is the same as the piano roll preset except it determines the color by the note.")
+        preset_multi_piano = pr.PresetTwoTrackPianoRoll(self, "Two-track Piano Roll", "This is similar to .")
+        preset_chord_root = pr.PresetChordRoot(self, "Chord Root", "Piano roll with chord rooots emphasized.")
+
 
         # Add the preset to the dictionary!
-        self.presets.update({simple_circle.name: simple_circle})
-        self.presets.update({piano_roll_color.name: piano_roll_color})
-        self.presets.update({piano_roll.name: piano_roll})
-        self.presets.update({piano_static.name: piano_static})
-        self.presets.update({multi_piano.name: multi_piano})
-        self.presets.update({piano_rading.name: piano_rading})
-        self.presets.update({grid_text.name: grid_text})
+        self.presets.update({preset_simple_circle.name: preset_simple_circle})
+        self.presets.update({preset_piano_roll_color.name: preset_piano_roll_color})
+        self.presets.update({preset_piano_roll.name: preset_piano_roll})
+        self.presets.update({preset_piano_static.name: preset_piano_static})
+        self.presets.update({preset_multi_piano.name: preset_multi_piano})
+        self.presets.update({preset_piano_rading.name: preset_piano_rading})
+        self.presets.update({preset_grid_text.name: preset_grid_text})
+        self.presets.update({preset_chord_root.name: preset_chord_root})
 
     def LoadPreset(self, key):
         """

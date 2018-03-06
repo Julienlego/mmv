@@ -196,6 +196,7 @@ def GetNotesList(score):
         # print(element)
         track_num += 1
         new_track = []
+        instruments = element.getInstruments()
         for note in element.flat.notes:
             if isinstance(note, music21.note.Note):
                 # print(note)
@@ -237,3 +238,22 @@ def CreateUnitInQuadrant(note_unit, top_left_pos, bottom_right_pos):
     a modified note in the center of the quadrant.
     """
     pass
+
+def GetChord(notes):
+    note_names = []
+    for note in notes:
+        if isinstance(note, music21.note.Note):
+            note_names.append(note.name)
+        elif isinstance(note, vn.VizNote):
+            note_names.append(note.note.name)
+
+    if len(note_names) > 0:
+        chord = music21.chord.Chord(note_names)
+        return chord
+    else:
+        return None
+
+def GetRecentNotes(notes, num=5):
+    index = abs(num) * -1
+    previous_notes = notes[index:]
+    return previous_notes
