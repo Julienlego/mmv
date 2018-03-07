@@ -272,7 +272,7 @@ def GetEdgePitches(score):
     """
     Takes a score and returns the lowest and highest pitches in the song.
     """
-    lowest = 0
+    lowest = 255
     highest = 0
     for note in score.flat.notes:
         if isinstance(note, music21.note.Note):
