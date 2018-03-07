@@ -43,12 +43,12 @@ class PygameDisplay(wx.Window):
         self.screen.fill((0, 0, 0))
 
         for unit in self.viz_manager.units:
-            if isinstance(unit, Unit.RectNoteUnit):
-                if unit.should_delete:
-                    self.viz_manager.units.remove(unit)
-                else:
-                    unit.Update()
-                    unit.Draw(self.screen)
+            # if isinstance(unit, Unit.RectNoteUnit):
+            if unit.should_delete is True:
+                self.viz_manager.units.remove(unit)
+            else:
+                unit.Update()
+                unit.Draw(self.screen)
 
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
@@ -119,9 +119,9 @@ class PresetDialog(wx.Dialog):
         super().__init__(parent, title=title, size=(500, 250))
         self.lst_presets = presets
         self.parent = parent
-        self.lst = wx.ListBox(self, pos=(10, 10), size=(150, 150), choices=presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
+        self.lst = wx.ListBox(self, pos=(10, 10), size=(150, 150), choices=self.lst_presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
         self.text = wx.TextCtrl(self,-1, pos=(180, 10), size=(290, 190), style=wx.TE_MULTILINE | wx.TE_READONLY)
-        btn = wx.Button(self, 1, 'Select', (10, 175), style=wx.Center)
+        btn = wx.Button(self, 1, 'Select', (30, 175), style=wx.Center)
         btn.SetFocus()
 
         self.Bind(wx.EVT_LISTBOX, self.OnListBox, self.lst)
@@ -203,7 +203,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.PlayVisualization, self.runviz)
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_MENU, self.LoadPreset, self.ldp)
+        self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
         self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
 
 
@@ -247,7 +247,7 @@ class MainFrame(wx.Frame):
 
         dialog.Destroy()
 
-    def LoadPreset(self, event):
+    def LoadSelectedPreset(self, event):
         """
         Load selected preset from the submenu
         """

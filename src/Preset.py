@@ -3,7 +3,6 @@ import pygame
 import music21
 import src.Utilities as util
 import src.Unit as unit
-import random
 
 
 class BasePreset:
@@ -18,6 +17,7 @@ class BasePreset:
         self.name = name
         # Description of the visualization preset.
         self.desc = desc
+        # Reference to the viz manager
         self.viz_manager = viz_manager
         self.lowest_pitch = float("inf")
         self.highest_pitch = 0
@@ -52,26 +52,13 @@ class BasePreset:
         pass
 
 
-class PresetJustText(BasePreset):
+class PresetTest(BasePreset):
     """
-
+    For testing purposes.
     """
     def OnFirstLoad(self, score):
-        # Draw gridlines
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        x_interval = screen_x // 4
-        color = (255, 255, 255)         # white
-        width = 5
-        for x in range(0, screen_x, x_interval):
-            # pygame.draw.line(self.viz_manager.screen, color, (x, 0), (x, screen_y), width)
-            line = unit.LineUnit(x, 0, x, screen_y, color, width)
-            self.viz_manager.units.append(line)
-        y_interval = screen_y // 4
-        for y in range(0, screen_y, y_interval):
-            # pygame.draw.line(self.viz_manager.screen, color, (0, y), (screen_x, y), width)
-            line = unit.LineUnit(0, y, screen_x, y, color, width)
-            self.viz_manager.units.append(line)
 
     def PerNoteOn(self, screen, message):
         pass
@@ -80,33 +67,63 @@ class PresetJustText(BasePreset):
         pass
 
 
-class PresetSimpleCircle(BasePreset):
+#############################################################
+#                                                           #
+#              !!! PRESETS WITH CIRCLES !!!                 #
+#                                                           #
+#############################################################
+
+
+class PresetSimpleColorCircleRelative(BasePreset):
     """
     This is a basic preset that draws a circle randomly on the screen for each midi event.
 
     For each event:
         - color is determined by note
         - radius of circle is determined by velocity
-
     """
 
     def OnFirstLoad(self, score):
-        pass
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, message):
+    def PerNoteOn(self, screen, viz_note):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-
-        if isinstance(message, music21.note.Note):
-            color = util.SimpleNoteToColorTuple(message)
-            radius = 75
-            y = int(screen_y / message.octave)
-            pos = (screen_x // 2, y)
-
-            pygame.draw.circle(screen, color, pos, radius)
+        color = util.SimpleNoteToColorTuple(viz_note)
+        y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
+        r = int(viz_note.note.volume.velocity) // 2
+        circle = unit.CircleNoteUnit(screen_x // 2, 0, color, viz_note, r)
+        circle = util.CreateUnitInCenterOfQuadrant(circle, (0, 0), (screen_x, screen_y))
+        circle.y = y
+        self.viz_manager.units.append(circle)
 
     def PerNoteOff(self, screen, message):
-        pass
+        self.viz_manager.remove_unit(message.note)
+
+
+class PresetSimpleColorCircleMaxPitch(BasePreset):
+    """
+    This is a basic preset that draws a circle randomly on the screen for each midi event.
+
+    For each event:
+        - color is determined by note
+        - radius of circle is determined by the velocity
+    """
+
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.SimpleNoteToColorTuple(note)
+        y = util.GraphNoteY(viz_note, 255, 0, screen_y)
+        r = int(note.volume.velocity) // 2
+        circle = unit.CircleNoteUnit(screen_x // 2, 0, color, note, r)
+        circle = util.CreateUnitInCenterOfQuadrant(circle, (0, 0), (screen_x, screen_y))
+        circle.y = y
+        self.viz_manager.units.append(circle)
+
+    def PerNoteOff(self, screen, message):
+        self.viz_manager.remove_unit(message.note)
 
 
 class PresetPianoRollFading(BasePreset):
@@ -117,35 +134,18 @@ class PresetPianoRollFading(BasePreset):
     """
 
     def OnFirstLoad(self, score):
-        for note in score.flat.notes:
-            if isinstance(note, music21.note.Note):
-                if note.pitch.midi > self.highest_pitch:
-                    self.highest_pitch = note.pitch.midi
-                if note.pitch.midi < self.lowest_pitch:
-                    self.lowest_pitch = note.pitch.midi
-            if isinstance(note, music21.chord.Chord):
-                chord_notes = note._notes
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, music21.note.Note):
-                        if chord_note.pitch.midi > self.highest_pitch:
-                            self.highest_pitch = chord_note.pitch.midi
-                        if chord_note.pitch.midi < self.lowest_pitch:
-                            self.lowest_pitch = chord_note.pitch.midi
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, message):
+    def PerNoteOn(self, screen, viz_note):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        rect = pygame.Rect(0, 0, screen_x, screen_y)
-        y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
-        random.seed()
-        color = (0, random.randint(50, 100), random.randint(150, 200))
-        note_rect = unit.RectNoteUnit(300, y, color, message, 200, 20)
+        y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.GetRandColor()
+        note_rect = unit.RectNoteUnit(screen_x // 2, y, color, viz_note, 200, 20)
+        note_rect.x -= (note_rect.w // 2)  # subtracts half the width as the offset to make the unit center
         note_rect.fade = True
         note_rect.delete_after_fade = True
         self.viz_manager.units.append(note_rect)
-
-    def PerNoteOff(self, screen, message):
-        print("NOTE OFF")
 
 
 class PresetPianoRoll(BasePreset):
@@ -156,37 +156,45 @@ class PresetPianoRoll(BasePreset):
     """
 
     def OnFirstLoad(self, score):
-        for note in score.flat.notes:
-            if isinstance(note, music21.note.Note):
-                if note.pitch.midi > self.highest_pitch:
-                    self.highest_pitch = note.pitch.midi
-                if note.pitch.midi < self.lowest_pitch:
-                    self.lowest_pitch = note.pitch.midi
-            if isinstance(note, music21.chord.Chord):
-                chord_notes = note._notes
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, music21.note.Note):
-                        if chord_note.pitch.midi > self.highest_pitch:
-                            self.highest_pitch = chord_note.pitch.midi
-                        if chord_note.pitch.midi < self.lowest_pitch:
-                            self.lowest_pitch = chord_note.pitch.midi
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
     def PerNoteOn(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        rect = pygame.Rect(0, 0, screen_x, screen_y)
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, rect)
-        random.seed()
-        color = [0, random.randint(50, 100), random.randint(150, 200)]
-        note_rect = unit.RectNoteUnit(300, y, color, note, 200, 20)
-        note_rect.fade = False
-        note_rect.delete_after_fade = False
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.GetRandColor()
+        note_rect = unit.RectNoteUnit(screen_x // 2, y, color, note, 200, 20)
+        note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x, screen_y))
+        note_rect.y = y
         self.viz_manager.units.append(note_rect)
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)
-        # print("NOTE OFF")
+
+
+class PresetMonochromePianoRoll(BasePreset):
+    """
+    Similar to PianoRoll, but in black-white monochrome.
+    """
+
+    def OnFirstLoad(self, score):
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.viz_manager.screen.fill((0, 0, 255))
+
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.MidiToMonochrome(viz_note.note.pitch.midi)
+        note_rect = unit.RectNoteUnit(0, 0, color, note, 200, 20)
+        note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x, screen_y))
+        note_rect.y = y
+        self.viz_manager.units.append(note_rect)
+
+    def PerNoteOff(self, screen, message):
+        self.viz_manager.remove_unit(message.note)
 
 
 class PresetColorPianoRoll(BasePreset):
@@ -195,32 +203,16 @@ class PresetColorPianoRoll(BasePreset):
     """
 
     def OnFirstLoad(self, score):
-        for note in score.flat.notes:
-            if isinstance(note, music21.note.Note):
-                if note.pitch.midi > self.highest_pitch:
-                    self.highest_pitch = note.pitch.midi
-                if note.pitch.midi < self.lowest_pitch:
-                    self.lowest_pitch = note.pitch.midi
-            if isinstance(note, music21.chord.Chord):
-                chord_notes = note._notes
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, music21.note.Note):
-                        if chord_note.pitch.midi > self.highest_pitch:
-                            self.highest_pitch = chord_note.pitch.midi
-                        if chord_note.pitch.midi < self.lowest_pitch:
-                            self.lowest_pitch = chord_note.pitch.midi
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, message):
-        message = message.note
+    def PerNoteOn(self, screen, viz_note):
+        viz_note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        rect = pygame.Rect(0, 0, screen_x, screen_y)
-        y = util.GraphNoteY(message, self.highest_pitch, self.lowest_pitch, rect)
-        color = util.SimpleNoteToColorTuple(message)
-        # print(color)
-        note_rect = unit.RectNoteUnit(screen_x // 2, y, color, message, 200, 20)
-        note_rect.fade = False
-        note_rect.delete_after_fade = False
+        color = util.SimpleNoteToColorTuple(viz_note)
+        note_rect = unit.RectNoteUnit((screen_x // 2) - 100, 0, color, viz_note, 200, 20)
+        note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x, screen_y))
+        note_rect.y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(note_rect)
 
     def PerNoteOff(self, screen, message):
@@ -254,13 +246,12 @@ class PresetStaticPianoRoll(BasePreset):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
                 rect = util.CreateNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y))
-                random.seed()
-                color = [0, random.randint(50, 100), random.randint(150, 200)]
+                color = util.GetRandColor()
                 note_rect = unit.RectNoteUnit(rect.left, rect.top, color, note, rect.width, rect.height)
                 self.viz_manager.units.append(note_rect)
 
 
-class PresetTwoTrackPianoRoll(BasePreset):
+class PresetTwoTrackColorPianoRoll(BasePreset):
     """
     This is a basic piano roll preset.
     Each note is drawn onto the screen in a piano roll fashion.
@@ -268,59 +259,42 @@ class PresetTwoTrackPianoRoll(BasePreset):
     """
 
     def OnFirstLoad(self, score):
-        for note in score.flat.notes:
-            if isinstance(note, music21.note.Note):
-                if note.pitch.midi > self.highest_pitch:
-                    self.highest_pitch = note.pitch.midi
-                if note.pitch.midi < self.lowest_pitch:
-                    self.lowest_pitch = note.pitch.midi
-            if isinstance(note, music21.chord.Chord):
-                chord_notes = note._notes
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, music21.note.Note):
-                        if chord_note.pitch.midi > self.highest_pitch:
-                            self.highest_pitch = chord_note.pitch.midi
-                        if chord_note.pitch.midi < self.lowest_pitch:
-                            self.lowest_pitch = chord_note.pitch.midi
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, message):
-        note = message.note
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        random.seed()
-        color = [0, random.randint(50, 100), random.randint(150, 200)]
-        # color = util.SimpleNoteToColorTuple(message)
-        if message.track is 1:
-            rect = pygame.Rect(0, 0, screen_x, screen_y)
-        else:
-            rect = pygame.Rect(screen_x, 0, screen_x, screen_y)
+        color = util.SimpleNoteToColorTuple(note)
+        w = 180
+        h = 15
 
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, rect)
-        h = 200
-        w = 20
+        if viz_note.track is 1:      # right side
+            x = (screen_x // 3) * 2
+        else:                       # left side
+            x = screen_x // 3
 
-        if message.track is 1:
-            x = screen_x // 3 - 100
-        else:
-            x = (screen_x // 3) * 2 - 100
+        note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
+        # note_rect = unit.RectNoteUnit()
 
-        note_rect = unit.RectNoteUnit(x, y, color, note, h, w)
-        note_rect.fade = False
-        note_rect.delete_after_fade = False
+        # w = 180
+        # h = 20
+        # note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
+
+        # Put note in left or right part of the screen, depending on what track it belongs to
+        # print("Track: {0}".format(viz_note.track))
+        if viz_note.track is 2:
+            note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (screen_x // 2, 0), (screen_x, screen_y))
+        elif viz_note.track is 1:
+            note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x // 2, screen_y))
+
+        note_rect.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+
         self.viz_manager.units.append(note_rect)
 
-        x_interval = screen_x // 4
-        color = (255, 255, 255)  # white
-        width = 5
-        for x in range(0, screen_x, x_interval):
-            # pygame.draw.line(self.viz_manager.screen, color, (x, 0), (x, screen_y), width)
-            line = unit.LineUnit(x, 0, x, screen_y, color, width)
-            self.viz_manager.units.append(line)
-        y_interval = screen_y // 4
-        for y in range(0, screen_y, y_interval):
-            # pygame.draw.line(self.viz_manager.screen, color, (0, y), (screen_x, y), width)
-            line = unit.LineUnit(0, y, screen_x, y, color, width)
-            self.viz_manager.units.append(line)
+        # Add white line down center of the screen
+        line_unit = unit.LineUnit(screen_x // 2, 0, screen_x // 2, screen_y, (255, 255, 255), 1)
+        self.viz_manager.units.append(line_unit)
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)

@@ -16,12 +16,14 @@ class BaseUnit:
         self.x = x
         self.y = y
         self.color = color
+        self.should_delete = False
 
     def Move(self, x, y):
         """
         Moves the object relative to its current position.
         """
-        pass
+        self.x += x
+        self.y += y
 
     def Update(self):
         """
@@ -46,18 +48,6 @@ class LineUnit(BaseUnit):
         self.end_y = end_y
         self.width = width
 
-    def Move(self, x, y):
-        """
-        Moves the object relative to its current position.
-        """
-        pass
-
-    def Update(self):
-        """
-        Updates the object's internals.
-        """
-        pass
-
     def Draw(self, screen):
         """
         Do any drawing related to the object.
@@ -74,16 +64,35 @@ class NoteUnit(BaseUnit):
         self.note = note
 
 
-class CircleNoteRect(NoteUnit):
+class CircleNoteUnit(NoteUnit):
     """
     This object represents a single note as a circle on the screen.
     """
-    def __init__(self, x, y, color, note, radius):
+    def __init__(self, x, y, color, note, radius=0):
         super().__init__(x, y, color, note)
         self.radius = radius
+        self.fade = False
+        self.fade_speed = 5
+        self.delete_after_fade = False
+
+    def Update(self):
+        if self.fade:
+            self.color[0] -= int(self.fade_speed)
+            self.color[1] -= int(self.fade_speed)
+            self.color[2] -= int(self.fade_speed)
+            if self.color[0] < 0:
+                self.color[0] = 0
+            if self.color[1] < 0:
+                self.color[1] = 0
+            if self.color[2] < 0:
+                self.color[2] = 0
+
+        if self.delete_after_fade:
+            if self.color[0] + self.color[1] + self.color[2] == 0:
+                self.should_delete = True
 
     def Draw(self, screen):
-        pygame.draw.circle(screen, self.color, self.x, self.y, self.radius)
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, 0)
 
 
 class RectNoteUnit(NoteUnit):
@@ -97,11 +106,6 @@ class RectNoteUnit(NoteUnit):
         self.fade = False
         self.fade_speed = 5
         self.delete_after_fade = False
-        self.should_delete = False
-
-    def Move(self, x, y):
-        self.x += x
-        self.y += y
 
     def Update(self):
         if self.fade:

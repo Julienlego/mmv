@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 import music21, pygame, wx
 import src.VizNote as vn
+import src.Unit as unit
+import random
 
+#############################################################
+#                                                           #
+#   !!! THESE FUNCTIONS ARE FOR PRINTI TO DEBUG FRAME !!!   #
+#                                                           #
+#############################################################
 
 def PrintSongToPanel(dbg, score):
     notes = [i for i in score.flat.notesAndRests]
@@ -72,12 +79,23 @@ def PrintChordToPanel(panel, n):
             panel.AppendText(line)
 
 
-def SimpleNoteToColorTuple(note):
+#############################################################
+#                                                           #
+#         !!! THESE FUNCTIONS ARE FOR COLOR !!!             #
+#                                                           #
+#############################################################
+
+
+def SimpleNoteToColorTuple(viz_note):
     """
     Converts music21 Note to an RGB color tuple (R, G, B) and returns the tuple.
     The colors are predetermined.
     """
-    note_name = 'None'
+    if isinstance(viz_note, vn.VizNote):
+        note = viz_note.note
+    else:
+        note = viz_note
+
     if isinstance(note, music21.note.Note):
         note_name = note.name
 
@@ -85,8 +103,8 @@ def SimpleNoteToColorTuple(note):
         psum = 0
         for p in note.pitches:
             psum += int(p.midi)
-        pavg = psum / len(note.pitches)
-        np = music21.pitch.Pitch(pavg)
+        avg = psum // len(note.pitches)
+        np = music21.pitch.Pitch(avg)
         n = music21.note.Note(np)
         note_name = n.name
 
@@ -121,33 +139,98 @@ def SimpleNoteToColorTuple(note):
         color = (71, 0, 237)        # blue-ish
     elif note_name == 'F':
         color = (99, 0, 178)        # indigo
-    else:
-        return [255, 255, 255]
-    print("Converting note {0} to color {1}".format(note_name, color))
+    # print("Converting note {0} to color {1}".format(note_name, color))
     return color
 
 
-def MidiToColorTuple(midi_note):
+def MidiToMonochrome(midi_note):
     """
+    Returns a monochrome color using the midi note value.
+    """
+    r = g = b = midi_note
+    return (r, g, b)
 
+
+def ChangeColorBrightness(color=(0, 0, 0), val=0):
     """
-    pass
+    Changes the brightness of the RGB color by an integer -255 <= val <= 255 and returns the color.
+    """
+    r = TruncateColorValue(color[0] + val)
+    g = TruncateColorValue(color[1] + val)
+    b = TruncateColorValue(color[2] + val)
+    return (r, g, b)
+
+
+def TruncateColorValue(val):
+    """
+    Makes sure the new color value is with the valid range of 0 <= val <= 255.
+    """
+    if val < 0:
+        return 0
+    elif val > 255:
+        return 255
+
+
+def GetRandColor():
+    """
+    Returns a random RGB color.
+    """
+    random.seed()
+    return (0, random.randint(50, 100), random.randint(150, 200))
+
+
+#############################################################
+#                                                           #
+#     !!! THESE FUNCTIONS ARE FOR GRAPHING NOTES !!!        #
+#                                                           #
+#############################################################
 
 
 def OffsetMS(offset, tempo):
+    """
+
+    """
     seconds_per_beat = 60.0 / tempo
     ms_per_beat = seconds_per_beat * 1000
     offset_ms = ms_per_beat * offset
     return offset_ms
 
 
-def GraphNoteY(note, highest_note, lowest_note, dest):
+def GraphNoteY(note, highest_note, lowest_note, screen_height):
     """
     Returns the height position of a note's pitch relative to the lowest and highest possible notes.
     """
-    the_pitch = note.pitch.midi
-    y = dest.top + (dest.height - (((the_pitch - lowest_note) / (highest_note - lowest_note)) * dest.height))
+    if isinstance(note, vn.VizNote):
+        pitch = note.note.pitch.midi
+    else:
+        pitch = note.pitch.midi
+    y = int(screen_height - (((pitch - lowest_note) / (highest_note - lowest_note)) * screen_height))
     return y
+
+
+def CreateUnitInCenterOfQuadrant(note_unit=None, top_left_pos=(0, 0), bottom_right_pos=(0, 0)):
+    """
+    Takes a NoteUnit and returns a new NoteUnit located in the center of the rectangle drawn with the
+    top left and bottom right points. Each point is a tuple (x, y) of its position.
+    """
+    x_mid = (bottom_right_pos[0] - top_left_pos[0]) // 2
+    y_mid = (bottom_right_pos[1] - top_left_pos[1]) // 2
+    new_unit = note_unit
+    offset = 0
+    if isinstance(note_unit, unit.RectNoteUnit):
+        offset = new_unit.w // 2
+    elif isinstance(note_unit, unit.CircleNoteUnit):
+        offset = note_unit.radius
+    new_unit.x = x_mid - offset
+    new_unit.y = y_mid
+    return new_unit
+
+
+#############################################################
+#                                                           #
+#          !!! THESE ARE HELPER FUNCTIONS !!!               #
+#                                                           #
+#############################################################
 
 
 def CreateNoteRect(notes, the_note, dest):
@@ -183,6 +266,30 @@ def CreateNoteRect(notes, the_note, dest):
     h = 20
     rect = pygame.Rect(x, y, w, h)
     return rect
+
+
+def GetEdgePitches(score):
+    """
+    Takes a score and returns the lowest and highest pitches in the song.
+    """
+    lowest = 0
+    highest = 0
+    for note in score.flat.notes:
+        if isinstance(note, music21.note.Note):
+            if note.pitch.midi > highest:
+                highest = note.pitch.midi
+            if note.pitch.midi < lowest:
+                lowest = note.pitch.midi
+        if isinstance(note, music21.chord.Chord):
+            chord_notes = note._notes
+            for chord_note in chord_notes:
+                if isinstance(chord_note, music21.note.Note):
+                    if chord_note.pitch.midi > highest:
+                        highest = chord_note.pitch.midi
+                    if chord_note.pitch.midi < lowest:
+                        lowest = chord_note.pitch.midi
+    return lowest, highest
+
 
 def GetNotesList(score):
     current_offset = 0.0
@@ -225,19 +332,10 @@ def GetNotesList(score):
             flat.append(note)
 
     # print(len(flat))
-
     flat.sort(key=lambda x: x.note.offset)
-
     # print(flat)
-
     return flat
 
-def CreateUnitInQuadrant(note_unit, top_left_pos, bottom_right_pos):
-    """
-    Takes a note unit and the upper left corner and bottom right corner positions of the quadrant and returns
-    a modified note in the center of the quadrant.
-    """
-    pass
 
 def GetChord(notes):
     note_names = []
@@ -252,6 +350,7 @@ def GetChord(notes):
         return chord
     else:
         return None
+
 
 def GetRecentNotes(notes, num=5):
     index = abs(num) * -1
