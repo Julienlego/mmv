@@ -90,7 +90,7 @@ class VizManager:
 
         text = "Takes the first two tracks in the midi file and draws their notes in their part of the screen. Left" \
                "side is track 1, right side for track 2. The notes are drawn similarly to the Color Piano Roll preset."
-        preset_multi_piano = pr.PresetTwoTrackColorPianoRoll(self, "Two-track Piano Roll", text)
+        preset_two_track_piano = pr.PresetTwoTrackColorPianoRoll(self, "Two-track Piano Roll", text)
 
         text = "Piano roll with chord roots emphasized."
         preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
@@ -102,17 +102,21 @@ class VizManager:
                "possible midi pitches."
         preset_circle_max_pitch = pr.PresetSimpleColorCircleMaxPitch(self, "Color Piano Roll 2", text)
 
+        text = ""
+        preset_multitrack_circle_piano = pr.PresetMultiTrackColorCircle(self, "Multitrack Colored Circles", text)
+
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
         self.presets.update({preset_piano_fading.name: preset_piano_fading})
-        self.presets.update({preset_multi_piano.name: preset_multi_piano})
+        self.presets.update({preset_two_track_piano.name: preset_two_track_piano})
         self.presets.update({preset_simple_circle.name: preset_simple_circle})
         self.presets.update({preset_circle_max_pitch.name: preset_circle_max_pitch})
         self.presets.update({preset_piano_roll_color.name: preset_piano_roll_color})
         # self.presets.update({preset_grid_text.name: preset_grid_text})
         self.presets.update({preset_chord_root.name: preset_chord_root})
         self.presets.update({preset_piano_roll_monochrome.name: preset_piano_roll_monochrome})
+        self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
 
 
     def LoadPreset(self, key):

@@ -268,32 +268,65 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
         screen_y = self.viz_manager.main_frame.display.size.y
         color = util.SimpleNoteToColorTuple(note)
 
-        # variables for note_rect sizes
+        # variables for note_rect sizes and y position
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
         w = 180
         h = 15
-
-        note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
-        # note_rect = unit.RectNoteUnit()
-
-        # w = 180
-        # h = 20
-        # note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
 
         # Put note in left or right part of the screen, depending on what track it belongs to
         # print("Track: {0}".format(viz_note.track))
         if viz_note.track is 2:
+            note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
             note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (screen_x // 2, 0), (screen_x, screen_y))
+            note_rect.y = y
+            self.viz_manager.units.append(note_rect)
         elif viz_note.track is 1:
+            note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
             note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x // 2, screen_y))
-
-        note_rect.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
-
-        if viz_note.track is 1 or viz_note.track is 2:
+            note_rect.y = y
             self.viz_manager.units.append(note_rect)
 
         # Add white line down center of the screen
         line_unit = unit.LineUnit(screen_x // 2, 0, screen_x // 2, screen_y, (255, 255, 255), 1)
         self.viz_manager.units.append(line_unit)
+
+    def PerNoteOff(self, screen, message):
+        self.viz_manager.remove_unit(message.note)
+
+
+class PresetMultiTrackColorCircle(BasePreset):
+
+    def __init__(self, viz_manager, name="", desc="A description goes here."):
+        super().__init__(viz_manager, name, desc)
+        self.num_tracks = 0
+
+
+    def OnFirstLoad(self, score):
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.num_tracks = len(score.parts)
+
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.SimpleNoteToColorTuple(note)
+        r = 15
+        circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
+
+        interval = screen_x // self.num_tracks
+
+        # Add white line down center of the screen
+        for i in range(0, screen_x, interval):
+            line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
+            self.viz_manager.units.append(line)
+
+        x = interval * (viz_note.track - 1)
+        # print("Printing note {0} in track {1} in interval {2}".format(note, viz_note.track, x))
+        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
+        # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
+        # circle_note.x += (self.num_tracks - 1) * interval
+        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        self.viz_manager.units.append(circle_note)
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)
