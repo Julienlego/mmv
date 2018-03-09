@@ -144,15 +144,11 @@ class VizManager:
         part = self.parser.score.parts[0]   # Gets first track/part of song
 
         # Prints all notes/rests in part to debug panel
-        # util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
-        # self.main_frame.debugger.WriteLine("Note/Rest\tOctave\tLen\tOffset\n")
-
+        util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
         self.notes = util.GetNotesList(self.parser.score)
-
-        # for n in self.notes:
-        #     util.PrintNoteToPanel(dbg, n.note)
-
-        # util.PrintLineToPanel(dbg, "\n\n===============================")
+        for n in self.notes:
+            util.PrintNoteToPanel(dbg, n.note)
+        util.PrintLineToPanel(dbg, "\n\n===============================")
 
         self.should_play = True
         self.next_notes = []

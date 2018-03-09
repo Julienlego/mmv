@@ -213,8 +213,8 @@ def CreateUnitInCenterOfQuadrant(note_unit=None, top_left_pos=(0, 0), bottom_rig
     Takes a NoteUnit and returns a new NoteUnit located in the center of the rectangle drawn with the
     top left and bottom right points. Each point is a tuple (x, y) of its position.
     """
-    x_mid = (bottom_right_pos[0] - top_left_pos[0]) // 2
-    y_mid = (bottom_right_pos[1] - top_left_pos[1]) // 2
+    x_mid = (bottom_right_pos[0] + top_left_pos[0]) // 2
+    y_mid = (bottom_right_pos[1] + top_left_pos[1]) // 2
     new_unit = note_unit
     offset = 0
     if isinstance(note_unit, unit.RectNoteUnit):

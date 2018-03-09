@@ -22,6 +22,7 @@ class BasePreset:
         self.lowest_pitch = float("inf")
         self.highest_pitch = 0
         self.notes_played = []
+        self.latest_chord = None
 
     def OnFirstLoad(self, score):
         """
@@ -266,13 +267,10 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         color = util.SimpleNoteToColorTuple(note)
+
+        # variables for note_rect sizes
         w = 180
         h = 15
-
-        if viz_note.track is 1:      # right side
-            x = (screen_x // 3) * 2
-        else:                       # left side
-            x = screen_x // 3
 
         note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
         # note_rect = unit.RectNoteUnit()
@@ -290,7 +288,8 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
 
         note_rect.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
 
-        self.viz_manager.units.append(note_rect)
+        if viz_note.track is 1 or viz_note.track is 2:
+            self.viz_manager.units.append(note_rect)
 
         # Add white line down center of the screen
         line_unit = unit.LineUnit(screen_x // 2, 0, screen_x // 2, screen_y, (255, 255, 255), 1)
@@ -340,7 +339,20 @@ class PresetChordRoot(BasePreset):
         self.notes_played.append(message)
         recent_notes = util.GetRecentNotes(self.notes_played)
         chord = util.GetChord(recent_notes)
-        print("new chord: " + str(chord.pitchedCommonName))
+        chord_name = chord.pitchedCommonName
+        dbg = self.viz_manager.main_frame.debugger.textbox
+        s1 = str(chord_name)
+        s2 = ""
+        if isinstance(self.latest_chord, music21.chord.Chord):
+            s2 = str(self.latest_chord.pitchedCommonName)
+        if s1 != s2:
+            self.latest_chord = chord
+            print("new chord: " + str(chord_name))
+            util.PrintLineToPanel(dbg, "new chord: " + str(chord_name) + "\n")
+        else:
+            util.PrintLineToPanel(dbg, "------")
+
+        pass
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)
