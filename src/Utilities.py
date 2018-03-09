@@ -216,6 +216,7 @@ def CreateUnitInCenterOfQuadrant(note_unit=None, top_left_pos=(0, 0), bottom_rig
     x_mid = (bottom_right_pos[0] - top_left_pos[0]) // 2
     y_mid = (bottom_right_pos[1] - top_left_pos[1]) // 2
     new_unit = note_unit
+    # Center the note using the offset
     offset = 0
     if isinstance(note_unit, unit.RectNoteUnit):
         offset = new_unit.w // 2
