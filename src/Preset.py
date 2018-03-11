@@ -52,6 +52,26 @@ class BasePreset:
         """
         pass
 
+    def FindChordFromNote(self, viz_note):
+        """
+        Sees if the note belongs to a chord by looking for other notes played that have
+        the same offset and are from the same track.
+
+        Returns a chord object containing the notes that are in the chord. Returns Nonte
+        if the note doesn't belong to a chord.
+        """
+        offset = viz_note.note.offset
+        track = viz_note.track
+        notes = []
+
+        for vn in self.notes_played:
+            if (vn.track == track) and (vn.note.offset == offset):
+                notes.append(vn.note)
+
+        if not notes: return None
+        else: return music21.chord.Chord(notes)
+
+
 
 class PresetTest(BasePreset):
     """
