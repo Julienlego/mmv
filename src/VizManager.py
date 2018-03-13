@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-import src.Preset as pr
-import src.MidiParser as mp
 import wx
 import pygame
 import pygame.midi
 import src.Unit as Unit
 import src.Utilities as util
+import src.Player as play
+import src.Preset as pr
+import src.MidiParser as mp
 
 
 class VizManager:
@@ -26,6 +27,8 @@ class VizManager:
         self.curr_frame = None  # 0, if a song or preset is loaded
         # Midi file parser. This contains the actual file path and musc21 score.
         self.parser = mp.MidiParser()
+        # the midi player
+        self.player = play.Player()
 
         # the tempo of the song
         self.tempo = 0
@@ -55,10 +58,6 @@ class VizManager:
 
         # the offset of the last note in the song
         self.last_offset = 0.
-
-        # the midi player
-        pygame.midi.init()
-        self.player = pygame.midi.Output(0)
 
         # Init and load all presets
         self.LoadPresets()
@@ -169,10 +168,6 @@ class VizManager:
                     mts = n.notes.midiTickStart
                 except AttributeError:
                     mts = util.OffsetMS(n.note.offset, self.tempo)
-
-
-                oq_error = 0
-                qlq_error = 0
                 try:
                     oq_error = n.note.editorial.offsetQuantizationError
                     mts += oq_error
@@ -181,6 +176,7 @@ class VizManager:
 
                 new_next_note.append(ticks + mts)
                 self.next_notes.append(new_next_note)
+
             if n.note.offset > self.last_offset:
                 self.last_offset = n.note.offset
 
@@ -208,7 +204,7 @@ class VizManager:
         for n in self.current_notes:
             if len(n) > 1:
                 if ticks >= n[1]:
-                    self.player.note_off(n[0].note.pitch.midi, n[0].note.volume.velocity)
+                    self.player.NoteOff(n[0].note.pitch.midi, n[0].note.volume.velocity)
                     self.preset.PerNoteOff(self.screen, n[0])
                     self.current_notes.remove(n)
 
@@ -272,7 +268,7 @@ class VizManager:
                             pass
                         length_ms = util.OffsetMS(length, self.tempo) + util.OffsetMS(qlq_error, self.tempo)
                         n.append(ticks + length_ms)
-                        self.player.note_on(n[0].note.pitch.midi, n[0].note.volume.velocity)
+                        self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
                         self.preset.PerNoteOn(self.screen, n[0])
 
     def remove_unit(self, note):

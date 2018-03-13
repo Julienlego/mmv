@@ -229,7 +229,7 @@ def CreateUnitInCenterOfQuadrant(note_unit=None, top_left_pos=(0, 0), bottom_rig
 
 #############################################################
 #                                                           #
-#          !!! THESE ARE HELPER FUNCTIONS !!!               #
+#      !!! THESE ARE HELPER FUNCTIONS FOR PRESETS!!!        #
 #                                                           #
 #############################################################
 
@@ -357,3 +357,35 @@ def GetRecentNotes(notes, num=5):
     index = abs(num) * -1
     previous_notes = notes[index:]
     return previous_notes
+
+
+#############################################################
+#                                                           #
+#         !!! FOR COMPUTATIONAL MUSIC ANALYSIS!!!           #
+#                                                           #
+#############################################################
+
+def GetNoteDistance(note1=None, note2=None):
+    pass
+
+
+def GetChordDistance(chord=None, chord2=None):
+    pass
+
+
+def GetSurfaceTension(note=None):
+    if issubclass(note, unit.NoteUnit):
+        n = note.note
+        pc = n.pitch.pitchClass
+
+
+def GetMelodicAttraction(pitch1=None, pitch2=None):
+    pass
+
+
+def GetHarmonicAttraction(pitch1=None, pitch2=None):
+    pass
+
+
+def GetSequentialTension(note1=None, note2=None):
+    pass

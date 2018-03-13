@@ -2,9 +2,7 @@
 
 import pygame, wx, os, sys
 import src.VizManager as vm
-import src.Unit as Unit
 
-frame = None
 
 class PygameDisplay(wx.Window):
     def __init__(self, parent, id):
@@ -157,6 +155,33 @@ class PresetDialog(wx.Dialog):
         self.Destroy()
 
 
+class InstrumentFrame(wx.Frame):
+    """
+    WIP
+    """
+    def __init__(self, parent, title, presets):
+        super().__init__(parent, title=title, size=(500, 250))
+        self.parent = parent
+        self.sizer = wx.GridBagSizer()
+
+        text1 = wx.StaticText(self, "Track 1 :")
+        self.sizer.Add(text1, (0, 0), flag= wx.ALL, border=5)
+
+        text2 = wx.StaticText(self, "Track 2 :")
+
+        text3 = wx.StaticText(self, "Track 3 :")
+
+        text4 = wx.StaticText(self, "Track 4 :")
+
+        text5 = wx.StaticText(self, "Track 5 :")
+
+        text6 = wx.StaticText(self, "Track 6 :")
+
+        text7 = wx.StaticText(self, "Track 7 :")
+
+        text8 = wx.StaticText(self, "Track 8 :")
+
+
 class MainFrame(wx.Frame):
     """
     This class is the main window class.
@@ -206,11 +231,9 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
         self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
 
-
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.display, 1, flag=wx.EXPAND)
-
 
         self.SetMenuBar(menubar)
         self.SetAutoLayout(True)
@@ -274,6 +297,12 @@ class MainFrame(wx.Frame):
                 self.viewmenu.Check(self.toggledebug.GetId(), False)
                 self.debugger.isEnabled = False
                 self.debugger.Hide()
+
+    def ShowInstrumentSelector(self, event):
+        """
+
+        """
+        pass
 
     def PlayVisualization(self, event):
         """
