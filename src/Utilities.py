@@ -196,7 +196,7 @@ def OffsetMS(offset, tempo):
     return offset_ms
 
 
-def GraphNoteY(note, highest_note, lowest_note, screen_height):
+def GraphNoteY(note, highest_note, lowest_note, screen_height, smart_crop=False):
     """
     Returns the height position of a note's pitch relative to the lowest and highest possible notes.
     """
@@ -204,7 +204,12 @@ def GraphNoteY(note, highest_note, lowest_note, screen_height):
         pitch = note.note.pitch.midi
     else:
         pitch = note.pitch.midi
+
+    if smart_crop:
+        lowest_note -= 1
+
     y = int(screen_height - (((pitch - lowest_note) / (highest_note - lowest_note)) * screen_height))
+
     return y
 
 

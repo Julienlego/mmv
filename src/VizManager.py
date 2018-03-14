@@ -105,6 +105,9 @@ class VizManager:
         text = ""
         preset_multitrack_circle_piano = pr.PresetMultiTrackColorCircle(self, "Multitrack Colored Circles", text)
 
+        text = ""
+        preset_multitrack_color_piano_roll = pr.PresetMultiTrackColorPianoRoll(self, "Multitrack Colored Piano Roll", text)
+
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
@@ -117,6 +120,7 @@ class VizManager:
         self.presets.update({preset_chord_root.name: preset_chord_root})
         self.presets.update({preset_piano_roll_monochrome.name: preset_piano_roll_monochrome})
         self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
+        self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
 
 
     def LoadPreset(self, key):

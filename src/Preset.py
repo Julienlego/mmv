@@ -352,6 +352,38 @@ class PresetMultiTrackColorCircle(BasePreset):
         self.viz_manager.remove_unit(message.note)
 
 
+class PresetMultiTrackColorPianoRoll(BasePreset):
+
+    def __init__(self, viz_manager, name="", desc="A description goes here."):
+        super().__init__(viz_manager, name, desc)
+        self.num_tracks = 0
+
+    def OnFirstLoad(self, score):
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.num_tracks = len(score.parts)
+
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.SimpleNoteToColorTuple(note)
+        track_width = screen_x // self.num_tracks
+
+        h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
+        rect_note = unit.RectNoteUnit(0, 0, color, note, track_width, h)
+
+        region_x = track_width * (viz_note.track - 1)
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
+
+        rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
+        rect_note.y = y
+
+        self.viz_manager.units.append(rect_note)
+
+    def PerNoteOff(self, screen, viz_note):
+        self.viz_manager.remove_unit(viz_note.note)
+
+
 class PresetChordRoot(BasePreset):
     """
     This preset aims to detect chords being played and displays the root note of each chord.

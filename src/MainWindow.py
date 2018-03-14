@@ -116,11 +116,11 @@ class PresetDialog(wx.Dialog):
     Dialog to browse and select a preset to load to the system.
     """
     def __init__(self, parent, title, presets):
-        super().__init__(parent, title=title, size=(500, 250))
+        super().__init__(parent, title=title, size=(600, 250))
         self.lst_presets = presets
         self.parent = parent
-        self.lst = wx.ListBox(self, pos=(10, 10), size=(150, 150), choices=self.lst_presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
-        self.text = wx.TextCtrl(self,-1, pos=(180, 10), size=(290, 190), style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.lst = wx.ListBox(self, pos=(10, 10), size=(250, 150), choices=self.lst_presets, style=wx.LB_SINGLE | wx.TE_MULTILINE)
+        self.text = wx.TextCtrl(self,-1, pos=(270, 10), size=(300, 190), style=wx.TE_MULTILINE | wx.TE_READONLY)
         btn = wx.Button(self, 1, 'Select', (30, 175), style=wx.Center)
         btn.SetFocus()
 
@@ -204,7 +204,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
-        self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
+        # self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
 
 
         # Add panels to sizer and set to panel
