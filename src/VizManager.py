@@ -37,7 +37,7 @@ class VizManager:
         self.start_time = 0
 
         # bool for if the song is playing
-        self.isPlaying = False
+        self.is_playing = False
 
         # bool for if the song should play
         self.should_play = False
@@ -194,10 +194,10 @@ class VizManager:
         """
 
         """
-        if not self.isPlaying:
+        if not self.is_playing:
             if self.should_play:
                 self.should_play = False
-                self.isPlaying = True
+                self.is_playing = True
                 self.start_time = pygame.time.get_ticks()
             return
         # determine whether or not to play something

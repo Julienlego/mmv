@@ -206,10 +206,11 @@ class MainFrame(wx.Frame):
 
         # Create menu items
         self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
-        self.runviz = filemenu.Append(wx.ID_ANY, 'Run\tCtrl+R', 'Run Viz')
+        self.runviz = filemenu.Append(wx.ID_ANY, 'Run Preset\tCtrl+R', 'Run Viz')
         self.toggledebug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
         self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset\tCtrl+P')
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
+        self.toggleplay = filemenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -230,6 +231,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
         # self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
+        self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggleplay)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -314,6 +316,17 @@ class MainFrame(wx.Frame):
             wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
         else:
             self.vizmanager.Play()
+
+    def TogglePlay(self, event):
+        """
+        Toggles the is_playing attribute of the VizManager
+        """
+        if self.vizmanager.notes:
+            self.vizmanager.is_playing = not self.vizmanager.is_playing
+            if not self.vizmanager.is_playing:
+                self.statusbar.SetStatusText(str(self.vizmanager.preset.name + " [PAUSED]"), 1)
+            else:
+                self.statusbar.SetStatusText(str(self.vizmanager.preset.name), 1)
 
     def PauseVisualization(self, event):
         """
