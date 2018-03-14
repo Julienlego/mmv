@@ -72,7 +72,6 @@ class BasePreset:
         else: return music21.chord.Chord(notes)
 
 
-
 class PresetTest(BasePreset):
     """
     For testing purposes.
