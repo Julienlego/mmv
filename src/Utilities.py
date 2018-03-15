@@ -525,4 +525,5 @@ instruments = {
     "Helicopter": 126,
     "Applause": 127,
     "Gunshot": 128,
+    "Percussion": 129
 }

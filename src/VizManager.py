@@ -282,7 +282,13 @@ class VizManager:
                             pass
                         length_ms = util.OffsetMS(length, self.tempo) + util.OffsetMS(qlq_error, self.tempo)
                         n.append(ticks + length_ms)
-                        self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
+                        instrument = self.track_instrument_map[n[0].track - 1]
+                        if instrument < 128:
+                            self.player.SetInstrument(instrument)
+                            self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
+                        else:
+                            self.player.SetInstrument(20, 10)
+                            self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity, channel=10)
                         self.preset.PerNoteOn(self.screen, n[0])
 
     def remove_unit(self, note):

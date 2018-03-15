@@ -37,12 +37,19 @@ class MidiParser:
         Returns the tempo of the song, as a float. Takes a music21.stream.Score object as the argument.
         This function assumes there are no tempo changes within the file.
         """
-        seconds = self.score.secondsMap[0]['durationSeconds']
-        # print(seconds)
-        last_note = self.score.flat.notes[len(self.score.flat.notes) - 1]
-        quarter_length = last_note.quarterLength
-        offset = last_note.offset
-        total_length = offset + quarter_length
-        beats = (total_length - (total_length % 4)) + 4
-        tempo = int(60.0 / float(seconds / beats))
+        quarter_length = None
+        the_note = None
+        for note in self.score.flat.notesAndRests:
+            if note.quarterLength > 0.0:
+                quarter_length = note.quarterLength
+                the_note = note
+                break
+
+        if quarter_length is None:
+            return 120
+
+        seconds = the_note.seconds
+        full_quarter_length = seconds * (1.0 / quarter_length)
+        tempo = 60.0 / full_quarter_length
+
         return tempo

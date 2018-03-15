@@ -171,10 +171,10 @@ class InstrumentFrame(wx.Dialog):
 
         for track in tracks:
             index = tracks.index(track)
-            text = wx.StaticText(panel, id=wx.ID_ANY, label="Track " + str(index + 1), pos=(20, (25 * index) + 10))
+            text = wx.StaticText(panel, id=wx.ID_ANY, label="Track " + str(index + 1), pos=(20 + ((index // 8) * 200), (25 * (index % 8)) + 10))
             self.text_labels.append(text)
 
-            box = wx.ComboBox(panel, id=wx.ID_ANY, value="Instrument", pos=(60, (25 * index) + 8),
+            box = wx.ComboBox(panel, id=wx.ID_ANY, value="Default", pos=(65 + ((index // 8) * 200), (25 * (index % 8)) + 8),
                               size=(150, 20), choices=list(util.instruments.keys()))
             self.combo_boxes.append(box)
 
@@ -186,10 +186,11 @@ class InstrumentFrame(wx.Dialog):
     def OnClose(self, event):
         for box in self.combo_boxes:
             if isinstance(box, wx.ComboBox):
-                selection = box.Items[box.GetSelection()]
-                if selection is not wx.NOT_FOUND:
-                    track = util.instruments[selection]
-                    self.parent.vizmanager.track_instrument_map[self.combo_boxes.index(box)] = track
+                selection = 'Acoustic Grand Piano'
+                if box.GetSelection() >= 0:
+                    selection = box.Items[box.GetSelection()]
+                track = util.instruments[selection]
+                self.parent.vizmanager.track_instrument_map[self.combo_boxes.index(box)] = track
 
         self.Close()
         self.Destroy()
