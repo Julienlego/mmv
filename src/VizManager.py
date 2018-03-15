@@ -47,6 +47,12 @@ class VizManager:
 
         # the list of notes in the currently open file, one after the other with chords broken down
         self.notes = []
+        
+        # the list of all tracks in the currently open file. each track contains all of its notes
+        self.tracks = []
+
+        # a dictionary mapping each track to its proper instrument
+        self.track_instrument_map = {}
 
         # the list of the currently playing notes
         # it is a list of tuples. first value is note, second is the tick it was played on
@@ -136,6 +142,11 @@ class VizManager:
         self.parser.ParseFile(path)
         self.units.clear()
         self.tempo = self.parser.GetTempo()
+        self.notes, self.tracks = util.GetVizNotesAndTracks(self.parser.score)
+
+        for track in self.tracks:
+            self.track_instrument_map[self.tracks.index(track)] = 0
+
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
 
@@ -152,7 +163,6 @@ class VizManager:
 
         # Prints all notes/rests in part to debug panel
         util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
-        self.notes = util.GetNotesList(self.parser.score)
         for n in self.notes:
             util.PrintNoteToPanel(dbg, n.note)
         util.PrintLineToPanel(dbg, "\n\n===============================")

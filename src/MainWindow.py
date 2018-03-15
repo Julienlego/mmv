@@ -2,6 +2,7 @@
 
 import pygame, wx, os, sys
 import src.VizManager as vm
+import src.Utilities as util
 
 
 class PygameDisplay(wx.Window):
@@ -155,31 +156,43 @@ class PresetDialog(wx.Dialog):
         self.Destroy()
 
 
-class InstrumentFrame(wx.Frame):
+class InstrumentFrame(wx.Dialog):
     """
     WIP
     """
-    def __init__(self, parent, title, presets):
-        super().__init__(parent, title=title, size=(500, 250))
+    def __init__(self, parent, title, tracks):
+        super().__init__(parent, title=title, size=(500, 300))
         self.parent = parent
-        self.sizer = wx.GridBagSizer()
 
-        text1 = wx.StaticText(self, "Track 1 :")
-        self.sizer.Add(text1, (0, 0), flag= wx.ALL, border=5)
+        panel = wx.Panel(self, -1)
 
-        text2 = wx.StaticText(self, "Track 2 :")
+        self.text_labels = []
+        self.combo_boxes = []
 
-        text3 = wx.StaticText(self, "Track 3 :")
+        for track in tracks:
+            index = tracks.index(track)
+            text = wx.StaticText(panel, id=wx.ID_ANY, label="Track " + str(index + 1), pos=(20, (25 * index) + 10))
+            self.text_labels.append(text)
 
-        text4 = wx.StaticText(self, "Track 4 :")
+            box = wx.ComboBox(panel, id=wx.ID_ANY, value="Instrument", pos=(60, (25 * index) + 8),
+                              size=(150, 20), choices=list(util.instruments.keys()))
+            self.combo_boxes.append(box)
 
-        text5 = wx.StaticText(self, "Track 5 :")
+        self.button = wx.Button(panel, id=wx.ID_ANY, label="Approve", pos=(200, 225),
+                                style=wx.CENTER)
 
-        text6 = wx.StaticText(self, "Track 6 :")
+        self.Bind(wx.EVT_BUTTON, self.OnClose)
 
-        text7 = wx.StaticText(self, "Track 7 :")
+    def OnClose(self, event):
+        for box in self.combo_boxes:
+            if isinstance(box, wx.ComboBox):
+                selection = box.Items[box.GetSelection()]
+                if selection is not wx.NOT_FOUND:
+                    track = util.instruments[selection]
+                    self.parent.vizmanager.track_instrument_map[self.combo_boxes.index(box)] = track
 
-        text8 = wx.StaticText(self, "Track 8 :")
+        self.Close()
+        self.Destroy()
 
 
 class MainFrame(wx.Frame):
@@ -203,14 +216,16 @@ class MainFrame(wx.Frame):
         menubar = wx.MenuBar()
         filemenu = wx.Menu()
         self.viewmenu = wx.Menu()
+        self.midimenu = wx.Menu()
 
         # Create menu items
-        self.fileopen = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
-        self.runviz = filemenu.Append(wx.ID_ANY, 'Run Preset\tCtrl+R', 'Run Viz')
-        self.toggledebug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
+        self.file_open = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
+        self.run_viz = filemenu.Append(wx.ID_ANY, 'Run Preset\tCtrl+R', 'Run Viz')
+        self.toggle_debug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
         self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset\tCtrl+P')
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
-        self.toggleplay = filemenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
+        self.toggle_play = self.midimenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
+        self.select_tracks = self.midimenu.Append(wx.ID_ANY, 'Track Select\tCtrl+T', 'Select instruments for each track')
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -222,16 +237,18 @@ class MainFrame(wx.Frame):
         # Add file and menu options to menu bar
         menubar.Append(filemenu, '&File')
         menubar.Append(self.viewmenu, '&View')
+        menubar.Append(self.midimenu, '&MIDI')
 
         # Bind everything!
         self.Bind(wx.EVT_MENU, self.OnQuit)
-        self.Bind(wx.EVT_MENU, self.OpenFile, self.fileopen)
-        self.Bind(wx.EVT_MENU, self.PlayVisualization, self.runviz)
-        self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggledebug)
+        self.Bind(wx.EVT_MENU, self.OpenFile, self.file_open)
+        self.Bind(wx.EVT_MENU, self.PlayVisualization, self.run_viz)
+        self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggle_debug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
         # self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
-        self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggleplay)
+        self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggle_play)
+        self.Bind(wx.EVT_MENU, self.ShowInstrumentSelector, self.select_tracks)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -284,27 +301,29 @@ class MainFrame(wx.Frame):
         """
         Shows/Hides the debug textbox
         """
-        if self.toggledebug.IsChecked():
+        if self.toggle_debug.IsChecked():
             if self.debugger:
                 self.debugger.isEnabled = True
-                self.viewmenu.Check(self.toggledebug.GetId(), True)
+                self.viewmenu.Check(self.toggle_debug.GetId(), True)
                 self.debugger.Show()
             else:
                 self.debugger = DebugFrame(self, "Debugger")
                 self.debugger.isEnabled = True
-                self.viewmenu.Check(self.toggledebug.GetId(), True)
+                self.viewmenu.Check(self.toggle_debug.GetId(), True)
                 self.debugger.Show()
         else:
             if self.debugger:
-                self.viewmenu.Check(self.toggledebug.GetId(), False)
+                self.viewmenu.Check(self.toggle_debug.GetId(), False)
                 self.debugger.isEnabled = False
                 self.debugger.Hide()
 
     def ShowInstrumentSelector(self, event):
         """
-
+        Open the track selector dialog box
         """
-        pass
+        frame = InstrumentFrame(self, "Track Selector", self.vizmanager.tracks)
+        frame.Show(True)
+        frame.Center()
 
     def PlayVisualization(self, event):
         """
