@@ -133,6 +133,9 @@ class VizManager:
         Load preset with given key.
         """
         self.preset = self.presets[key]
+        # info = pygame.midi.get_device_info(0)
+        # print(info)
+        # self.player.NoteOn(39, 100, 9)
 
     def LoadSongFromPath(self, path):
         """
@@ -284,7 +287,10 @@ class VizManager:
                         n.append(ticks + length_ms)
                         instrument = self.track_instrument_map[n[0].track - 1]
                         if instrument < 128:
-                            self.player.SetInstrument(instrument - 1)
+                            if instrument > 0:
+                                self.player.SetInstrument(instrument - 1)
+                            else:
+                                self.player.SetInstrument(instrument)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
                         else:
                             self.player.SetInstrument(20, 10)
