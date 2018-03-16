@@ -227,7 +227,7 @@ class MainFrame(wx.Frame):
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
         self.toggle_play = self.midimenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
         self.select_tracks = self.midimenu.Append(wx.ID_ANY, 'Track Select\tCtrl+T', 'Select instruments for each track')
-        self.print_song = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Print Song On Load', 'Toggle printing song to debug panel on preset load')
+        self.print_song = self.viewmenu.Append(wx.ID_ANY, 'Print Song', 'Print the currently loaded song to the debug panel')
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -251,7 +251,7 @@ class MainFrame(wx.Frame):
         # self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
         self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggle_play)
         self.Bind(wx.EVT_MENU, self.ShowInstrumentSelector, self.select_tracks)
-        self.Bind(wx.EVT_MENU, self.TogglePrintSong, self.print_song)
+        self.Bind(wx.EVT_MENU, self.PrintSong, self.print_song)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -350,11 +350,11 @@ class MainFrame(wx.Frame):
             else:
                 self.statusbar.SetStatusText(str(self.vizmanager.preset.name), 1)
 
-    def TogglePrintSong(self, event):
+    def PrintSong(self, event):
         """
-        Toggles the vizmanager's print_song_on_preset_load value
+        Prints the song to the debug box through vizmanager
         """
-        self.vizmanager.print_song_on_preset_load ^= self.vizmanager.print_song_on_preset_load
+        self.vizmanager.print_song()
 
     def PauseVisualization(self, event):
         """
