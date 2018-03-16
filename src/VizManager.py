@@ -42,6 +42,9 @@ class VizManager:
         # bool for if the song should play
         self.should_play = False
 
+        # bool for if a preset is loaded
+        self.preset_loaded = False
+
         # the list of units to draw to the screen
         self.units = []
 
@@ -128,7 +131,7 @@ class VizManager:
         self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
 
 
-    def LoadPreset(self, key):
+    def SetPreset(self, key):
         """
         Load preset with given key.
         """
@@ -142,6 +145,14 @@ class VizManager:
         Reads file at given path, if possible, and saves as an object.
         """
         bsy = wx.BusyInfo("Loading song from path: " + path)
+
+        # cleanup everything
+        self.current_notes.clear()
+        self.next_notes.clear()
+        self.is_playing = False
+        self.should_play = False
+        self.preset_loaded = False
+
         self.parser.ParseFile(path)
         self.units.clear()
         self.tempo = self.parser.GetTempo()
@@ -153,7 +164,7 @@ class VizManager:
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
 
-    def Play(self):
+    def LoadPreset(self):
         """
         Starts playing the visualization from the beginning.
         """
@@ -170,7 +181,7 @@ class VizManager:
             util.PrintNoteToPanel(dbg, n.note)
         util.PrintLineToPanel(dbg, "\n\n===============================")
 
-        self.should_play = True
+        self.should_play = False
         self.next_notes = []
 
         # get the offset of the first note in the song
@@ -196,6 +207,8 @@ class VizManager:
 
             if n.note.offset > self.last_offset:
                 self.last_offset = n.note.offset
+
+        self.preset_loaded = True
 
     def Pause(self):
         """

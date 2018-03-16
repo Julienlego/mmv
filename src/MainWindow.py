@@ -148,7 +148,7 @@ class PresetDialog(wx.Dialog):
         name = self.GetNameSelect(self)
         print("Preset selected: ", name)
         self.parent.statusbar.SetStatusText(name, 1)
-        self.parent.vizmanager.LoadPreset(name)
+        self.parent.vizmanager.SetPreset(name)
         self.Destroy()
 
     def OnClose(self, event):
@@ -221,9 +221,9 @@ class MainFrame(wx.Frame):
 
         # Create menu items
         self.file_open = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
-        self.run_viz = filemenu.Append(wx.ID_ANY, 'Run Preset\tCtrl+R', 'Run Viz')
+        self.run_viz = filemenu.Append(wx.ID_ANY, 'Load Selected Preset\tCtrl+R', 'Run Viz')
         self.toggle_debug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
-        self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Load Preset\tCtrl+P')
+        self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Select Preset\tCtrl+P')
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
         self.toggle_play = self.midimenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
         self.select_tracks = self.midimenu.Append(wx.ID_ANY, 'Track Select\tCtrl+T', 'Select instruments for each track')
@@ -335,13 +335,13 @@ class MainFrame(wx.Frame):
         elif self.vizmanager.parser.IsEmpty() is True:
             wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
         else:
-            self.vizmanager.Play()
+            self.vizmanager.LoadPreset()
 
     def TogglePlay(self, event):
         """
         Toggles the is_playing attribute of the VizManager
         """
-        if self.vizmanager.notes:
+        if self.vizmanager.preset_loaded:
             self.vizmanager.is_playing = not self.vizmanager.is_playing
             if not self.vizmanager.is_playing:
                 self.statusbar.SetStatusText(str(self.vizmanager.preset.name + " [PAUSED]"), 1)
