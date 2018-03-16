@@ -248,7 +248,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggle_debug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
-        # self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
+        self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
         self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggle_play)
         self.Bind(wx.EVT_MENU, self.ShowInstrumentSelector, self.select_tracks)
         self.Bind(wx.EVT_MENU, self.PrintSong, self.print_song)
@@ -368,9 +368,9 @@ class MainFrame(wx.Frame):
 
     def ToggleFullscreen(self, event):
         """
-
+        Toggle fullscreen display
         """
-        self.display.ToggleFullscreen(event)
+        # self.display.ToggleFullscreen(event)
 
 
 class App(wx.App):
