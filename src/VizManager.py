@@ -284,7 +284,7 @@ class VizManager:
                         n.append(ticks + length_ms)
                         instrument = self.track_instrument_map[n[0].track - 1]
                         if instrument < 128:
-                            self.player.SetInstrument(instrument)
+                            self.player.SetInstrument(instrument - 1)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
                         else:
                             self.player.SetInstrument(20, 10)
