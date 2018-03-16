@@ -375,7 +375,7 @@ class MainFrame(wx.Frame):
 
 class App(wx.App):
     def OnInit(self):
-        frame = MainFrame(None, "Midi Music Visualizer", size=(800, 600))
+        frame = MainFrame(None, "Midi Music Visualizer", size=(1200, 800))
         frame.Show()
         self.SetTopWindow(frame)
 

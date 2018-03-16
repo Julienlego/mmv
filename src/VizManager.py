@@ -203,7 +203,7 @@ class VizManager:
                 self.last_offset = n.note.offset
 
         self.preset_loaded = True
-        util.PrintLineToPanel(dbg, "Preset Loaded\n\n")
+        util.PrintLineToPanel(dbg, "\nPreset Loaded\n\n")
 
     def Pause(self):
         """
@@ -333,10 +333,10 @@ class VizManager:
         if self.notes:
 
             # Prints all notes/rests in part to debug panel
-            util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
+            util.PrintLineToPanel(dbg, "\nNote/Rest\tOctave\tLen\tOffset\n")
             for n in self.notes:
                 util.PrintNoteToPanel(dbg, n.note)
             util.PrintLineToPanel(dbg, "\n\n===============================")
         else:
-            util.PrintLineToPanel(dbg, "No song loaded!\n")
+            util.PrintLineToPanel(dbg, "\nNo song loaded!\n")
 
