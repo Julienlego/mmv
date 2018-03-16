@@ -45,6 +45,9 @@ class VizManager:
         # bool for if a preset is loaded
         self.preset_loaded = False
 
+        # bool for if the song should be printed to the debug panel on preset load
+        self.print_song_on_preset_load = False
+
         # the list of units to draw to the screen
         self.units = []
 
@@ -176,10 +179,11 @@ class VizManager:
         part = self.parser.score.parts[0]   # Gets first track/part of song
 
         # Prints all notes/rests in part to debug panel
-        util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
-        for n in self.notes:
-            util.PrintNoteToPanel(dbg, n.note)
-        util.PrintLineToPanel(dbg, "\n\n===============================")
+        if self.print_song_on_preset_load:
+            util.PrintLineToPanel(dbg, "Note/Rest\tOctave\tLen\tOffset\n")
+            for n in self.notes:
+                util.PrintNoteToPanel(dbg, n.note)
+            util.PrintLineToPanel(dbg, "\n\n===============================")
 
         self.should_play = False
         self.next_notes = []
@@ -209,6 +213,7 @@ class VizManager:
                 self.last_offset = n.note.offset
 
         self.preset_loaded = True
+        util.PrintLineToPanel(dbg, "Preset Loaded\n\n")
 
     def Pause(self):
         """
