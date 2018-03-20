@@ -381,7 +381,8 @@ class PresetTensionCornell(BasePreset):
     def PerNoteOn(self, screen, viz_note):
         self.notes_played.append(viz_note)
         tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
-        print(tension)
+        print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
+        screen.fill((tension, tension, tension))
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -398,8 +399,6 @@ class PresetTensionCornell(BasePreset):
 
         x = interval * (viz_note.track - 1)
         circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
-        # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
-        # circle_note.x += (self.num_tracks - 1) * interval
         circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(circle_note)
 
@@ -412,13 +411,8 @@ class PresetChordRoot(BasePreset):
     This preset aims to detect chords being played and displays the root note of each chord.
     It also draws a piano roll visualization of the notes, just like normal piano roll.
     """
-
     def OnFirstLoad(self, score):
-
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
-
-
-
 
     def PerNoteOn(self, screen, message):
         self.notes_played.append(message)
