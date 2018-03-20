@@ -6,6 +6,9 @@ import src.Utilities as util
 
 
 class PygameDisplay(wx.Window):
+    """
+
+    """
     def __init__(self, parent, id):
         super().__init__(parent, id)
         self.parent = parent
@@ -78,6 +81,7 @@ class PygameDisplay(wx.Window):
         # (Otherwise wx seems to call Draw between quitting Pygame and destroying the frame)
         self.Unbind(event=wx.EVT_PAINT, handler=self.OnPaint)
         self.Unbind(event=wx.EVT_TIMER, handler=self.Update, source=self.timer)
+        pygame.quit()
 
 
 class DebugFrame(wx.Frame):
@@ -158,7 +162,7 @@ class PresetDialog(wx.Dialog):
 
 class InstrumentFrame(wx.Dialog):
     """
-    WIP
+
     """
     def __init__(self, parent, title, tracks):
         super().__init__(parent, title=title, size=(500, 300))
@@ -221,7 +225,7 @@ class MainFrame(wx.Frame):
 
         # Create menu items
         self.file_open = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
-        self.run_viz = filemenu.Append(wx.ID_ANY, 'Load Selected Preset\tCtrl+R', 'Run Viz')
+        self.run_viz = filemenu.Append(wx.ID_ANY, 'Play Selected Preset\tCtrl+R', 'Play Viz')
         self.toggle_debug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
         self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Select Preset\tCtrl+P')
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
@@ -337,7 +341,7 @@ class MainFrame(wx.Frame):
         elif self.vizmanager.parser.IsEmpty() is True:
             wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
         else:
-            self.vizmanager.LoadPreset()
+            self.vizmanager.PlayPreset()
 
     def TogglePlay(self, event):
         """
@@ -363,14 +367,16 @@ class MainFrame(wx.Frame):
         pass
 
     def OnButtonKeyEvent(self, event):
-        keycode = event.GetKeyCode()
-        print(keycode)
+        """
+
+        """
+        print(event.GetKeyCode())
 
     def ToggleFullscreen(self, event):
         """
         Toggle fullscreen display
         """
-        # self.display.ToggleFullscreen(event)
+        self.display.ToggleFullscreen(event)
 
 
 class App(wx.App):

@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 import music21, time, pygame, pygame.midi
 
-class Player:
 
+class Player:
+    """
+
+    """
     def __init__(self):
         pygame.midi.init()
         self.__player = pygame.midi.Output(0)
         # Instruments for each track
-        self.instrument = []
+        self.instruments = []
         for i in range(16):
-            self.instrument.append(0)
+            self.instruments.append(0)
 
     def __del__(self):
+        # Clean-up
+        self.__player.close()
         pygame.midi.quit()
 
     def SetInstrument(self, instrument_id=0, channel=0):
@@ -22,10 +27,3 @@ class Player:
 
     def NoteOff(self, midi_note=0, velocity=0, channel=0):
         self.__player.note_off(midi_note, velocity, channel)
-
-
-    # def LoadSoundFont(self, sf):
-    #     pass
-
-    # def PlayNote(self, note, beats):
-    #     seconds = beats / self.bpm

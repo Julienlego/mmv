@@ -354,8 +354,7 @@ def GetChord(notes):
     if len(note_names) > 0:
         chord = music21.chord.Chord(note_names)
         return chord
-    else:
-        return None
+    return None
 
 
 def GetRecentNotes(notes, num=5):
@@ -370,29 +369,327 @@ def GetRecentNotes(notes, num=5):
 #                                                           #
 #############################################################
 
+def GetDiatonicCircleLevel(note=None):
+    """
+
+    """
+    name = note.name
+    val = 0     # start at C = 0
+    if name is 'G':
+        val = 1
+    elif name is 'D':
+        val = 2
+    elif name is 'A':
+        val = 3
+    elif name is 'E':
+        val = 4
+    elif name is 'B':
+        val = 5
+    elif name is ('G-' or 'F#'):
+        val = 6
+    elif name is 'D-':
+        val = 7
+    elif name is 'A-':
+        val = 8
+    elif name is 'E-':
+        val = 9
+    elif name is 'B-':
+        val = 10
+    elif name is 'F':
+        val = 11
+
+    return val
+
+
+def GetChromaticCircleLevel(note=None):
+    """
+
+    """
+    name = note.name
+    val = 0  # start at C = 0
+    if name is ('C#' or 'D-'):
+        val = 1
+    elif name is 'D':
+        val = 2
+    elif name is ('D#' or 'E-'):
+        val = 3
+    elif name is 'E':
+        val = 4
+    elif name is 'F':
+        val = 5
+    elif name is ('G-' or 'F#'):
+        val = 6
+    elif name is 'G':
+        val = 7
+    elif name is ('A-' or 'G#'):
+        val = 8
+    elif name is 'A':
+        val = 9
+    elif name is ('B-' or 'A-'):
+        val = 10
+    elif name is 'B':
+        val = 11
+
+    return val
+
+
+def GetPitchDistance(pitch1=None, pitch2=None):
+    """
+    Sums up the number of moves on the diatonic and chromatic circle of fifths between the two pitches.
+    """
+    note1_dia_lvl = GetDiatonicCircleLevel(pitch1)
+    note2_dia_lvl = GetDiatonicCircleLevel(pitch2)
+    dia_dist = abs(note1_dia_lvl - note2_dia_lvl)
+
+    note1_chr_lvl = GetChromaticCircleLevel(pitch1)
+    note2_chr_lvl = GetChromaticCircleLevel(pitch2)
+    chr_dist = abs(note1_chr_lvl - note2_chr_lvl)
+
+    return dia_dist + chr_dist
+
+
 def GetNoteDistance(note1=None, note2=None):
-    pass
+    """
+
+    """
+    return GetPitchDistance(note1, note2)
 
 
 def GetChordDistance(chord=None, chord2=None):
-    pass
+    """
+    Attempted implementation of the chord distance rule from the Cornell paper.
+
+    Calculates distance between notes using the Diatonic chord istance rule from the Cornell paper. The rule is a
+    stated: F(x, y) = i + j + k, where
+        - i = the number of moves on the circle of fifths at the diatonic level
+        - j = the number of moves on the cycle of fifths at the chromatic level
+        - k = the number of non-common pitch classes in the basic space of y compared to the basic space of x
+    """
+    # Find root of each chord
+    root_chord1 = chord.root()
+    root_chord2 = chord2.root()
+
+    # Sum of moves on both circles
+    circle_sum = GetPitchDistance(root_chord1, root_chord2)
+
+    # Count non-common pitch classes in both y and x
+    num_noncom_pitch = 0
+    for p in chord.pitches:
+        if p not in chord2.pitches:
+            num_noncom_pitch += 1
+    for p in chord2.pitches:
+        if p not in chord.pitches:
+            num_noncom_pitch += 1
+
+    return circle_sum + (num_noncom_pitch // 2)
 
 
-def GetSurfaceTension(note=None):
-    if issubclass(note, unit.NoteUnit):
-        n = note.note
-        pc = n.pitch.pitchClass
+def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
+    """
+    Calculates the surface tension of a note using the Surface tension rule from the Cornell paper, which states:
+
+    F(x) = scale degree + inversion + non-harmonic tones summed over all pitch classes in x, where
+        - scale degree = 1 if scale degree is 3 or 5 in the melodic voice, 0 otherwise
+        - inversion = 2 if 3rd of 5th inversion, 0 otherwise
+        - non-harmonic tone = 3 if pitch class is a diatonic non-chord tone, 4 if it is a chromatic non-chord tone,
+          0 therwise
+
+    Parts of the rule are improvised due to lack of musical and technical expertise.
+    """
+    # First, figure out if we're dealing with a chord
+    tempchord = FindChordFromVizNote(viz_note, prev_notes_played)
+    scale = music21.scale.ConcreteScale(scorekey)   # scale the song is in
+
+    score = 0
+
+    if tempchord is None:      # It's a single note that doesn't belong to any chord in the track
+        note = viz_note.note
+        # pc = note.pitch.pitchClass
+
+        # Determine scale degree
+        sd = scale.getScaleDegreeFromPitch(note.pitch)
+
+        # Since we can't inverse a note, just add 1 because the note stands out
+        score += 1
+
+        # Determine if the note is a diatonic or chromatic non-chord tone, or not
+        if note.pitch.accidental:     # note has accidental, meaning it's chromatic
+            score += 3
+        else:                           # note is diatonic
+            score += 2
+
+    else:                   # note belongs to a chord, so use the chord
+        chord = tempchord
+        root_note = chord.root()
+        root_pc = root_note.pitch.pitchClass
+
+        # Determine the scale degree of the chord's melodic note/voice
+        # Using highest pitch in chord as melodic note
+        ps = chord.sortAscending()
+        sd = scale.getScaleDegreeFromPitch(ps[:1])
+
+        # Determine the chord's inversion
+        inv = chord.inversion()
+        if inv is (3 or 5):
+            score += 2
+
+        # Determine if a pitch class in the chord is a diatonic or chromatic non-chord tone or neither
+        pc = chord.pitchClasses
+        ideal_chord = music21.chord.Chord([root_pc, root_pc+2, root_pc+4])
+        # Is any pitch class in the ideal
+        for x in pc:
+            isNonChord = True
+            for y in ideal_chord.pitchClasses:
+                if x is y:
+                    isNonChord = False
+            if isNonChord is True:
+                # Determine if non-chord pitch is diatonic or chromatic
+                index = pc.index(x)
+                pitch = chord.pitches[index]       # get pitch in chord from pitch class
+                if pitch.accidental:  # note has accidental, meaning it's chromatic
+                    score += 4
+                else:  # note is diatonic
+                    score += 3
+
+    if sd is (3 or 5):
+        score += 1
+
+    return score
+
+
+def FindChordFromVizNote(viz_note, prev_notes_played):
+    """
+    Sees if the note belongs to a chord by looking for other notes played that have
+    the same offset and are from the same track.
+
+    Returns a chord object containing the notes that are in the chord. Returns Nonte
+    if the note doesn't belong to a chord.
+    """
+    offset = viz_note.note.offset
+    track = viz_note.track
+    notes = []
+
+    for vn in prev_notes_played:
+        if (vn.track == track) and (vn.note.offset == offset):
+            notes.append(vn.note)
+
+    if not notes:
+        return None
+    else:
+        return music21.chord.Chord(notes)
 
 
 def GetMelodicAttraction(pitch1=None, pitch2=None):
-    pass
+    """
+    Attempted implementation of the melodic attraction rule from the Cornell paper.
+
+    F(p1, p2) = (s1 / s2) x (1 / n^2), where
+        - p1 /= p2
+        - s1 = anchoring strength of p1
+        - s2 = anchoring strength of p2
+        - n = number of semitone intervals between p1 and p2
+
+    The anchoring strength of a pitch is relative to its pitch class.
+
+    This function might be biased towards major scales (assume everything is in major)
+    """
+    if pitch1 == pitch2:
+        return None
+
+    tension_sequence = [4, 1, 2, 1, 3, 2, 1, 3, 1, 2, 1, 2, 4]         # For all major scales in I/C
+    p1 = tension_sequence[pitch1.pitchClass]
+    p2 = tension_sequence[pitch2.pitchClass]
+    n = abs(pitch1.midi - pitch2.midi)
+
+    return (p1 / p2) * (1 / n ^ 2)
 
 
 def GetHarmonicAttraction(pitch1=None, pitch2=None):
+    """
+    Attempted implemntation of the harmonic attraction rule from the Cornell paper.
+
+    F(p1, p2) = 10 x [a(p1, p2) / o(p1, p2)], where
+        - a = sum of realized voice-leading attractions for all voices in p1
+        - o = distance from p1 to p2
+    """
+    # Calculate sum of melodic attraction between all pitches between pitch1 and pitch2
+    sum = 0
+    for x in range(pitch1.midi, pitch2.midi, 1):
+        a = music21.pitch.Pitch(x)
+        b = music21.pitch.Pitch(x+1)
+        val = GetMelodicAttraction(a, b)
+        if val is not None:
+            sum += val
+
+    c = music21.note.Note(pitch1)
+    d = music21.note.Note(pitch2)
+    result = sum / GetNoteDistance(c, d)
+    return 10 * result
+
+
+def GetLocalHierarchicalTension(viz_note=None, prev_notes_played=None):
+    """
+    Calculates the local tension of the note hierrarchicaly using the hierarchical tension rule from the Cornell paper.
+
+    F(x) = d(x2, x) + s(x), where
+        - x = the target note
+        - d = the distance between x and x2
+        - x2 = the chord that directly dominates x in the prolongational tree
+        - s = tje surface tension associated with x
+    """
     pass
 
 
-def GetSequentialTension(note1=None, note2=None):
+def GetGlobalHierarchicalTension(viz_note=None, prev_notes_played=None):
+    """
+    Calculates the local tension of the note hierrarchicaly using the hierarchical tension rule from the Cornell paper.
+
+    F(x) = l(x) + u(x), where
+        - x = the target note
+        - l = the local tension associated with x
+        - u = the sum of distance values inherited by x from chords that dominate x2
+        - x2 = the chord that directly dominates x in the prolongational tree
+    """
+    pass
+
+
+def GetSequentialTension(target_viz_note=None, prev_notes_played=None):
+    """
+    Calculates the tension of a note sequentially using the sequential tension rule from the Cornell paper.
+
+    F(x) = d(x2, x) + s(x), where
+        - x = the target chord
+        - d = the distance between x and x2
+        - x2 = the chord that immediately precedes y in the sequence
+        - s = the surface tension associated with x
+
+    First, we need to determine if the target is a note or belongs to a chord since the Cornell paper mainly deals
+    with chords and our program iterates through a flat list of all the notes in the track, striped from their chord.
+    If the target note doesn't belong to a chord at all, then we need to improvise so a note's pitch can be used.
+    """
+    temp = FindChordFromVizNote(target_viz_note, prev_notes_played)
+    if temp is None:        # standalone note
+        prec_note = prev_notes_played[:1]
+        return GetNoteDistance(prec_note, target_viz_note) + GetSurfaceTension(target_viz_note, prev_notes_played)
+    else:                   # chord
+        # get preceding note or chord
+        i = 0
+        temp2 = FindChordFromVizNote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
+        while (temp == temp2) and (temp2 is not None):
+            temp2 = FindChordFromVizNote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
+        if temp2 is None:       # what precedes the target is a note!
+            prec_note = prev_notes_played[len(prev_notes_played) - i]
+            pc = prec_note.pitchClass
+            ideal_chord = music21.chord.Chord([pc, pc + 2, pc + 4])
+            return GetChordDistance(temp, ideal_chord) + GetSurfaceTension(target_viz_note, prev_notes_played)
+        else:                   # what precedes the target is another chord!
+            return GetChordDistance(temp, temp2) + GetSurfaceTension(target_viz_note, prev_notes_played)
+
+
+def CreateChordFromNote(root_note=None):
+    """
+    Creates and returns a normal chord with the given note as its root.
+    """
     pass
 
 

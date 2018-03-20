@@ -52,25 +52,6 @@ class BasePreset:
         """
         pass
 
-    def FindChordFromNote(self, viz_note):
-        """
-        Sees if the note belongs to a chord by looking for other notes played that have
-        the same offset and are from the same track.
-
-        Returns a chord object containing the notes that are in the chord. Returns Nonte
-        if the note doesn't belong to a chord.
-        """
-        offset = viz_note.note.offset
-        track = viz_note.track
-        notes = []
-
-        for vn in self.notes_played:
-            if (vn.track == track) and (vn.note.offset == offset):
-                notes.append(vn.note)
-
-        if not notes: return None
-        else: return music21.chord.Chord(notes)
-
 
 class PresetTest(BasePreset):
     """
@@ -277,7 +258,6 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
     Each note is drawn onto the screen in a piano roll fashion.
     Notes with greater pitch go higher on the screen, lower notes go lower.
     """
-
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
@@ -314,11 +294,12 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
 
 
 class PresetMultiTrackColorCircle(BasePreset):
+    """
 
+    """
     def __init__(self, viz_manager, name="", desc="A description goes here."):
         super().__init__(viz_manager, name, desc)
         self.num_tracks = 0
-
 
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
@@ -383,60 +364,39 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
         self.viz_manager.remove_unit(viz_note.note)
 
 
-class PresetChordRoot(BasePreset):
-    """
-    This preset aims to detect chords being played and displays the root note of each chord.
-    It also draws a piano roll visualization of the notes, just like normal piano roll.
+class PresetTensionCornell(BasePreset):
     """
 
+    """
     def OnFirstLoad(self, score):
+        self.key = score.key
+        self.num_tracks = 0
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-        notes = [music21.note.Note('A'), music21.note.Note('D'), music21.note.Note('F'), music21.note.Note('G')]
-        print(notes)
-        chord = util.GetChord(notes)
-        print(chord)
-        print("chord name: " + str(chord.commonName))
-        print("third: " + str(chord.third))
-        print("fifth: " + str(chord.fifth))
-        print("full name: " + str(chord.fullName))
-        print("pitched common name: " + str(chord.pitchedCommonName))
-        print("quality: " + str(chord.quality))
-        print("root: " + str(chord.root))
+    def PerNoteOn(self, screen, viz_note):
+        self.notes_played.append(viz_note)
+        tension = util.GetSequentialTension(viz_note, self.notes_played)
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.SimpleNoteToColorTuple(note)
+        r = 15
+        circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
 
+        interval = screen_x // self.num_tracks
 
-        for note in score.flat.notes:
-            if isinstance(note, music21.note.Note):
-                if note.pitch.midi > self.highest_pitch:
-                    self.highest_pitch = note.pitch.midi
-                if note.pitch.midi < self.lowest_pitch:
-                    self.lowest_pitch = note.pitch.midi
-            if isinstance(note, music21.chord.Chord):
-                chord_notes = note._notes
-                for chord_note in chord_notes:
-                    if isinstance(chord_note, music21.note.Note):
-                        if chord_note.pitch.midi > self.highest_pitch:
-                            self.highest_pitch = chord_note.pitch.midi
-                        if chord_note.pitch.midi < self.lowest_pitch:
-                            self.lowest_pitch = chord_note.pitch.midi
+        # Add white line down center of the screen
+        for i in range(0, screen_x, interval):
+            line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
+            self.viz_manager.units.append(line)
 
-    def PerNoteOn(self, screen, message):
-        self.notes_played.append(message)
-        recent_notes = util.GetRecentNotes(self.notes_played)
-        chord = util.GetChord(recent_notes)
-        chord_name = chord.pitchedCommonName
-        dbg = self.viz_manager.main_frame.debugger.textbox
-        s1 = str(chord_name)
-        s2 = ""
-        if isinstance(self.latest_chord, music21.chord.Chord):
-            s2 = str(self.latest_chord.pitchedCommonName)
-        if s1 != s2:
-            self.latest_chord = chord
-            print("new chord: " + str(chord_name))
-            util.PrintLineToPanel(dbg, "new chord: " + str(chord_name) + "\n")
-        else:
-            util.PrintLineToPanel(dbg, "------")
-
-        pass
+        x = interval * (viz_note.track - 1)
+        # print("Printing note {0} in track {1} in interval {2}".format(note, viz_note.track, x))
+        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
+        # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
+        # circle_note.x += (self.num_tracks - 1) * interval
+        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        self.viz_manager.units.append(circle_note)
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)

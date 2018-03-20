@@ -71,6 +71,10 @@ class VizManager:
         # Init and load all presets
         self.LoadPresets()
 
+        self.instruments = []   #[((0) for i in range(16))]
+        for i in range(16):
+            self.instruments.append(0)
+
     def LoadPresets(self):
         """
         Create and loads all presets.
@@ -100,8 +104,8 @@ class VizManager:
                "side is track 1, right side for track 2. The notes are drawn similarly to the Color Piano Roll preset."
         preset_two_track_piano = pr.PresetTwoTrackColorPianoRoll(self, "Two-track Piano Roll", text)
 
-        text = "Piano roll with chord roots emphasized."
-        preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
+        # text = "Piano roll with chord roots emphasized."
+        # preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
 
         text = "Similar to Piano-Roll preset, but in black-white monochrome."
         preset_piano_roll_monochrome = pr.PresetMonochromePianoRoll(self, "Piano-Roll Monochrome", text)
@@ -116,6 +120,9 @@ class VizManager:
         text = ""
         preset_multitrack_color_piano_roll = pr.PresetMultiTrackColorPianoRoll(self, "Multitrack Colored Piano Roll", text)
 
+        text = "Uses the theories from the Cornell paper to depict tonal tension."
+        preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
+
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
@@ -125,20 +132,17 @@ class VizManager:
         self.presets.update({preset_circle_max_pitch.name: preset_circle_max_pitch})
         self.presets.update({preset_piano_roll_color.name: preset_piano_roll_color})
         # self.presets.update({preset_grid_text.name: preset_grid_text})
-        self.presets.update({preset_chord_root.name: preset_chord_root})
+        # self.presets.update({preset_chord_root.name: preset_chord_root})
         self.presets.update({preset_piano_roll_monochrome.name: preset_piano_roll_monochrome})
         self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
         self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
-
+        self.presets.update({preset_tension_circle_color.name: preset_tension_circle_color})
 
     def SetPreset(self, key):
         """
         Load preset with given key.
         """
         self.preset = self.presets[key]
-        # info = pygame.midi.get_device_info(0)
-        # print(info)
-        # self.player.NoteOn(39, 100, 9)
 
     def LoadSongFromPath(self, path):
         """
@@ -164,7 +168,7 @@ class VizManager:
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
 
-    def LoadPreset(self):
+    def PlayPreset(self):
         """
         Starts playing the visualization from the beginning.
         """
@@ -173,7 +177,7 @@ class VizManager:
         bsy = None
         dbg = self.main_frame.debugger.textbox
 
-        part = self.parser.score.parts[0]   # Gets first track/part of song
+        # part = self.parser.score.parts[0]   # Gets first track/part of song
 
         self.should_play = False
         self.next_notes = []
@@ -203,7 +207,15 @@ class VizManager:
                 self.last_offset = n.note.offset
 
         self.preset_loaded = True
+        print("Preset Loaded")
         util.PrintLineToPanel(dbg, "\nPreset Loaded\n\n")
+
+    def LoadInstruments(self):
+        """
+        Reads instruments from score and sets them to their designated channel.
+        """
+        s = self.parser.score
+
 
     def Pause(self):
         """
@@ -320,7 +332,7 @@ class VizManager:
 
     def print_song(self):
 
-        inst = self.player.instrument
+        inst = self.player.instruments
 
         # self.player.SetInstrument(1, 10)
         # self.player.SetInstrument(2, 11)
