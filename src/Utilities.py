@@ -526,7 +526,8 @@ def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
         # Determine the scale degree of the chord's melodic note/voice
         # Using highest pitch in chord as melodic note
         chord = chord.sortAscending()
-        sd = scale.getScaleDegreeFromPitch(chord.pitches[-1])
+        if scale._abstract is not None:
+            sd = scale.getScaleDegreeFromPitch(chord.pitches[-1])
 
         # Determine the chord's inversion
         inv = chord.inversion()
