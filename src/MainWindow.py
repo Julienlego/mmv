@@ -36,7 +36,6 @@ class PygameDisplay(wx.Window):
         self.timespacing = 1000.0 / self.fps
         self.timer.Start(self.timespacing, False)
 
-
     def Update(self, event):
         # Any update tasks would go here (moving sprites, advancing animation frames etc.)
         self.Redraw()
@@ -111,7 +110,6 @@ class DebugFrame(wx.Frame):
         self.parent.viewmenu.Check(self.parent.toggledebug.GetId(), False)
         self.Close()
         self.Destroy()
-
 
 
 class PresetDialog(wx.Dialog):

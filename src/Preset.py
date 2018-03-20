@@ -23,6 +23,7 @@ class BasePreset:
         self.highest_pitch = 0
         self.notes_played = []
         self.latest_chord = None
+        self.key = None
 
     def OnFirstLoad(self, score):
         """
@@ -297,7 +298,7 @@ class PresetMultiTrackColorCircle(BasePreset):
     """
 
     """
-    def __init__(self, viz_manager, name="", desc="A description goes here."):
+    def __init__(self, viz_manager, name, desc):
         super().__init__(viz_manager, name, desc)
         self.num_tracks = 0
 
@@ -334,7 +335,7 @@ class PresetMultiTrackColorCircle(BasePreset):
 
 class PresetMultiTrackColorPianoRoll(BasePreset):
 
-    def __init__(self, viz_manager, name="", desc="A description goes here."):
+    def __init__(self, viz_manager, name, desc):
         super().__init__(viz_manager, name, desc)
         self.num_tracks = 0
 
@@ -368,14 +369,19 @@ class PresetTensionCornell(BasePreset):
     """
 
     """
-    def OnFirstLoad(self, score):
-        self.key = score.key
+    def __init__(self, viz_manager, name, desc):
+        super().__init__(viz_manager, name, desc)
         self.num_tracks = 0
+
+    def OnFirstLoad(self, score):
+        self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
+        self.num_tracks = len(score.parts)
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
     def PerNoteOn(self, screen, viz_note):
         self.notes_played.append(viz_note)
-        tension = util.GetSequentialTension(viz_note, self.notes_played)
+        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
+        print(tension)
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -391,7 +397,6 @@ class PresetTensionCornell(BasePreset):
             self.viz_manager.units.append(line)
 
         x = interval * (viz_note.track - 1)
-        # print("Printing note {0} in track {1} in interval {2}".format(note, viz_note.track, x))
         circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
         # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
         # circle_note.x += (self.num_tracks - 1) * interval

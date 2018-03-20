@@ -492,17 +492,18 @@ def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
         - scale degree = 1 if scale degree is 3 or 5 in the melodic voice, 0 otherwise
         - inversion = 2 if 3rd of 5th inversion, 0 otherwise
         - non-harmonic tone = 3 if pitch class is a diatonic non-chord tone, 4 if it is a chromatic non-chord tone,
-          0 therwise
+          0 otherwise
 
     Parts of the rule are improvised due to lack of musical and technical expertise.
     """
     # First, figure out if we're dealing with a chord
-    tempchord = FindChordFromVizNote(viz_note, prev_notes_played)
+    chord = FindChordFromVizNote(viz_note, prev_notes_played)
     scale = music21.scale.ConcreteScale(scorekey)   # scale the song is in
 
     score = 0
+    sd = 0
 
-    if tempchord is None:      # It's a single note that doesn't belong to any chord in the track
+    if chord is None:      # It's a single note that doesn't belong to any chord in the track
         note = viz_note.note
         # pc = note.pitch.pitchClass
 
@@ -518,15 +519,14 @@ def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
         else:                           # note is diatonic
             score += 2
 
-    else:                   # note belongs to a chord, so use the chord
-        chord = tempchord
-        root_note = chord.root()
-        root_pc = root_note.pitch.pitchClass
+    elif chord.pitches is not None:                   # note belongs to a chord, so use the chord
+        root_pitch = chord.root()
+        root_pc = root_pitch.pitchClass
 
         # Determine the scale degree of the chord's melodic note/voice
         # Using highest pitch in chord as melodic note
-        ps = chord.sortAscending()
-        sd = scale.getScaleDegreeFromPitch(ps[:1])
+        chord = chord.sortAscending()
+        sd = scale.getScaleDegreeFromPitch(chord.pitches[-1])
 
         # Determine the chord's inversion
         inv = chord.inversion()
@@ -653,7 +653,7 @@ def GetGlobalHierarchicalTension(viz_note=None, prev_notes_played=None):
     pass
 
 
-def GetSequentialTension(target_viz_note=None, prev_notes_played=None):
+def GetSequentialTension(target_viz_note=None, prev_notes_played=None, key=None):
     """
     Calculates the tension of a note sequentially using the sequential tension rule from the Cornell paper.
 
@@ -673,7 +673,7 @@ def GetSequentialTension(target_viz_note=None, prev_notes_played=None):
         return GetNoteDistance(prec_note, target_viz_note) + GetSurfaceTension(target_viz_note, prev_notes_played)
     else:                   # chord
         # get preceding note or chord
-        i = 0
+        i = 1
         temp2 = FindChordFromVizNote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
         while (temp == temp2) and (temp2 is not None):
             temp2 = FindChordFromVizNote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
@@ -681,9 +681,9 @@ def GetSequentialTension(target_viz_note=None, prev_notes_played=None):
             prec_note = prev_notes_played[len(prev_notes_played) - i]
             pc = prec_note.pitchClass
             ideal_chord = music21.chord.Chord([pc, pc + 2, pc + 4])
-            return GetChordDistance(temp, ideal_chord) + GetSurfaceTension(target_viz_note, prev_notes_played)
+            return GetChordDistance(temp, ideal_chord) + GetSurfaceTension(target_viz_note, prev_notes_played, key)
         else:                   # what precedes the target is another chord!
-            return GetChordDistance(temp, temp2) + GetSurfaceTension(target_viz_note, prev_notes_played)
+            return GetChordDistance(temp, temp2) + GetSurfaceTension(target_viz_note, prev_notes_played, key)
 
 
 def CreateChordFromNote(root_note=None):

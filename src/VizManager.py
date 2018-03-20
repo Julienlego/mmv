@@ -334,13 +334,6 @@ class VizManager:
 
         inst = self.player.instruments
 
-        # self.player.SetInstrument(1, 10)
-        # self.player.SetInstrument(2, 11)
-        # self.player.SetInstrument(3, 9)
-        # self.player.NoteOn(36, 120, 10)
-        # self.player.NoteOn(46, 120, 9)
-        # self.player.NoteOn(56, 120, 11)
-
         dbg = self.main_frame.debugger.textbox
         if self.notes:
 
@@ -351,4 +344,3 @@ class VizManager:
             util.PrintLineToPanel(dbg, "\n\n===============================")
         else:
             util.PrintLineToPanel(dbg, "\nNo song loaded!\n")
-
