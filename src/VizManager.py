@@ -123,6 +123,9 @@ class VizManager:
         text = "Uses the theories from the Cornell paper to depict tonal tension."
         preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
 
+        text = ""
+        preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
+
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
@@ -137,6 +140,7 @@ class VizManager:
         self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
         self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
         self.presets.update({preset_tension_circle_color.name: preset_tension_circle_color})
+        self.presets.update({preset_chord_root.name: preset_chord_root})
 
     def SetPreset(self, key):
         """

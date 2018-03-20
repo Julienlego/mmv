@@ -405,3 +405,59 @@ class PresetTensionCornell(BasePreset):
 
     def PerNoteOff(self, screen, message):
         self.viz_manager.remove_unit(message.note)
+
+
+class PresetChordRoot(BasePreset):
+    """
+    This preset aims to detect chords being played and displays the root note of each chord.
+    It also draws a piano roll visualization of the notes, just like normal piano roll.
+    """
+
+    def OnFirstLoad(self, score):
+
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+
+
+
+
+    def PerNoteOn(self, screen, message):
+        self.notes_played.append(message)
+        recent_notes = util.GetRecentNotes(self.notes_played)
+        chord = util.GetChord(recent_notes)
+        chord_name = chord.pitchedCommonName
+        # dbg = self.viz_manager.main_frame.debugger.textbox
+        s1 = str(chord_name)
+        s2 = ""
+        if isinstance(self.latest_chord, music21.chord.Chord):
+            s2 = str(self.latest_chord.pitchedCommonName)
+        if s1 != s2:
+            print("new chord: " + str(chord_name))
+            # util.PrintLineToPanel(dbg, "new chord: " + str(chord_name) + "\n")
+
+            screen_x = self.viz_manager.main_frame.display.size.x
+            screen_y = self.viz_manager.main_frame.display.size.y
+
+            if self.latest_chord is None:
+                self.latest_chord = chord
+
+            root = self.latest_chord.root()
+            note = music21.note.Note(root)
+            self.viz_manager.remove_unit(note)
+
+            self.latest_chord = chord
+            root = self.latest_chord.root()
+            note = music21.note.Note(root)
+
+            color = util.SimpleNoteToColorTuple(note)
+            rect_note = unit.RectNoteUnit(300, 0, color, note, 200, 60)
+            rect_note.h = 60
+            rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (0, 0), (screen_x, screen_y))
+            rect_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+
+            self.viz_manager.units.append(rect_note)
+        else:
+            pass
+            # util.PrintLineToPanel(dbg, "------")
+
+    def PerNoteOff(self, screen, message):
+        pass
