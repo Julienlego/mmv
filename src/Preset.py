@@ -381,7 +381,7 @@ class PresetTensionCornell(BasePreset):
     def PerNoteOn(self, screen, viz_note):
         self.notes_played.append(viz_note)
         tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
-        print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
+        # print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
         screen.fill((tension, tension, tension))
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x

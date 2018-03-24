@@ -10,6 +10,7 @@ import random
 #                                                           #
 #############################################################
 
+
 def PrintSongToPanel(dbg, score):
     notes = [i for i in score.flat.notesAndRests]
     # Iterates through all notes, rests, and chords
@@ -309,7 +310,6 @@ def GetVizNotesAndTracks(score):
         # print(element)
         track_num += 1
         new_track = []
-        instruments = element.getInstruments()
         for note in element.flat.notes:
             if isinstance(note, music21.note.Note):
                 # print(note)
@@ -695,23 +695,23 @@ def CreateChordFromNote(root_note=None):
 
 
 instruments = {
-    "Acoustic Grand Piano": 1,
+    "Piano": 1,
     "Bright Acoustic Piano": 2,
     "Electric Grand Piano": 3,
     "Honky-tonk Piano": 4,
     "Electric Piano 1": 5,
     "Electric Piano 2": 6,
     "Harpsichord": 7,
-    "Clavi": 8,
+    "Clavichord": 8,
     "Celesta": 9,
     "Glockenspiel": 10,
     "Music Box": 11,
     "Vibraphone": 12,
     "Marimba": 13,
     "Xylophone": 14,
-    "Tubular Bells": 15,
+    "Church Bells": 15,
     "Dulcimer": 16,
-    "Drawbar Organ": 17,
+    "Electric Organ": 17,
     "Percussive Organ": 18,
     "Rock Organ": 19,
     "Church Organ": 20,
@@ -719,16 +719,16 @@ instruments = {
     "Accordion": 22,
     "Harmonica": 23,
     "Tango Accordion": 24,
-    "Acoustic Guitar (nylon)": 25,
+    "Guitar": 25,
     "Acoustic Guitar (steel)": 26,
-    "Electric Guitar (jazz)": 27,
+    "Electric Guitar": 27,
     "Electric Guitar (clean)": 28,
     "Electric Guitar (muted)": 29,
     "Overdriven Guitar": 30,
     "Distortion Guitar": 31,
     "Guitar harmonics": 32,
     "Acoustic Bass": 33,
-    "Electric Bass (finger)": 34,
+    "Electric Bass": 34,
     "Electric Bass (pick)": 35,
     "Fretless Bass": 36,
     "Slap Bass 1": 37,
@@ -741,13 +741,13 @@ instruments = {
     "Contrabass": 44,
     "Tremolo Strings": 45,
     "Pizzicato Strings": 46,
-    "Orchestral Harp": 47,
+    "Harp": 47,
     "Timpani": 48,
-    "String Ensemble 1": 49,
+    "StringInstrument": 49,
     "String Ensemble 2": 50,
     "SynthStrings 1": 51,
     "SynthStrings 2": 52,
-    "Choir Aahs": 53,
+    "Voice": 53,
     "Voice Oohs": 54,
     "Synth Voice": 55,
     "Orchestra Hit": 56,
@@ -755,14 +755,14 @@ instruments = {
     "Trombone": 58,
     "Tuba": 59,
     "Muted Trumpet": 60,
-    "French Horn": 61,
-    "Brass Section": 62,
+    "Horn": 61,
+    "Brass": 62,
     "SynthBrass 1": 63,
     "SynthBrass 2": 64,
-    "Soprano Sax": 65,
-    "Alto Sax": 66,
-    "Tenor Sax": 67,
-    "Baritone Sax": 68,
+    "Soprano Saxophone": 65,
+    "Saxophone": 66,
+    "Tenor Saxophone": 67,
+    "Baritone Saxophone": 68,
     "Oboe": 69,
     "English Horn": 70,
     "Bassoon": 71,
@@ -804,14 +804,14 @@ instruments = {
     "Shamisen": 107,
     "Koto": 108,
     "Kalimba": 109,
-    "Bag pipe": 110,
+    "Bagpipes": 110,
     "Fiddle": 111,
-    "Shanai": 112,
+    "Shehnai": 112,
     "Tinkle Bell": 113,
     "Agogo": 114,
-    "Steel Drums": 115,
+    "Steel Drum": 115,
     "Woodblock": 116,
-    "Taiko Drum": 117,
+    "Taiko": 117,
     "Melodic Tom": 118,
     "Synth Drum": 119,
     "Reverse Cymbal": 120,

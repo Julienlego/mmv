@@ -56,6 +56,7 @@ class VizManager:
 
         # a dictionary mapping each track to its proper instrument
         self.track_instrument_map = {}
+        self.instrument_map = [0 for x in range(16)]
 
         # the list of the currently playing notes
         # it is a list of tuples. first value is note, second is the tick it was played on
@@ -70,10 +71,6 @@ class VizManager:
 
         # Init and load all presets
         self.LoadPresets()
-
-        self.instruments = []   #[((0) for i in range(16))]
-        for i in range(16):
-            self.instruments.append(0)
 
     def LoadPresets(self):
         """
@@ -104,8 +101,8 @@ class VizManager:
                "side is track 1, right side for track 2. The notes are drawn similarly to the Color Piano Roll preset."
         preset_two_track_piano = pr.PresetTwoTrackColorPianoRoll(self, "Two-track Piano Roll", text)
 
-        # text = "Piano roll with chord roots emphasized."
-        # preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
+        text = "Piano roll with chord roots emphasized."
+        preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
 
         text = "Similar to Piano-Roll preset, but in black-white monochrome."
         preset_piano_roll_monochrome = pr.PresetMonochromePianoRoll(self, "Piano-Roll Monochrome", text)
@@ -123,9 +120,6 @@ class VizManager:
         text = "Uses the theories from the Cornell paper to depict tonal tension."
         preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
 
-        text = ""
-        preset_chord_root = pr.PresetChordRoot(self, "Chord Root", text)
-
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
@@ -134,13 +128,11 @@ class VizManager:
         self.presets.update({preset_simple_circle.name: preset_simple_circle})
         self.presets.update({preset_circle_max_pitch.name: preset_circle_max_pitch})
         self.presets.update({preset_piano_roll_color.name: preset_piano_roll_color})
-        # self.presets.update({preset_grid_text.name: preset_grid_text})
-        # self.presets.update({preset_chord_root.name: preset_chord_root})
+        self.presets.update({preset_chord_root.name: preset_chord_root})
         self.presets.update({preset_piano_roll_monochrome.name: preset_piano_roll_monochrome})
         self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
         self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
         self.presets.update({preset_tension_circle_color.name: preset_tension_circle_color})
-        self.presets.update({preset_chord_root.name: preset_chord_root})
 
     def SetPreset(self, key):
         """
@@ -161,13 +153,22 @@ class VizManager:
         self.should_play = False
         self.preset_loaded = False
 
+        # parse file
         self.parser.ParseFile(path)
         self.units.clear()
         self.tempo = self.parser.GetTempo()
         self.notes, self.tracks = util.GetVizNotesAndTracks(self.parser.score)
 
-        for track in self.tracks:
-            self.track_instrument_map[self.tracks.index(track)] = 0
+        # set track instruments
+        for part in self.parser.score.parts:
+            instr = part.getInstrument(returnDefault=False)     # extract instrument obj from part
+            i = 0       # default instrument
+            if instr.instrumentName in util.instruments:
+                i = util.instruments[instr.instrumentName]      # get midi val of instrument
+            j = list(self.parser.score.parts).index(part)       # track index
+            # print("Track {0} has midi instrument {1}".format(j, i))
+            self.track_instrument_map[j] = i
+            self.instrument_map[j] = i
 
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
@@ -218,8 +219,10 @@ class VizManager:
         """
         Reads instruments from score and sets them to their designated channel.
         """
-        s = self.parser.score
-
+        score = self.parser.score
+        for part in score.parts:
+            instr = part.getInstrument(returnDefault=False)     # instrument object of the part
+            midi_instr = util.instruments[instr.instrumentName]
 
     def Pause(self):
         """
@@ -309,16 +312,19 @@ class VizManager:
                             pass
                         length_ms = util.OffsetMS(length, self.tempo) + util.OffsetMS(qlq_error, self.tempo)
                         n.append(ticks + length_ms)
-                        instrument = self.track_instrument_map[n[0].track - 1]
-                        if instrument < 128:
+                        track = n[0].track
+                        # instrument = self.track_instrument_map[track - 1]
+                        instrument = self.instrument_map[track - 1]
+                        if instrument < 130:
                             if instrument > 0:
                                 self.player.SetInstrument(instrument - 1)
                             else:
                                 self.player.SetInstrument(instrument)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
-                        else:
+                        else:       # if instrument is not 1-129
                             self.player.SetInstrument(20, 10)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity, channel=10)
+
                         self.preset.PerNoteOn(self.screen, n[0])
 
     def remove_unit(self, note):
