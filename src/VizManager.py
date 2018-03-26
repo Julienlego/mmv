@@ -111,13 +111,16 @@ class VizManager:
                "possible midi pitches."
         preset_circle_max_pitch = pr.PresetSimpleColorCircleMaxPitch(self, "Color Piano Roll 2", text)
 
-        text = ""
-        preset_multitrack_circle_piano = pr.PresetMultiTrackColorCircle(self, "Multitrack Colored Circles", text)
+        text = "For each track, draw its current note as a colored circle in its own column region on the screen," \
+               "where the leftmost column represents the 1st track, the next column to the right is the 2nd track," \
+               "and so on."
+        preset_multitrack_circle_piano = pr.PresetMultiTrackColorCircle(self, "Multi-track Colored Circles", text)
 
-        text = ""
-        preset_multitrack_color_piano_roll = pr.PresetMultiTrackColorPianoRoll(self, "Multitrack Colored Piano Roll", text)
+        text = "Similar to Two-track Piano Roll, except each track has its own column, starting with the leftmost" \
+               "column representing the 1st track."
+        preset_multitrack_color_piano_roll = pr.PresetMultiTrackColorPianoRoll(self, "Multi-track Colored Piano Roll", text)
 
-        text = "Uses the theories from the Cornell paper to depict tonal tension."
+        text = "Similar to Uses the theories from the Cornell paper to depict tonal tension."
         preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
 
         # Add the preset to the dictionary!
