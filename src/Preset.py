@@ -352,7 +352,7 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
 
         h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
         rect_note = unit.RectNoteUnit(0, 0, color, note, track_width, h)
-        rect_note.id = id(viz_note)
+        rect_note.id = id(viz_note)     # this is an important line!
 
         region_x = track_width * (viz_note.track - 1)
         y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
@@ -385,6 +385,7 @@ class PresetMultiTrackChords(BasePreset):
 
         h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
         rect_note = unit.RectNoteUnit(0, 0, color, note, track_width, h)
+        rect_note.id = id(viz_note)
 
         region_x = track_width * (viz_note.track - 1)
         y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
@@ -412,19 +413,17 @@ class PresetMultiTrackChords(BasePreset):
 
             root = self.latest_chord.root()
             note = music21.note.Note(root)
-            self.viz_manager.remove_unit(note)
+            self.viz_manager.remove_unit(note, id(note))
 
             self.latest_chord = chord
             root = self.latest_chord.root()
             note = music21.note.Note(root)
 
             color = util.SimpleNoteToColorTuple(note)
-            rect_note = unit.RectNoteUnit(300, 0, color, note, 200, 60)
-            rect_note.h = 60
-            rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (0, 0), (screen_x, screen_y))
-            rect_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+            rect_chord = unit.ChordUnit(0, 0, color, note, screen_x, screen_y, 20)
+            rect_chord.id = id(note)
 
-            self.viz_manager.units.append(rect_note)
+            self.viz_manager.units.append(rect_chord)
 
     def PerNoteOff(self, screen, viz_note):
         self.viz_manager.remove_unit(viz_note.note, id(viz_note))

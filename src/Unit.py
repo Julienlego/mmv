@@ -133,10 +133,10 @@ class ChordUnit(NoteUnit):
     """
     This object represents a single chord as two thin vertical rectangles on the screen.
     """
-    def __init__(self, x, y, color, note, width=0, height=0, full_width=0):
+    def __init__(self, x, y, color, note, width=0, height=0, sub_width=0):
         super().__init__(x, y, color, note)
         self.w = width
-        self.fw = full_width
+        self.sw = sub_width
         self.h = height
         self.fade = False
         self.fade_speed = 5
@@ -160,5 +160,5 @@ class ChordUnit(NoteUnit):
 
     def Draw(self, screen):
         # print("Note color: {0}".format(self.color))
-        pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
-        pygame.draw.rect(screen, self.color, pygame.Rect((self.x + self.fw) - self.w, self.y, self.w, self.h))
+        pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.sw, self.h))
+        pygame.draw.rect(screen, self.color, pygame.Rect((self.x + self.w) - self.sw, self.y, self.sw, self.h))
