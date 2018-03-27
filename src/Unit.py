@@ -17,6 +17,7 @@ class BaseUnit:
         self.y = y
         self.color = color
         self.should_delete = False
+        self.id = None
 
     def Move(self, x, y):
         """
@@ -126,3 +127,38 @@ class RectNoteUnit(NoteUnit):
     def Draw(self, screen):
         # print("Note color: {0}".format(self.color))
         pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
+
+
+class ChordUnit(NoteUnit):
+    """
+    This object represents a single chord as two thin vertical rectangles on the screen.
+    """
+    def __init__(self, x, y, color, note, width=0, height=0, full_width=0):
+        super().__init__(x, y, color, note)
+        self.w = width
+        self.fw = full_width
+        self.h = height
+        self.fade = False
+        self.fade_speed = 5
+        self.delete_after_fade = False
+
+    def Update(self):
+        if self.fade:
+            self.color[0] -= int(self.fade_speed)
+            self.color[1] -= int(self.fade_speed)
+            self.color[2] -= int(self.fade_speed)
+            if self.color[0] < 0:
+                self.color[0] = 0
+            if self.color[1] < 0:
+                self.color[1] = 0
+            if self.color[2] < 0:
+                self.color[2] = 0
+
+        if self.delete_after_fade:
+            if self.color[0] + self.color[1] + self.color[2] == 0:
+                self.should_delete = True
+
+    def Draw(self, screen):
+        # print("Note color: {0}".format(self.color))
+        pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
+        pygame.draw.rect(screen, self.color, pygame.Rect((self.x + self.fw) - self.w, self.y, self.w, self.h))

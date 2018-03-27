@@ -66,6 +66,9 @@ class VizManager:
         # it is a list of tuples. first value is note, second is the tick it should play on
         self.next_notes = []
 
+        # the next id to be used by a unit
+        self.next_id = 0
+
         # the offset of the last note in the song
         self.last_offset = 0.
 
@@ -123,6 +126,9 @@ class VizManager:
         text = "Similar to Uses the theories from the Cornell paper to depict tonal tension."
         preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
 
+        text = "An extension of the Multi-Track Color Piano Roll, that adds visualization of chords being played"
+        preset_multitrack_chords = pr.PresetMultiTrackChords(self, "Multi=track Chords", text)
+
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
@@ -136,6 +142,7 @@ class VizManager:
         self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
         self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
         self.presets.update({preset_tension_circle_color.name: preset_tension_circle_color})
+        self.presets.update({preset_multitrack_chords.name: preset_multitrack_chords})
 
     def SetPreset(self, key):
         """
@@ -330,7 +337,7 @@ class VizManager:
 
                         self.preset.PerNoteOn(self.screen, n[0])
 
-    def remove_unit(self, note):
+    def remove_unit(self, note, id=None):
         """
         Removes whichever units in the units list that are associated with that note.
         :param note: the note with which to match to a unit
@@ -339,7 +346,10 @@ class VizManager:
         for unit in self.units:
             # Check if unit is subclass of noteunit
             if issubclass(type(unit), Unit.NoteUnit):
-                if unit.note == note:
+                if id is not None:
+                    if unit.id == id:
+                        self.units.remove(unit)
+                elif unit.note == note:
                     self.units.remove(unit)
                     # print("unit removed. list size: " + str(len(self.units)))
 
@@ -357,3 +367,8 @@ class VizManager:
             util.PrintLineToPanel(dbg, "\n\n===============================")
         else:
             util.PrintLineToPanel(dbg, "\nNo song loaded!\n")
+
+    def get_next_id(self):
+        id = self.next_id
+        self.next_id += 1
+        return id
