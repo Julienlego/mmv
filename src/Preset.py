@@ -513,9 +513,51 @@ class PresetChordRoot(BasePreset):
             rect_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
 
             self.viz_manager.units.append(rect_note)
+
         else:
             pass
             # util.PrintLineToPanel(dbg, "------")
 
     def PerNoteOff(self, screen, message):
         pass
+
+
+class PresetJulien(BasePreset):
+    """
+
+    """
+    def __init__(self, viz_manager, name, desc):
+        super().__init__(viz_manager, name, desc)
+        self.num_tracks = 0
+
+    def OnFirstLoad(self, score):
+        self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
+        self.num_tracks = len(score.parts)
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+
+    def PerNoteOn(self, screen, viz_note):
+        self.notes_played.append(viz_note)
+        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
+        # print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
+        screen.fill((tension, tension, tension))
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.SimpleNoteToColorTuple(note)
+        r = 15
+        circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
+
+        interval = screen_x // self.num_tracks
+
+        # Add white line down center of the screen
+        for i in range(0, screen_x, interval):
+            line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
+            self.viz_manager.units.append(line)
+
+        x = interval * (viz_note.track - 1)
+        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
+        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        self.viz_manager.units.append(circle_note)
+
+    def PerNoteOff(self, screen, message):
+        self.viz_manager.remove_unit(message.note)

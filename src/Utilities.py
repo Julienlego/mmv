@@ -32,7 +32,7 @@ def PrintLineToPanel(txt_panel, line):
     Write line to TextCtrl (debug) panel
     """
     if isinstance(txt_panel, wx.TextCtrl):
-        txt_panel.AppendText(line)
+        txt_panel.WriteText(line)
 
 
 def PrintNoteToPanel(panel, n):
@@ -44,7 +44,7 @@ def PrintNoteToPanel(panel, n):
                + str(n.pitch.octave) + "\t" \
                + str(n.duration.quarterLength) + "\t" \
                + str(n.offset) + "\n"
-        panel.AppendText(line)
+        PrintLineToPanel(panel, line)
 
 
 def PrintRestToPanel(panel, r):
@@ -56,7 +56,7 @@ def PrintRestToPanel(panel, r):
             line = "Rest" + "\t" \
                    + str(r.duration.quarterLength) + "\t" \
                    + str(r.offset) + "\n"
-            panel.AppendText(line)
+            PrintLineToPanel(panel, line)
 
 
 def PrintChordToPanel(panel, n):
@@ -77,7 +77,7 @@ def PrintChordToPanel(panel, n):
                             + str(new_note.duration.quarterLength) + "\t" \
                             + str(new_note.offset) + "\n"
             line += "===============================\n"
-            panel.AppendText(line)
+            PrintLineToPanel(panel, line)
 
 
 #############################################################
@@ -298,7 +298,7 @@ def GetEdgePitches(score):
     return lowest, highest
 
 
-def GetVizNotesAndTracks(score):
+def GetVizNotes(score):
     current_offset = 0.0
     last_offset = 0.0
     track_num = 0
@@ -340,7 +340,7 @@ def GetVizNotesAndTracks(score):
     # print(len(flat))
     flat.sort(key=lambda x: x.note.offset)
     # print(flat)
-    return flat, tracks
+    return flat
 
 
 def GetChord(notes):

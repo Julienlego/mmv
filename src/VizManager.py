@@ -50,12 +50,8 @@ class VizManager:
 
         # the list of notes in the currently open file, one after the other with chords broken down
         self.notes = []
-        
-        # the list of all tracks in the currently open file. each track contains all of its notes
-        self.tracks = []
 
         # a dictionary mapping each track to its proper instrument
-        self.track_instrument_map = {}
         self.instrument_map = [0 for x in range(16)]
 
         # the list of the currently playing notes
@@ -72,7 +68,12 @@ class VizManager:
         # the offset of the last note in the song
         self.last_offset = 0.
 
-        # Init and load all presets
+        self.OnStartup()
+
+    def OnStartup(self):
+        """
+        Runs when vizmanager is initialized
+        """
         self.LoadPresets()
 
     def LoadPresets(self):
@@ -84,8 +85,6 @@ class VizManager:
                "note, and the height is relative to the lowest and highest note in the song. The radius is derived" \
                "from note's velocity."
         preset_simple_circle = pr.PresetSimpleColorCircleRelative(self, "Simple Colored Circles", text)
-
-        # preset_grid_text = pr.PresetTest(self, "Just Text", "Draws a grid and text.")
 
         text = "This is a basic piano roll preset. The height of the note is relative to the lowest and highest" \
                "pitch in the song."
@@ -164,21 +163,11 @@ class VizManager:
         self.preset_loaded = False
 
         # parse file
-        self.parser.ParseFile(path)
+        self.parser.ParseNewFile(path)
+        self.instrument_map = self.parser.instruments
         self.units.clear()
         self.tempo = self.parser.GetTempo()
-        self.notes, self.tracks = util.GetVizNotesAndTracks(self.parser.score)
-
-        # set track instruments
-        for part in self.parser.score.parts:
-            instr = part.getInstrument(returnDefault=False)     # extract instrument obj from part
-            i = 0       # default instrument
-            if instr.instrumentName in util.instruments:
-                i = util.instruments[instr.instrumentName]      # get midi val of instrument
-            j = list(self.parser.score.parts).index(part)       # track index
-            # print("Track {0} has midi instrument {1}".format(j, i))
-            self.track_instrument_map[j] = i
-            self.instrument_map[j] = i
+        self.notes = util.GetVizNotes(self.parser.score)
 
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import music21
+import src.Utilities as util
 
 
 class MidiParser:
@@ -14,13 +15,16 @@ class MidiParser:
         self.path = "No file detected"
         # Music21 object of the song.
         self.score = None
+        # a dictionary mapping each track to its proper instrument
+        self.instruments = [0 for x in range(16)]
 
-    def ParseFile(self, path):
+    def ParseNewFile(self, path):
         """
         Reads file at given path, if possible, and returns a music21 Score object.
         """
         self.path = path
         self.score = music21.midi.translate.midiFilePathToStream(path)
+        self.GetInstrumentsFromScore()
         return self.score
 
     def IsEmpty(self):
@@ -73,3 +77,16 @@ class MidiParser:
         beats = (total_length - (total_length % 4)) + 4
         tempo = int(60.0 / float(seconds / beats))
         return tempo
+
+    def GetInstrumentsFromScore(self):
+        """
+        Extracts instruments from current score.
+        """
+        for part in self.score.parts:
+            instr = part.getInstrument(returnDefault=False)     # extract instrument obj from part
+            i = 0       # default instrument
+            if instr.instrumentName in util.instruments:
+                i = util.instruments[instr.instrumentName]      # get midi val of instrument
+            j = list(self.score.parts).index(part)       # track index
+            # print("Track {0} has midi instrument {1}".format(j, i))
+            self.instruments[j] = i
