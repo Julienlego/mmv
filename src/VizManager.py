@@ -65,6 +65,9 @@ class VizManager:
         # the next id to be used by a unit
         self.next_id = 0
 
+        # the key of the currently loaded song. set to 'C major' by default by the MidiParser.
+        self.key = None
+
         # the offset of the last note in the song
         self.last_offset = 0.
 
@@ -126,7 +129,7 @@ class VizManager:
         preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
 
         text = "An extension of the Multi-Track Color Piano Roll, that adds visualization of chords being played"
-        preset_multitrack_chords = pr.PresetMultiTrackChords(self, "Multi=track Chords", text)
+        preset_multitrack_chords = pr.PresetMultiTrackChords(self, "Multi-track Chords", text)
 
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
@@ -168,6 +171,7 @@ class VizManager:
         self.units.clear()
         self.tempo = self.parser.GetTempo()
         self.notes = util.GetVizNotes(self.parser.score)
+        self.key = util.AnalyzeKey(self.parser.score)
 
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None

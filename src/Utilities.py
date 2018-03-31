@@ -87,7 +87,7 @@ def PrintChordToPanel(panel, n):
 #############################################################
 
 
-def SimpleNoteToColorTuple(viz_note):
+def SimpleNoteToColorTuple(viz_note, key=None):
     """
     Converts music21 Note to an RGB color tuple (R, G, B) and returns the tuple.
     The colors are predetermined.
@@ -142,6 +142,26 @@ def SimpleNoteToColorTuple(viz_note):
         color = (99, 0, 178)        # indigo
     # print("Converting note {0} to color {1}".format(note_name, color))
     return color
+
+
+def ScaleDegreeToColor(note, key=None):
+    sd = None
+    if isinstance(note, music21.note.Note):
+        sd = note.pitch.midi
+    else:
+        return (255, 255, 255)
+
+    sd = sd % 12
+
+    if key is not None:
+        tonic_pitch = key.tonic.pitchClass
+        relative_pitch = (sd - tonic_pitch) % 12
+
+        color = note_colors[relative_pitch]
+        return color
+    else:
+        color = note_colors[sd]
+        return color
 
 
 def MidiToMonochrome(midi_note):
@@ -693,6 +713,26 @@ def CreateChordFromNote(root_note=None):
     """
     pass
 
+
+def AnalyzeKey(score):
+    if isinstance(score, music21.stream.Score):
+        key = score.analyze('key')
+        return key
+
+note_colors = {
+    0: (255, 0, 0),
+    1: (255, 100, 0),
+    2: (255, 150, 0),
+    3: (255, 200, 0),
+    4: (255, 255, 0),
+    5: (0, 255, 0),
+    6: (0, 255, 255),
+    7: (0, 0, 255),
+    8: (100, 0, 255),
+    9: (200, 0, 255),
+    10: (255, 0, 255),
+    11: (255, 100, 255)
+}
 
 instruments = {
     "Piano": 1,

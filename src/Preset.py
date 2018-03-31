@@ -380,7 +380,7 @@ class PresetMultiTrackChords(BasePreset):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
+        color = util.ScaleDegreeToColor(note, self.viz_manager.key)
         track_width = screen_x // self.num_tracks
 
         h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
@@ -419,7 +419,7 @@ class PresetMultiTrackChords(BasePreset):
             root = self.latest_chord.root()
             note = music21.note.Note(root)
 
-            color = util.SimpleNoteToColorTuple(note)
+            color = util.ScaleDegreeToColor(note, self.viz_manager.key)
             rect_chord = unit.ChordUnit(0, 0, color, note, screen_x, screen_y, 20)
             rect_chord.id = id(note)
 
