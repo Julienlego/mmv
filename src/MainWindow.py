@@ -235,8 +235,8 @@ class MainFrame(wx.Frame):
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
-        self.statusbar.SetFieldsCount(4)
-        self.statusbar.SetStatusWidths([-3, -4, -2, -2])
+        self.statusbar.SetFieldsCount(5)
+        self.statusbar.SetStatusWidths([-100, -40, -20, -15, -25])
         self.statusbar.SetStatusText("No file selected", 0)
         self.statusbar.SetStatusText("No preset selected", 1)
 

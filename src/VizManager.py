@@ -172,6 +172,7 @@ class VizManager:
         self.tempo = self.parser.GetTempo()
         self.notes = util.GetVizNotes(self.parser.score)
         self.key = util.AnalyzeKey(self.parser.score)
+        self.main_frame.statusbar.SetStatusText(str(self.key), 4)
 
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
