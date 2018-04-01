@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import pygame
-import math
+from math import sqrt
 
 
 class BaseUnit:
@@ -135,25 +135,28 @@ class RhombusNoteUnit(NoteUnit):
         self.thickness = line_thickness
 
     def Draw(self, screen):
-        points = [(self.x - self.radius, self.y), (self.x + self.radius, self.y),
-                  (self.x, self.y + self.radius), (self.x, self.y - self.radius)]
-        pygame.draw.line(screen, self.color, False, points, self.thickness)
+        # When isolated, this can draw a triangle fine, however it doesn't in this case.
+        points = [(self.x - self.radius, self.y),
+                  (self.x + self.radius, self.y),
+                  (self.x, self.y + self.radius + 1),
+                  (self.x, self.y - self.radius - 1)]
+        pygame.draw.polygon(screen, self.color, points, self.thickness)
 
 
 class TriangleNoteUnit(NoteUnit):
     """
     This object represents a single note as a triangle.
     """
-    def __init__(self, x, y, color, note, side_length=0, line_thickness=0, fade=False, fade_speed=5, delete_after_fade=False):
-        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
+    def __init__(self, x, y, color, note, side_length=0, thickness=0):
+        super().__init__(x, y, color, note)
         self.side_length = side_length
-        self.thickness = line_thickness
+        self.thickness = thickness
 
     def Draw(self, screen):
-        points = [(self.x, self.y + (((math.sqrt(3)/3) * self.side_length) // 1)),
-                  (self.x + (self.side_length // 2), self.y - (((math.sqrt(3)/6) * self.side_length) // 1)),
-                  (self.x - (self.side_length // 2), self.y - (((math.sqrt(3)/6) * self.side_length) // 1))]
-        pygame.draw.line(screen, self.color, False, points, self.thickness)
+        points = [(self.x, self.y + int((sqrt(3)/3) * self.side_length)),
+                  (self.x + int(self.side_length // 2), self.y - int((sqrt(3)/6) * self.side_length)),
+                  (self.x - int(self.side_length // 2), self.y - int((sqrt(3)/6) * self.side_length))]
+        pygame.draw.polygon(screen, self.color, points, self.thickness)
 
 
 class RectChordUnit(NoteUnit):

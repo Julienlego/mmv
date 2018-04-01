@@ -416,7 +416,7 @@ class PresetMultiTrackChords(BasePreset):
             note = music21.note.Note(root)
 
             color = util.ScaleDegreeToColor(note, self.viz_manager.key)
-            rect_chord = unit.ChordUnit(0, 0, color, note, screen_x, screen_y, 20)
+            rect_chord = unit.RectChordUnit(0, 0, color, note, screen_x, screen_y, 20)
             rect_chord.id = id(note)
 
             self.viz_manager.units.append(rect_chord)
@@ -522,33 +522,66 @@ class PresetInstrumentGroups(BasePreset):
         Woodwind - ellipse
         Keyboards - square
         Percussion - rectangle
+        Other (i.e. sound effects) - rhombus
     """
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
 
+        for t in range(self.num_tracks):
+            midi = self.viz_manager.instrument_map[t]
+            print("Track {0} is instrument {1}".format(t, midi))
+
     def PerNoteOn(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
-        r = 15
-        circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
 
+        # Add track divider lines
         interval = screen_x // self.num_tracks
-
-        # Add white line down center of the screen
         for i in range(0, screen_x, interval):
             line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
             self.viz_manager.units.append(line)
 
-        x = interval * (viz_note.track - 1)
-        # print("Printing note {0} in track {1} in interval {2}".format(note, viz_note.track, x))
-        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
-        # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
-        # circle_note.x += (self.num_tracks - 1) * interval
-        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
-        self.viz_manager.units.append(circle_note)
+        color = util.SimpleNoteToColorTuple(note)
+        vn = None
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        x_interval = interval * (viz_note.track - 1)
+        x = (x_interval * 2 + interval) // 2
+        offset = 0
+
+        instr_midi = self.viz_manager.instrument_map[viz_note.track-1]
+        strings = list(range(25, 52, 1))
+        brass = list(range(57, 64)) + [65, 66, 67, 68, 70]
+        woodwind = list(range(73, 80)) + [69, 71, 72]
+        keyboards = list(range(24))
+        percussion = list(range(113, 120)) + [48]
+
+        # Determine shape
+        if instr_midi in strings:
+            offset = 15
+            vn = unit.TriangleNoteUnit(x, y, color, note, 40, 0)
+        elif instr_midi in brass:
+            offset = 15
+            vn = unit.CircleNoteUnit(x, y, color, note, 15)
+        elif instr_midi in woodwind:
+            offset = 30
+            vn = unit.EllipseNoteUnit(x, y, color, note, 60, 30, 0)
+        elif instr_midi in keyboards:
+            offset = 30
+            vn = unit.RectNoteUnit(x, y, color, note, 60, 60)
+        elif instr_midi in percussion:
+            offset = 60
+            vn = unit.RectNoteUnit(x, y, color, note, 120, 60)
+        else:
+            offset = 15
+            vn = unit.EllipseNoteUnit(x, y, color, note, 30, 30, 1)
+
+        vn.x -= offset
+        self.viz_manager.units.append(vn)
+
+    def PerNoteOff(self, screen, message):
+        self.viz_manager.remove_unit(message.note)
 
 
 class PresetJulien(BasePreset):

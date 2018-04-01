@@ -123,13 +123,17 @@ class VizManager:
 
         text = "Similar to Two-track Piano Roll, except each track has its own column, starting with the leftmost" \
                "column representing the 1st track."
-        preset_multitrack_color_piano_roll = pr.PresetMultiTrackColorPianoRoll(self, "Multi-track Colored Piano Roll", text)
+        preset_multitrack_piano_roll = pr.PresetMultiTrackColorPianoRoll(self, "Multi-track Colored Piano Roll", text)
 
-        text = "Similar to Uses the theories from the Cornell paper to depict tonal tension."
+        text = "Similar to the multi-track presets, except this uses the theories from the Cornell paper to depict " \
+               "tonal tension as a grey-ish background hue."
         preset_tension_circle_color = pr.PresetTensionCornell(self, "Tension Colored Circles", text)
 
         text = "An extension of the Multi-Track Color Piano Roll, that adds visualization of chords being played"
         preset_multitrack_chords = pr.PresetMultiTrackChords(self, "Multi-track Chords", text)
+
+        text = "Similar to the multi-track presets,"
+        preset_instrumentgroup = pr.PresetInstrumentGroups(self, "Instrument Groups", text)
 
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
@@ -142,9 +146,10 @@ class VizManager:
         self.presets.update({preset_chord_root.name: preset_chord_root})
         self.presets.update({preset_piano_roll_monochrome.name: preset_piano_roll_monochrome})
         self.presets.update({preset_multitrack_circle_piano.name: preset_multitrack_circle_piano})
-        self.presets.update({preset_multitrack_color_piano_roll.name: preset_multitrack_color_piano_roll})
+        self.presets.update({preset_multitrack_piano_roll.name: preset_multitrack_piano_roll})
         self.presets.update({preset_tension_circle_color.name: preset_tension_circle_color})
         self.presets.update({preset_multitrack_chords.name: preset_multitrack_chords})
+        self.presets.update({preset_instrumentgroup.name: preset_instrumentgroup})
 
     def SetPreset(self, key):
         """
@@ -173,6 +178,8 @@ class VizManager:
         self.notes = util.GetVizNotes(self.parser.score)
         self.key = util.AnalyzeKey(self.parser.score)
         self.main_frame.statusbar.SetStatusText(str(self.key), 4)
+
+        # Print track instruments to debugger
 
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
@@ -218,15 +225,6 @@ class VizManager:
         self.preset_loaded = True
         print("Preset Loaded")
         util.PrintLineToPanel(dbg, "\nPreset Loaded\n\n")
-
-    def LoadInstruments(self):
-        """
-        Reads instruments from score and sets them to their designated channel.
-        """
-        score = self.parser.score
-        for part in score.parts:
-            instr = part.getInstrument(returnDefault=False)     # instrument object of the part
-            midi_instr = util.instruments[instr.instrumentName]
 
     def Pause(self):
         """
