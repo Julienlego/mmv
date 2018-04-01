@@ -273,9 +273,10 @@ class MainFrame(wx.Frame):
         Called when the program exits.
         """
         self.display.Kill(event)
-        pygame.quit()
         self.Close()
         self.Destroy()
+        pygame.quit()
+        sys.exit()
 
     def OnSize(self, event):
         """

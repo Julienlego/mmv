@@ -24,6 +24,7 @@ class BasePreset:
         self.notes_played = []
         self.latest_chord = None
         self.key = None
+        self.num_tracks = 0
 
     def OnFirstLoad(self, score):
         """
@@ -296,7 +297,7 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
 
 class PresetMultiTrackColorCircle(BasePreset):
     """
-
+    This preset draws notes in each track as circles, where the each track has its own column on the screen.
     """
     def __init__(self, viz_manager, name, desc):
         super().__init__(viz_manager, name, desc)
@@ -334,11 +335,9 @@ class PresetMultiTrackColorCircle(BasePreset):
 
 
 class PresetMultiTrackColorPianoRoll(BasePreset):
+    """
 
-    def __init__(self, viz_manager, name, desc):
-        super().__init__(viz_manager, name, desc)
-        self.num_tracks = 0
-
+    """
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
@@ -367,11 +366,9 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
 
 
 class PresetMultiTrackChords(BasePreset):
+    """
 
-    def __init__(self, viz_manager, name, desc):
-        super().__init__(viz_manager, name, desc)
-        self.num_tracks = 0
-
+    """
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
@@ -395,8 +392,7 @@ class PresetMultiTrackChords(BasePreset):
 
         self.viz_manager.units.append(rect_note)
 
-        # chord stuff-------------------------
-
+        # chord stuff
         self.notes_played.append(viz_note)
         recent_notes = util.GetRecentNotes(self.notes_played)
         chord = util.GetChord(recent_notes)
@@ -433,10 +429,6 @@ class PresetTensionCornell(BasePreset):
     """
 
     """
-    def __init__(self, viz_manager, name, desc):
-        super().__init__(viz_manager, name, desc)
-        self.num_tracks = 0
-
     def OnFirstLoad(self, score):
         self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
         self.num_tracks = len(score.parts)
@@ -522,24 +514,20 @@ class PresetChordRoot(BasePreset):
         pass
 
 
-class PresetJulien(BasePreset):
+class PresetInstrumentGroups(BasePreset):
     """
-
+    Similar to the multitrack preset except notes belonging to an instrument group are assigned its own shape.
+        Strings - triangle
+        Brass - circle
+        Woodwind - ellipse
+        Keyboards - square
+        Percussion - rectangle
     """
-    def __init__(self, viz_manager, name, desc):
-        super().__init__(viz_manager, name, desc)
-        self.num_tracks = 0
-
     def OnFirstLoad(self, score):
-        self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
-        self.num_tracks = len(score.parts)
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.num_tracks = len(score.parts)
 
     def PerNoteOn(self, screen, viz_note):
-        self.notes_played.append(viz_note)
-        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
-        # print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
-        screen.fill((tension, tension, tension))
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -555,8 +543,38 @@ class PresetJulien(BasePreset):
             self.viz_manager.units.append(line)
 
         x = interval * (viz_note.track - 1)
+        # print("Printing note {0} in track {1} in interval {2}".format(note, viz_note.track, x))
+        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
+        # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
+        # circle_note.x += (self.num_tracks - 1) * interval
+        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        self.viz_manager.units.append(circle_note)
+
+
+class PresetJulien(BasePreset):
+    """
+
+    """
+    def OnFirstLoad(self, score):
+        self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
+        self.num_tracks = len(score.parts)
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+
+    def PerNoteOn(self, screen, viz_note):
+        self.notes_played.append(viz_note)
+        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
+        screen.fill((tension, tension, tension))
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.SimpleNoteToColorTuple(note)
+        r = 15
+        circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
+        interval = screen_x // self.num_tracks
+        x = interval * (viz_note.track - 1)
         circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
         circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+
         self.viz_manager.units.append(circle_note)
 
     def PerNoteOff(self, screen, message):

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pygame
+import math
 
 
 class BaseUnit:
@@ -59,22 +60,14 @@ class LineUnit(BaseUnit):
 class NoteUnit(BaseUnit):
     """
     This object represents a note in some shape or form.
+    Has the ability to fade over time.
     """
-    def __init__(self, x=0, y=0, color=None, note=None):
+    def __init__(self, x=0, y=0, color=None, note=None, fade=False, fade_speed=5, delete_after_fade=False):
         super().__init__(x, y, color)
         self.note = note
-
-
-class CircleNoteUnit(NoteUnit):
-    """
-    This object represents a single note as a circle on the screen.
-    """
-    def __init__(self, x, y, color, note, radius=0):
-        super().__init__(x, y, color, note)
-        self.radius = radius
-        self.fade = False
-        self.fade_speed = 5
-        self.delete_after_fade = False
+        self.fade = fade
+        self.fade_speed = fade_speed
+        self.delete_after_fade = delete_after_fade
 
     def Update(self):
         if self.fade:
@@ -91,6 +84,15 @@ class CircleNoteUnit(NoteUnit):
         if self.delete_after_fade:
             if self.color[0] + self.color[1] + self.color[2] == 0:
                 self.should_delete = True
+
+
+class CircleNoteUnit(NoteUnit):
+    """
+    This object represents a single note as a circle on the screen.
+    """
+    def __init__(self, x, y, color, note, radius=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
+        self.radius = radius
 
     def Draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, 0)
@@ -100,36 +102,61 @@ class RectNoteUnit(NoteUnit):
     """
     This object represents a single note as a rectangle on the screen.
     """
-    def __init__(self, x, y, color, note, width=0, height=0):
-        super().__init__(x, y, color, note)
+    def __init__(self, x, y, color, note, width=0, height=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
         self.w = width
         self.h = height
-        self.fade = False
-        self.fade_speed = 5
-        self.delete_after_fade = False
-
-    def Update(self):
-        if self.fade:
-            self.color[0] -= int(self.fade_speed)
-            self.color[1] -= int(self.fade_speed)
-            self.color[2] -= int(self.fade_speed)
-            if self.color[0] < 0:
-                self.color[0] = 0
-            if self.color[1] < 0:
-                self.color[1] = 0
-            if self.color[2] < 0:
-                self.color[2] = 0
-
-        if self.delete_after_fade:
-            if self.color[0] + self.color[1] + self.color[2] == 0:
-                self.should_delete = True
 
     def Draw(self, screen):
-        # print("Note color: {0}".format(self.color))
         pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
 
 
-class ChordUnit(NoteUnit):
+class EllipseNoteUnit(NoteUnit):
+    """
+    This object represents a single note as an ellipse (stretched out circle) on a screen.
+    """
+    def __init__(self, x, y, color, note, width=0, height=0, line_width=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
+        self.w = width
+        self.h = height
+        self.line_width = line_width
+
+    def Draw(self, screen):
+        pygame.draw.ellipse(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h), self.line_width)
+
+
+class RhombusNoteUnit(NoteUnit):
+    """
+    This object represents a single note as a rhombus.
+    """
+    def __init__(self, x, y, color, note, radius=0, line_thickness=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
+        self.radius = radius
+        self.thickness = line_thickness
+
+    def Draw(self, screen):
+        points = [(self.x - self.radius, self.y), (self.x + self.radius, self.y),
+                  (self.x, self.y + self.radius), (self.x, self.y - self.radius)]
+        pygame.draw.line(screen, self.color, False, points, self.thickness)
+
+
+class TriangleNoteUnit(NoteUnit):
+    """
+    This object represents a single note as a triangle.
+    """
+    def __init__(self, x, y, color, note, side_length=0, line_thickness=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
+        self.side_length = side_length
+        self.thickness = line_thickness
+
+    def Draw(self, screen):
+        points = [(self.x, self.y + (((math.sqrt(3)/3) * self.side_length) // 1)),
+                  (self.x + (self.side_length // 2), self.y - (((math.sqrt(3)/6) * self.side_length) // 1)),
+                  (self.x - (self.side_length // 2), self.y - (((math.sqrt(3)/6) * self.side_length) // 1))]
+        pygame.draw.line(screen, self.color, False, points, self.thickness)
+
+
+class RectChordUnit(NoteUnit):
     """
     This object represents a single chord as two thin vertical rectangles on the screen.
     """
@@ -138,27 +165,7 @@ class ChordUnit(NoteUnit):
         self.w = width
         self.sw = sub_width
         self.h = height
-        self.fade = False
-        self.fade_speed = 5
-        self.delete_after_fade = False
-
-    def Update(self):
-        if self.fade:
-            self.color[0] -= int(self.fade_speed)
-            self.color[1] -= int(self.fade_speed)
-            self.color[2] -= int(self.fade_speed)
-            if self.color[0] < 0:
-                self.color[0] = 0
-            if self.color[1] < 0:
-                self.color[1] = 0
-            if self.color[2] < 0:
-                self.color[2] = 0
-
-        if self.delete_after_fade:
-            if self.color[0] + self.color[1] + self.color[2] == 0:
-                self.should_delete = True
 
     def Draw(self, screen):
-        # print("Note color: {0}".format(self.color))
         pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.sw, self.h))
         pygame.draw.rect(screen, self.color, pygame.Rect((self.x + self.w) - self.sw, self.y, self.sw, self.h))
