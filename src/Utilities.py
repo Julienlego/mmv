@@ -387,6 +387,44 @@ def GetRadians(degrees):
     return degrees * (math.pi / 180.0)
 
 
+def GetPosOnCircleOfFifths(note, origin, radius, key):
+
+    if isinstance(note, vn.VizNote):
+        pitch = note.note.pitch.midi
+    elif isinstance(note, music21.note.Note):
+        pitch = note.pitch.midi
+    else:
+        pitch = note
+
+    pitch = pitch % 12
+
+    # have the tonic of the key on top of the circle
+    if key is not None:
+        tonic_pitch = key.tonic.pitchClass
+        relative_pitch = (pitch - tonic_pitch) % 12
+        relative_position = None
+
+        x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * relative_pitch))))
+        y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * relative_pitch))))
+
+        x = int(x)
+        y = int(y)
+
+        return x, y
+
+    # if there is no specified key, just go by the pitch itself, meaning C is on top
+    else:
+        x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * pitch))))
+        y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * pitch))))
+
+        x = int(x)
+        y = int(y)
+
+        return x, y
+
+
+
+
 #############################################################
 #                                                           #
 #         !!! FOR COMPUTATIONAL MUSIC ANALYSIS!!!           #

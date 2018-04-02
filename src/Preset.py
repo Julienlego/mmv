@@ -410,7 +410,7 @@ class PresetMultiTrackChords(BasePreset):
 
             root = self.latest_chord.root()
             note = music21.note.Note(root)
-            self.viz_manager.remove_unit(note, id(note))
+            self.viz_manager.remove_unit(note, id(note), type(unit.RectChordUnit))
 
             self.latest_chord = chord
             root = self.latest_chord.root()
@@ -430,6 +430,12 @@ class PresetMultiTrackChordsCircle(BasePreset):
     """
     Like multi-track chords, except with chords displayed in a circle-of-fifths pattern, with the song's key at the top of the circle.
     """
+    def __init__(self, vn, name, desc):
+        super().__init__(vn, name, desc)
+        self.circle_origin = 0, 0
+        self.circle_radius = 0
+        self.current_chord_unit = None
+
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
@@ -444,6 +450,9 @@ class PresetMultiTrackChordsCircle(BasePreset):
         self.viz_manager.units.append(circle_unit_outer)
         self.viz_manager.units.append(circle_unit_middle)
         self.viz_manager.units.append(circle_unit_inner)
+
+        self.circle_origin = circle_unit_outer.x, circle_unit_outer.y
+        self.circle_radius = 210
 
         # draw the 12 lines that separate the circle into 12 quadrants
         for i in range(0, 12):
@@ -491,17 +500,25 @@ class PresetMultiTrackChordsCircle(BasePreset):
 
             root = self.latest_chord.root()
             note = music21.note.Note(root)
-            self.viz_manager.remove_unit(note, id(note))
+            # self.viz_manager.remove_unit(note, id(note))
 
             self.latest_chord = chord
             root = self.latest_chord.root()
             note = music21.note.Note(root)
 
             color = util.ScaleDegreeToColor(note, self.viz_manager.key)
-            rect_chord = unit.RectChordUnit(0, 0, color, note, screen_x, screen_y, 20)
-            rect_chord.id = id(note)
+            x, y = util.GetPosOnCircleOfFifths(note, self.circle_origin, self.circle_radius * 0.82, self.viz_manager.key)
+            circle_chord = unit.CircleNoteUnit(x, y, color, note, 20)
+            circle_chord.id = id(note)
 
-            self.viz_manager.units.append(rect_chord)
+            the_type = type(circle_chord)
+            print(the_type)
+
+            if self.current_chord_unit is not None:
+                self.viz_manager.remove_unit(note, self.current_chord_unit.id, the_type)
+
+            self.viz_manager.units.append(circle_chord)
+            self.current_chord_unit = circle_chord
 
     def PerNoteOff(self, screen, viz_note):
         pass

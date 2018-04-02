@@ -333,7 +333,7 @@ class VizManager:
 
                         self.preset.PerNoteOn(self.screen, n[0])
 
-    def remove_unit(self, note, id=None):
+    def remove_unit(self, note, id=None, the_type=None):
         """
         Removes whichever units in the units list that are associated with that note.
         :param note: the note with which to match to a unit
@@ -343,10 +343,18 @@ class VizManager:
             # Check if unit is subclass of noteunit
             if issubclass(type(unit), Unit.NoteUnit):
                 if id is not None:
-                    if unit.id == id:
-                        self.units.remove(unit)
+                    if the_type is None:
+                        if unit.id == id:
+                            self.units.remove(unit)
+                    else:
+                        if unit.id == id and type(unit) == the_type:
+                            self.units.remove(unit)
                 elif unit.note == note:
-                    self.units.remove(unit)
+                    if the_type is None:
+                        self.units.remove(unit)
+                    else:
+                        if type(unit) == the_type:
+                            self.units.remove(unit)
                     # print("unit removed. list size: " + str(len(self.units)))
 
     def print_song(self):
