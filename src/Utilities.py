@@ -402,10 +402,10 @@ def GetPosOnCircleOfFifths(note, origin, radius, key):
     if key is not None:
         tonic_pitch = key.tonic.pitchClass
         relative_pitch = (pitch - tonic_pitch) % 12
-        relative_position = None
+        relative_position = ConvertPitchToCirclePosition(relative_pitch)
 
-        x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * relative_pitch))))
-        y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * relative_pitch))))
+        x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * relative_position))))
+        y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * relative_position))))
 
         x = int(x)
         y = int(y)
@@ -461,6 +461,16 @@ def GetDiatonicCircleLevel(note=None):
         val = 11
 
     return val
+
+
+def ConvertPitchToCirclePosition(pitch):
+    """
+    Converts a pitch (assumes already normalized to key) to a position on the circle of fifths.
+    """
+    if pitch % 2 == 0:
+        return pitch
+    else:
+        return (pitch - 6) % 12
 
 
 def GetChromaticCircleLevel(note=None):

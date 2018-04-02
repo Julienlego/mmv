@@ -85,8 +85,9 @@ class MidiParser:
         for part in self.score.parts:
             instr = part.getInstrument(returnDefault=False)     # extract instrument obj from part
             i = 0       # default instrument
-            if instr.instrumentName in util.instruments:
-                i = util.instruments[instr.instrumentName]      # get midi val of instrument
-            j = list(self.score.parts).index(part)       # track index
-            # print("Track {0} has midi instrument {1}".format(j, i))
-            self.instruments[j] = i
+            if instr is not None:
+                if instr.instrumentName in util.instruments:
+                    i = util.instruments[instr.instrumentName]      # get midi val of instrument
+                j = list(self.score.parts).index(part)       # track index
+                # print("Track {0} has midi instrument {1}".format(j, i))
+                self.instruments[j] = i
