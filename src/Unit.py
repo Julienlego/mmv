@@ -19,6 +19,7 @@ class BaseUnit:
         self.color = color
         self.should_delete = False
         self.id = None
+        self.layer = 0
 
     def Move(self, x, y):
         """

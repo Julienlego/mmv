@@ -445,8 +445,11 @@ class PresetMultiTrackChordsCircle(BasePreset):
 
         # draw the three circles
         circle_unit_outer = unit.CircleUnit(x, y, 210, 2, (255, 255, 255))
+        circle_unit_outer.layer = 1
         circle_unit_middle = unit.CircleUnit(x, y, 140, 2, (255, 255, 255))
+        circle_unit_middle.layer = 1
         circle_unit_inner = unit.CircleUnit(x, y, 70, 2, (255, 255, 255))
+        circle_unit_inner.layer = 1
         self.viz_manager.units.append(circle_unit_outer)
         self.viz_manager.units.append(circle_unit_middle)
         self.viz_manager.units.append(circle_unit_inner)
@@ -461,8 +464,12 @@ class PresetMultiTrackChordsCircle(BasePreset):
             x_outer = circle_unit_outer.x + (circle_unit_outer.radius * math.cos(util.GetRadians(-90 + (30 * i) + (0.5 * 30))))
             y_outer = circle_unit_outer.y + (circle_unit_outer.radius * math.sin(util.GetRadians(-90 + (30 * i) + (0.5 * 30))))
 
-            line_1 = unit.LineUnit(x_inner, y_inner, x_outer, y_outer, (255, 255, 255), 2)
-            self.viz_manager.units.append(line_1)
+            line_unit = unit.LineUnit(x_inner, y_inner, x_outer, y_outer, (255, 255, 255), 2)
+            line_unit.layer = 1
+            self.viz_manager.units.append(line_unit)
+
+        self.viz_manager.sort_units()
+        pass
 
     def PerNoteOn(self, screen, viz_note):
         note = viz_note.note
@@ -481,7 +488,8 @@ class PresetMultiTrackChordsCircle(BasePreset):
         rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
         rect_note.y = y
 
-        # self.viz_manager.units.append(rect_note)
+        self.viz_manager.units.append(rect_note)
+        self.viz_manager.sort_units()
 
         # chord stuff
         self.notes_played.append(viz_note)
@@ -522,7 +530,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
 
     def PerNoteOff(self, screen, viz_note):
         pass
-        # self.viz_manager.remove_unit(viz_note.note, id(viz_note))
+        self.viz_manager.remove_unit(viz_note.note, id(viz_note))
 
 
 class PresetTensionCornell(BasePreset):

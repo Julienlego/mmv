@@ -357,6 +357,9 @@ class VizManager:
                             self.units.remove(unit)
                     # print("unit removed. list size: " + str(len(self.units)))
 
+    def sort_units(self):
+        self.units.sort(key=lambda x: x.layer)
+
     def print_song(self):
 
         inst = self.player.instruments
