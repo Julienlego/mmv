@@ -387,7 +387,7 @@ def GetRadians(degrees):
     return degrees * (math.pi / 180.0)
 
 
-def GetPosOnCircleOfFifths(note, origin, radius, key):
+def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
 
     if isinstance(note, vn.VizNote):
         pitch = note.note.pitch.midi
@@ -402,7 +402,16 @@ def GetPosOnCircleOfFifths(note, origin, radius, key):
     if key is not None:
         tonic_pitch = key.tonic.pitchClass
         relative_pitch = (pitch - tonic_pitch) % 12
-        relative_position = ConvertPitchToCirclePosition(relative_pitch)
+        relative_position = ConvertPitchToCirclePosition(relative_pitch, quality)
+
+        if quality == 'major':
+            radius *= 0.82
+        elif quality == 'minor':
+            radius *= 0.5
+        elif quality == 'diminished':
+            radius *= 0.3
+        else:
+            radius *= 0.0
 
         x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * relative_position))))
         y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * relative_position))))
@@ -463,14 +472,32 @@ def GetDiatonicCircleLevel(note=None):
     return val
 
 
-def ConvertPitchToCirclePosition(pitch):
+def ConvertPitchToCirclePosition(pitch, quality=None):
     """
     Converts a pitch (assumes already normalized to key) to a position on the circle of fifths.
     """
     if pitch % 2 == 0:
-        return pitch
+        absolute_pitch = pitch
     else:
-        return (pitch - 6) % 12
+        absolute_pitch = (pitch - 6) % 12
+
+    if quality == 'major':
+        # print("QUALITY: major--------------------------------")
+        pass
+
+    if quality == 'minor':
+        absolute_pitch -= 3
+        # print("QUALITY: minor--------------------------------")
+
+    elif quality == 'diminished':
+        absolute_pitch -= 5
+        # print("QUALITY: diminished--------------------------------")
+
+    elif quality != 'major':
+        # print("QUALITY: other--------------------------------")
+        pass
+
+    return absolute_pitch
 
 
 def GetChromaticCircleLevel(note=None):

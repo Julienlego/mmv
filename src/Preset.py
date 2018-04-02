@@ -505,14 +505,14 @@ class PresetMultiTrackChordsCircle(BasePreset):
             self.latest_chord = chord
             root = self.latest_chord.root()
             note = music21.note.Note(root)
+            quality = self.latest_chord.quality
 
             color = util.ScaleDegreeToColor(note, self.viz_manager.key)
-            x, y = util.GetPosOnCircleOfFifths(note, self.circle_origin, self.circle_radius * 0.82, self.viz_manager.key)
+            x, y = util.GetPosOnCircleOfFifths(note, self.circle_origin, self.circle_radius, self.viz_manager.key, quality)
             circle_chord = unit.CircleNoteUnit(x, y, color, note, 20)
             circle_chord.id = id(note)
 
             the_type = type(circle_chord)
-            print(the_type)
 
             if self.current_chord_unit is not None:
                 self.viz_manager.remove_unit(note, self.current_chord_unit.id, the_type)
