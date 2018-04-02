@@ -3,7 +3,7 @@ import music21, pygame, wx
 import src.VizNote as vn
 import src.Unit as unit
 import random
-
+import math
 #############################################################
 #                                                           #
 #   !!! THESE FUNCTIONS ARE FOR PRINTI TO DEBUG FRAME !!!   #
@@ -381,6 +381,10 @@ def GetRecentNotes(notes, num=5):
     index = abs(num) * -1
     previous_notes = notes[index:]
     return previous_notes
+
+
+def GetRadians(degrees):
+    return degrees * (math.pi / 180.0)
 
 
 #############################################################

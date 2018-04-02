@@ -3,6 +3,7 @@ import pygame
 import music21
 import src.Utilities as util
 import src.Unit as unit
+import math
 
 
 class BasePreset:
@@ -432,6 +433,27 @@ class PresetMultiTrackChordsCircle(BasePreset):
     def OnFirstLoad(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
+        display_size = self.viz_manager.main_frame.display.size
+        x = display_size.x // 2
+        y = display_size.y // 2
+
+        # draw the three circles
+        circle_unit_outer = unit.CircleUnit(x, y, 210, 2, (255, 255, 255))
+        circle_unit_middle = unit.CircleUnit(x, y, 140, 2, (255, 255, 255))
+        circle_unit_inner = unit.CircleUnit(x, y, 70, 2, (255, 255, 255))
+        self.viz_manager.units.append(circle_unit_outer)
+        self.viz_manager.units.append(circle_unit_middle)
+        self.viz_manager.units.append(circle_unit_inner)
+
+        # draw the 12 lines that separate the circle into 12 quadrants
+        for i in range(0, 12):
+            x_inner = circle_unit_outer.x + (circle_unit_inner.radius * math.cos(util.GetRadians(-90 + (30 * i) + (0.5 * 30))))
+            y_inner = circle_unit_outer.y + (circle_unit_inner.radius * math.sin(util.GetRadians(-90 + (30 * i) + (0.5 * 30))))
+            x_outer = circle_unit_outer.x + (circle_unit_outer.radius * math.cos(util.GetRadians(-90 + (30 * i) + (0.5 * 30))))
+            y_outer = circle_unit_outer.y + (circle_unit_outer.radius * math.sin(util.GetRadians(-90 + (30 * i) + (0.5 * 30))))
+
+            line_1 = unit.LineUnit(x_inner, y_inner, x_outer, y_outer, (255, 255, 255), 2)
+            self.viz_manager.units.append(line_1)
 
     def PerNoteOn(self, screen, viz_note):
         note = viz_note.note
