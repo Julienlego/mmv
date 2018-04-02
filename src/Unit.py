@@ -57,6 +57,19 @@ class LineUnit(BaseUnit):
         pygame.draw.line(screen, self.color, (self.x, self.y), (self.end_x, self.end_y), self.width)
 
 
+class CircleUnit(BaseUnit):
+    """
+    Represents a circle drawn on the screen.
+    """
+    def __init__(self, x=0, y=0, radius=0, width=0, color=None):
+        super().__init__(x, y, color)
+        self.radius = radius
+        self.width = width
+
+    def Draw(self, screen):
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.width)
+
+
 class NoteUnit(BaseUnit):
     """
     This object represents a note in some shape or form.

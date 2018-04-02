@@ -425,6 +425,67 @@ class PresetMultiTrackChords(BasePreset):
         self.viz_manager.remove_unit(viz_note.note, id(viz_note))
 
 
+class PresetMultiTrackChordsCircle(BasePreset):
+    """
+    Like multi-track chords, except with chords displayed in a circle-of-fifths pattern, with the song's key at the top of the circle.
+    """
+    def OnFirstLoad(self, score):
+        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.num_tracks = len(score.parts)
+
+    def PerNoteOn(self, screen, viz_note):
+        note = viz_note.note
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+        track_width = screen_x // self.num_tracks
+
+        h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
+        rect_note = unit.RectNoteUnit(0, 0, color, note, track_width, h)
+        rect_note.id = id(viz_note)
+
+        region_x = track_width * (viz_note.track - 1)
+        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
+
+        rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
+        rect_note.y = y
+
+        # self.viz_manager.units.append(rect_note)
+
+        # chord stuff
+        self.notes_played.append(viz_note)
+        recent_notes = util.GetRecentNotes(self.notes_played)
+        chord = util.GetChord(recent_notes)
+        chord_name = chord.pitchedCommonName
+        s1 = str(chord_name)
+        s2 = ""
+        if isinstance(self.latest_chord, music21.chord.Chord):
+            s2 = str(self.latest_chord.pitchedCommonName)
+        if s1 != s2:
+            print("new chord: " + str(chord_name))
+
+            if self.latest_chord is None:
+                self.latest_chord = chord
+
+            root = self.latest_chord.root()
+            note = music21.note.Note(root)
+            self.viz_manager.remove_unit(note, id(note))
+
+            self.latest_chord = chord
+            root = self.latest_chord.root()
+            note = music21.note.Note(root)
+
+            color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+            rect_chord = unit.RectChordUnit(0, 0, color, note, screen_x, screen_y, 20)
+            rect_chord.id = id(note)
+
+            self.viz_manager.units.append(rect_chord)
+
+    def PerNoteOff(self, screen, viz_note):
+        pass
+        # self.viz_manager.remove_unit(viz_note.note, id(viz_note))
+
+
 class PresetTensionCornell(BasePreset):
     """
 

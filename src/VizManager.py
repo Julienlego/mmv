@@ -132,6 +132,9 @@ class VizManager:
         text = "An extension of the Multi-Track Color Piano Roll, that adds visualization of chords being played"
         preset_multitrack_chords = pr.PresetMultiTrackChords(self, "Multi-track Chords", text)
 
+        text = "Similar to the Multi-track Chords preset, with the chords shown in a circle-of-fifths style"
+        preset_multitrack_chords_circle = pr.PresetMultiTrackChordsCircle(self, "Multi-track Chords Circle", text)
+
         text = "Similar to the multi-track presets,"
         preset_instrumentgroup = pr.PresetInstrumentGroups(self, "Instrument Groups", text)
 
@@ -150,6 +153,7 @@ class VizManager:
         self.presets.update({preset_tension_circle_color.name: preset_tension_circle_color})
         self.presets.update({preset_multitrack_chords.name: preset_multitrack_chords})
         self.presets.update({preset_instrumentgroup.name: preset_instrumentgroup})
+        self.presets.update({preset_multitrack_chords_circle.name: preset_multitrack_chords_circle})
 
     def SetPreset(self, key):
         """
