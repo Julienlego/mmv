@@ -500,6 +500,33 @@ def ConvertPitchToCirclePosition(pitch, quality=None):
     return absolute_pitch
 
 
+def GetDissonanceOfNote(note, viz_manager, notes=None):
+    if isinstance(note, vn.VizNote):
+        pitch = note.note.pitch.midi % 12
+    elif isinstance(note, music21.note.Note):
+        pitch = note.pitch.midi % 12
+    else:
+        pitch = note % 12
+
+    key_num = viz_manager.key.tonic.pitchClass
+
+    distance_from_key = abs(ConvertPitchToCirclePosition(pitch) - ConvertPitchToCirclePosition(key_num))
+    if distance_from_key > 6:
+        distance_from_key = 12 - distance_from_key
+
+    recent_notes = GetRecentNotes(notes)
+    chord = GetChord(recent_notes)
+    root = chord.root()
+    root_note = music21.note.Note(root)
+    root_pitch = root_note.pitch.midi % 12
+
+    dissonance = (ConvertPitchToCirclePosition(pitch) - ConvertPitchToCirclePosition(root_pitch)) % 12
+
+    return distance_from_key + dissonance
+
+
+
+
 def GetChromaticCircleLevel(note=None):
     """
 

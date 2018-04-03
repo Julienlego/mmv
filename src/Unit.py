@@ -82,6 +82,7 @@ class NoteUnit(BaseUnit):
         self.fade = fade
         self.fade_speed = fade_speed
         self.delete_after_fade = delete_after_fade
+        self.dissonance = None
 
     def Update(self):
         if self.fade:
@@ -122,7 +123,18 @@ class RectNoteUnit(NoteUnit):
         self.h = height
 
     def Draw(self, screen):
-        pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h))
+        r, g, b = self.color
+        r -= self.dissonance * 10
+        g -= self.dissonance * 10
+        g -= self.dissonance * 10
+        if r < 0:
+            r = 0
+        if g < 0:
+            g = 0
+        if b < 0:
+            b = 0
+        new_color = (r, g, b)
+        pygame.draw.rect(screen, new_color, pygame.Rect(self.x, self.y, self.w, self.h))
 
 
 class EllipseNoteUnit(NoteUnit):
