@@ -161,11 +161,10 @@ class RhombusNoteUnit(NoteUnit):
         self.thickness = line_thickness
 
     def Draw(self, screen):
-        # When isolated, this can draw a triangle fine, however it doesn't in this case.
-        points = [(self.x - self.radius, self.y),
+        points = [(self.x, self.y + self.radius + 1),
                   (self.x + self.radius, self.y),
-                  (self.x, self.y + self.radius + 1),
-                  (self.x, self.y - self.radius - 1)]
+                  (self.x, self.y - self.radius - 1),
+                  (self.x - self.radius, self.y)]
         pygame.draw.polygon(screen, self.color, points, self.thickness)
 
 

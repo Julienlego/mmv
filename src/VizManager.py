@@ -135,8 +135,11 @@ class VizManager:
         text = "Similar to the Multi-track Chords preset, with the chords shown in a circle-of-fifths style"
         preset_multitrack_chords_circle = pr.PresetMultiTrackChordsCircle(self, "Multi-track Chords Circle", text)
 
-        text = "Similar to the multi-track presets,"
+        text = "Similar to the multi-track presets, except each instrument group is assigned it own shape."
         preset_instrumentgroup = pr.PresetInstrumentGroups(self, "Instrument Groups", text)
+
+        text = ""
+        preset_complex = pr.PresetJulien(self, "Julien's Preset", text)
 
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
@@ -154,6 +157,7 @@ class VizManager:
         self.presets.update({preset_multitrack_chords.name: preset_multitrack_chords})
         self.presets.update({preset_instrumentgroup.name: preset_instrumentgroup})
         self.presets.update({preset_multitrack_chords_circle.name: preset_multitrack_chords_circle})
+        self.presets.update({preset_complex.name: preset_complex})
 
     def SetPreset(self, key):
         """

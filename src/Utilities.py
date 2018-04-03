@@ -176,10 +176,11 @@ def ChangeColorBrightness(color=(0, 0, 0), val=0):
     """
     Changes the brightness of the RGB color by an integer -255 <= val <= 255 and returns the color.
     """
-    r = TruncateColorValue(color[0] + val)
-    g = TruncateColorValue(color[1] + val)
-    b = TruncateColorValue(color[2] + val)
-    return (r, g, b)
+    r = TruncateColorValue(int(color[0] + val))
+    g = TruncateColorValue(int(color[1] + val))
+    b = TruncateColorValue(int(color[2] + val))
+    nc = (r, g, b)
+    return nc
 
 
 def TruncateColorValue(val):
@@ -190,6 +191,8 @@ def TruncateColorValue(val):
         return 0
     elif val > 255:
         return 255
+    else:
+        return val
 
 
 def GetRandColor():
@@ -383,8 +386,29 @@ def GetRecentNotes(notes, num=5):
     return previous_notes
 
 
-def GetRadians(degrees):
-    return degrees * (math.pi / 180.0)
+def GetAverageNote(track):
+    """
+    Returns average note in a given track. Track must be a part from a score.
+    """
+    midi_sum = 0
+    num_notes = 0
+    for note in track.notes:
+        # if not isinstance(n, music21.note.Rest):
+        #     num_notes += 1
+        if not isinstance(note, music21.note.Rest):
+            midi = 0
+            if isinstance(note, music21.chord.Chord):
+                s = 0
+                for p in note.pitches:
+                    s += p.midi
+                midi = s // len(note.pitches)
+            if isinstance(note, music21.note.Note):
+                midi = note.pitch.midi
+            midi_sum += midi
+            num_notes += 1
+
+    new_p = midi_sum // num_notes
+    return music21.note.Note(new_p)
 
 
 def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
@@ -413,8 +437,8 @@ def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
         else:
             radius *= 0.0
 
-        x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * relative_position))))
-        y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * relative_position))))
+        x = origin[0] + (radius * math.cos(math.radians(-90 + (30 * relative_position))))
+        y = origin[1] + (radius * math.sin(math.radians(-90 + (30 * relative_position))))
 
         x = int(x)
         y = int(y)
@@ -423,8 +447,8 @@ def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
 
     # if there is no specified key, just go by the pitch itself, meaning C is on top
     else:
-        x = origin[0] + (radius * math.cos(GetRadians(-90 + (30 * pitch))))
-        y = origin[1] + (radius * math.sin(GetRadians(-90 + (30 * pitch))))
+        x = origin[0] + (radius * math.cos(math.radians(-90 + (30 * pitch))))
+        y = origin[1] + (radius * math.sin(math.radians(-90 + (30 * pitch))))
 
         x = int(x)
         y = int(y)
