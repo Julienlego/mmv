@@ -63,6 +63,7 @@ class PygameDisplay(wx.Window):
         self.Redraw()
 
     def OnSize(self, event):
+        # self.screen.fill((0, 0, 0))
         self.size = self.GetSize()
 
     def ToggleFullscreen(self, event):
@@ -283,6 +284,7 @@ class MainFrame(wx.Frame):
         Called whenever the main frame is re-sized
         """
         self.Layout()
+        self.vizmanager.units.clear()
 
     def OpenFile(self, event):
         """
@@ -366,12 +368,6 @@ class MainFrame(wx.Frame):
         Pauses whatever visualization is running, if any.
         """
         pass
-
-    def OnButtonKeyEvent(self, event):
-        """
-
-        """
-        print(event.GetKeyCode())
 
     def ToggleFullscreen(self, event):
         """

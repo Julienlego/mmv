@@ -135,11 +135,13 @@ class VizManager:
         text = "Similar to the Multi-track Chords preset, with the chords shown in a circle-of-fifths style"
         preset_multitrack_chords_circle = pr.PresetMultiTrackChordsCircle(self, "Multi-track Chords Circle", text)
 
-        text = "Similar to the multi-track presets, except each instrument group is assigned it own shape."
+        text = "Similar to the multi-track presets, except the shape of the notes are determined by what instrument" \
+               "group the instrument playing the note belongs to. Strings are triangles; Brass are circles; Woodwind" \
+               "are are ellipses; Keyboards are square; Percussions are diamond. Anything else are unfilled circles."
         preset_instrumentgroup = pr.PresetInstrumentGroups(self, "Instrument Groups", text)
 
-        text = ""
-        preset_complex = pr.PresetJulien(self, "Julien's Preset", text)
+        text = "Combines the presets Instrument Group and Tension. Notes fade after they play."
+        preset_complex = pr.PresetJulien(self, "Instruments and Tension", text)
 
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
@@ -185,7 +187,7 @@ class VizManager:
         self.tempo = self.parser.GetTempo()
         self.notes = util.GetVizNotes(self.parser.score)
         self.key = util.AnalyzeKey(self.parser.score)
-        self.main_frame.statusbar.SetStatusText(str(self.key), 4)
+        self.main_frame.statusbar.SetStatusText("Key: " + str(self.key), 4)
 
         # Print track instruments to debugger
 

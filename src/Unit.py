@@ -76,29 +76,35 @@ class NoteUnit(BaseUnit):
     This object represents a note in some shape or form.
     Has the ability to fade over time.
     """
-    def __init__(self, x=0, y=0, color=None, note=None, fade=False, fade_speed=5, delete_after_fade=False):
+    def __init__(self, x=0, y=0, color=None, note=None, fade=False, fade_speed=5, delete_after_fade=False, dissonance=0):
         super().__init__(x, y, color)
         self.note = note
-        self.fade = fade
+        self.dissonance = dissonance
         self.fade_speed = fade_speed
+        self.fade = fade
         self.delete_after_fade = delete_after_fade
-        self.dissonance = None
 
     def Update(self):
         if self.fade:
-            self.color[0] -= int(self.fade_speed)
-            self.color[1] -= int(self.fade_speed)
-            self.color[2] -= int(self.fade_speed)
-            if self.color[0] < 0:
-                self.color[0] = 0
-            if self.color[1] < 0:
-                self.color[1] = 0
-            if self.color[2] < 0:
-                self.color[2] = 0
+            r = self.color[0] - int(self.fade_speed)
+            g = self.color[1] - int(self.fade_speed)
+            b = self.color[2] - int(self.fade_speed)
+            if r < 0:
+                r = 0
+            if g < 0:
+                g = 0
+            if b < 0:
+                b = 0
+            self.color = (r, g, b)
 
         if self.delete_after_fade:
             if self.color[0] + self.color[1] + self.color[2] == 0:
                 self.should_delete = True
+
+    def SetFade(self, toggle=False, speed=5, delete_after=False):
+        self.fade_speed = speed
+        self.fade = toggle
+        self.delete_after_fade = delete_after
 
 
 class CircleNoteUnit(NoteUnit):
@@ -151,7 +157,7 @@ class EllipseNoteUnit(NoteUnit):
         pygame.draw.ellipse(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h), self.line_width)
 
 
-class RhombusNoteUnit(NoteUnit):
+class DiamondNoteUnit(NoteUnit):
     """
     This object represents a single note as a rhombus.
     """
@@ -172,8 +178,8 @@ class TriangleNoteUnit(NoteUnit):
     """
     This object represents a single note as a triangle.
     """
-    def __init__(self, x, y, color, note, side_length=0, thickness=0):
-        super().__init__(x, y, color, note)
+    def __init__(self, x, y, color, note, side_length=0, thickness=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
         self.side_length = side_length
         self.thickness = thickness
 

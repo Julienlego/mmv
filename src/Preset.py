@@ -640,10 +640,6 @@ class PresetInstrumentGroups(BasePreset):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
 
-        # for t in range(self.num_tracks):
-        #     midi = self.viz_manager.instrument_map[t]
-        #     print("Track {0} is instrument {1}".format(t, midi))
-
     def PerNoteOn(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
@@ -684,7 +680,7 @@ class PresetInstrumentGroups(BasePreset):
             vn = unit.RectNoteUnit(x, y, color, note, 30, 30)
         elif instr_midi in percussion:
             offset = 60
-            vn = unit.RhombusNoteUnit(x, y, color, note, 60, 0)
+            vn = unit.DiamondNoteUnit(x, y, color, note, 60, 0)
         else:
             offset = 15
             vn = unit.EllipseNoteUnit(x, y, color, note, 30, 30, 1)
@@ -701,17 +697,27 @@ class PresetJulien(BasePreset):
 
     """
     def OnFirstLoad(self, score):
-        self.key = score.analyze('key')  # uses the Krumhansl-Schmuckler key determination algorithm
+        self.key = score.analyze('key')                 # uses the Krumhansl-Schmuckler key determination algorithm
         self.num_tracks = len(score.parts)
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
     def PerNoteOn(self, screen, viz_note):
         self.notes_played.append(viz_note)
-        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
-        screen.fill(util.MidiToMonochrome(tension))
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
+
+        # Create red rectangle of tension
+        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
+        print(tension)
+        alpha = tension + 10
+        if alpha > 245:
+            alpha = 245
+        s = pygame.Surface((screen_x // 3, screen_y // 3), pygame.SRCALPHA | pygame.HWSURFACE)
+        s.fill((255, 0, 0, alpha))
+        mid_x = screen_x // 3
+        mid_y = screen_y // 3
+        screen.blit(s, (mid_x, mid_y))
 
         # Add track divider lines
         col_wid = screen_x // self.num_tracks
@@ -721,11 +727,9 @@ class PresetJulien(BasePreset):
 
         color = util.SimpleNoteToColorTuple(note)
         color2 = util.ChangeColorBrightness(color, note.volume.velocity)
-        vn = None
         y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
         x_interval = col_wid * (viz_note.track - 1)
         x = (x_interval * 2 + col_wid) // 2
-        offset = 0
 
         instr_midi = self.viz_manager.instrument_map[viz_note.track-1]
         strings = list(range(25, 52, 1))
@@ -749,13 +753,11 @@ class PresetJulien(BasePreset):
             vn = unit.RectNoteUnit(x, y, color2, note, 30, 30)
         elif instr_midi in percussion:
             offset = 60
-            vn = unit.RhombusNoteUnit(x, y, color2, note, 60, 0)
+            vn = unit.DiamondNoteUnit(x, y, color2, note, 60, 0)
         else:
             offset = 15
             vn = unit.EllipseNoteUnit(x, y, color2, note, 30, 30, 1)
+        vn.SetFade(True, 8, True)
 
         vn.x -= offset
         self.viz_manager.units.append(vn)
-
-    def PerNoteOff(self, screen, message):
-        self.viz_manager.remove_unit(message.note)
