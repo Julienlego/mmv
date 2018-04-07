@@ -514,7 +514,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
         if isinstance(self.latest_chord, music21.chord.Chord):
             s2 = str(self.latest_chord.pitchedCommonName)
         if s1 != s2:
-            print("new chord: " + str(chord_name))
+            print("new chord: " + str(chord_name) + "\t(" + str(chord.quality) + ")")
 
             if self.latest_chord is None:
                 self.latest_chord = chord
