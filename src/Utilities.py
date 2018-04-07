@@ -466,7 +466,7 @@ def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
 
 def GetDiatonicCircleLevel(note=None):
     """
-
+    Returns the diatonic circle level of the given music21 note.
     """
     name = note.name
     val = 0     # start at C = 0
@@ -585,7 +585,7 @@ def GetChromaticCircleLevel(note=None):
 
 def GetPitchDistance(pitch1=None, pitch2=None):
     """
-    Sums up the number of moves on the diatonic and chromatic circle of fifths between the two pitches.
+    Sums up the number of moves on the diatonic and chromatic circle of fifths between the two music21 pitches.
     """
     note1_dia_lvl = GetDiatonicCircleLevel(pitch1)
     note2_dia_lvl = GetDiatonicCircleLevel(pitch2)
@@ -600,7 +600,7 @@ def GetPitchDistance(pitch1=None, pitch2=None):
 
 def GetNoteDistance(note1=None, note2=None):
     """
-
+    Calculates the distance between two notes.
     """
     return GetPitchDistance(note1, note2)
 
@@ -819,9 +819,12 @@ def GetSequentialTension(target_viz_note=None, prev_notes_played=None, key=None)
     If the target note doesn't belong to a chord at all, then we need to improvise so a note's pitch can be used.
     """
     temp = FindChordFromVizNote(target_viz_note, prev_notes_played)
+    dist = 0
     if temp is None:        # standalone note
         prec_note = prev_notes_played[:1]
-        return GetNoteDistance(prec_note, target_viz_note) + GetSurfaceTension(target_viz_note, prev_notes_played)
+        dist = GetNoteDistance(prec_note.note, target_viz_note.note) + \
+               GetSurfaceTension(target_viz_note, prev_notes_played)
+        return dist
     else:                   # chord
         # get preceding note or chord
         i = 1

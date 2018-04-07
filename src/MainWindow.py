@@ -24,7 +24,7 @@ class PygameDisplay(wx.Window):
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.Bind(wx.EVT_TIMER, self.Update, self.timer)
+        self.Bind(wx.EVT_TIMER, self.update, self.timer)
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self.viz_manager = None
@@ -36,7 +36,7 @@ class PygameDisplay(wx.Window):
         self.timespacing = 1000.0 / self.fps
         self.timer.Start(self.timespacing, False)
 
-    def Update(self, event):
+    def update(self, event):
         # Any update tasks would go here (moving sprites, advancing animation frames etc.)
         self.Redraw()
 
@@ -48,14 +48,14 @@ class PygameDisplay(wx.Window):
             if unit.should_delete is True:
                 self.viz_manager.units.remove(unit)
             else:
-                unit.Update()
-                unit.Draw(self.screen)
+                unit.update()
+                unit.draw(self.screen)
 
         # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.size.width/2), int(self.size.height/2)), 100)
 
         self.viz_manager.main_frame.statusbar.SetStatusText("t: " + str(pygame.time.get_ticks()), 3)
 
-        self.viz_manager.Update()
+        self.viz_manager.update()
 
         pygame.display.update()
 
@@ -80,7 +80,7 @@ class PygameDisplay(wx.Window):
         # call the Redraw() method
         # (Otherwise wx seems to call Draw between quitting Pygame and destroying the frame)
         self.Unbind(event=wx.EVT_PAINT, handler=self.OnPaint)
-        self.Unbind(event=wx.EVT_TIMER, handler=self.Update, source=self.timer)
+        self.Unbind(event=wx.EVT_TIMER, handler=self.update, source=self.timer)
         pygame.quit()
 
 
@@ -151,7 +151,7 @@ class PresetDialog(wx.Dialog):
         name = self.GetNameSelect(self)
         print("Preset selected: ", name)
         self.parent.statusbar.SetStatusText(name, 1)
-        self.parent.vizmanager.SetPreset(name)
+        self.parent.vizmanager.set_preset(name)
         self.OnClose(event)
 
     def OnClose(self, event):
@@ -295,7 +295,7 @@ class MainFrame(wx.Frame):
 
         if dialog.ShowModal() == wx.ID_OK:
             self.statusbar.SetStatusText(dialog.GetPath(), 0)
-            self.vizmanager.LoadSongFromPath(dialog.GetPath())
+            self.vizmanager.load_song_from_path(dialog.GetPath())
 
         dialog.Destroy()
 
@@ -341,10 +341,10 @@ class MainFrame(wx.Frame):
         """
         if self.vizmanager.preset is None:
             wx.MessageBox("No preset was selected", "Missing Preset!", wx.OK | wx.ICON_ERROR)
-        elif self.vizmanager.parser.IsEmpty() is True:
+        elif self.vizmanager.parser.is_empty() is True:
             wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
         else:
-            self.vizmanager.PlayPreset()
+            self.vizmanager.play_preset()
 
     def TogglePlay(self, event):
         """

@@ -71,15 +71,15 @@ class VizManager:
         # the offset of the last note in the song
         self.last_offset = 0.
 
-        self.OnStartup()
+        self.initialize()
 
-    def OnStartup(self):
+    def initialize(self):
         """
         Runs when vizmanager is initialized
         """
-        self.LoadPresets()
+        self.load_presets()
 
-    def LoadPresets(self):
+    def load_presets(self):
         """
         Create and loads all presets.
         """
@@ -143,6 +143,9 @@ class VizManager:
         text = "Combines the presets Instrument Group and Tension. Notes fade after they play."
         preset_complex = pr.PresetJulien(self, "Instruments and Tension", text)
 
+        text = ""
+        preset_particles = pr.PresetParticles(self, "Particles", text)
+
         # Add the preset to the dictionary!
         self.presets.update({preset_piano_roll.name: preset_piano_roll})
         self.presets.update({preset_piano_static.name: preset_piano_static})
@@ -160,14 +163,15 @@ class VizManager:
         self.presets.update({preset_instrumentgroup.name: preset_instrumentgroup})
         self.presets.update({preset_multitrack_chords_circle.name: preset_multitrack_chords_circle})
         self.presets.update({preset_complex.name: preset_complex})
+        self.presets.update({preset_particles.name: preset_particles})
 
-    def SetPreset(self, key):
+    def set_preset(self, key):
         """
         Load preset with given key.
         """
         self.preset = self.presets[key]
 
-    def LoadSongFromPath(self, path):
+    def load_song_from_path(self, path):
         """
         Reads file at given path, if possible, and saves as an object.
         """
@@ -181,10 +185,10 @@ class VizManager:
         self.preset_loaded = False
 
         # parse file
-        self.parser.ParseNewFile(path)
+        self.parser.parse_file(path)
         self.instrument_map = self.parser.instruments
         self.units.clear()
-        self.tempo = self.parser.GetTempo()
+        self.tempo = self.parser.get_tempo()
         self.notes = util.GetVizNotes(self.parser.score)
         self.key = util.AnalyzeKey(self.parser.score)
         self.main_frame.statusbar.SetStatusText("Key: " + str(self.key), 4)
@@ -194,12 +198,12 @@ class VizManager:
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
 
-    def PlayPreset(self):
+    def play_preset(self):
         """
         Starts playing the visualization from the beginning.
         """
         bsy = wx.BusyInfo("Initial Loading...")
-        self.preset.OnFirstLoad(self.parser.score)
+        self.preset.first_load(self.parser.score)
         bsy = None
         dbg = self.main_frame.debugger.textbox
 
@@ -236,13 +240,13 @@ class VizManager:
         print("Preset Loaded")
         util.PrintLineToPanel(dbg, "\nPreset Loaded\n\n")
 
-    def Pause(self):
+    def pause(self):
         """
         Stops the visualization at wherever it is.
         """
         pass
 
-    def Update(self):
+    def update(self):
         """
 
         """
@@ -261,7 +265,7 @@ class VizManager:
             if len(n) > 1:
                 if ticks >= n[1]:
                     self.player.NoteOff(n[0].note.pitch.midi, n[0].note.volume.velocity)
-                    self.preset.PerNoteOff(self.screen, n[0])
+                    self.preset.per_note_off(self.screen, n[0])
                     self.current_notes.remove(n)
 
         if self.next_notes is not None:
@@ -337,7 +341,7 @@ class VizManager:
                             self.player.SetInstrument(20, 10)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity, channel=10)
 
-                        self.preset.PerNoteOn(self.screen, n[0])
+                        self.preset.per_note_on(self.screen, n[0])
 
     def remove_unit(self, note, id=None, the_type=None):
         """

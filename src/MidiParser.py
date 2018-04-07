@@ -18,16 +18,16 @@ class MidiParser:
         # a dictionary mapping each track to its proper instrument
         self.instruments = [0 for x in range(16)]
 
-    def ParseNewFile(self, path):
+    def parse_file(self, path):
         """
         Reads file at given path, if possible, and returns a music21 Score object.
         """
         self.path = path
         self.score = music21.midi.translate.midiFilePathToStream(path)
-        self.GetInstrumentsFromScore()
+        self.get_instruments()
         return self.score
 
-    def IsEmpty(self):
+    def is_empty(self):
         """
         Returns true if no song is loaded, false if there is.
         """
@@ -36,7 +36,7 @@ class MidiParser:
         else:
             return bool(False)
 
-    def GetTempo(self):
+    def get_tempo(self):
         """
         Returns the tempo of the song, as a float. Takes a music21.stream.Score object as the argument.
         This function assumes there are no tempo changes within the file.
@@ -56,14 +56,14 @@ class MidiParser:
                     break
 
         if quarter_length is None or seconds is None:
-            return self.GetTempoOld()
+            return self.get_tempo_old()
 
         full_quarter_length = seconds * (1.0 / quarter_length)
         tempo = 60.0 / full_quarter_length
 
         return tempo
 
-    def GetTempoOld(self):
+    def get_tempo_old(self):
         """
         Returns the tempo of the song, as a float. Takes a music21.stream.Score object as the argument.
         This function assumes there are no tempo changes within the file.
@@ -78,9 +78,9 @@ class MidiParser:
         tempo = int(60.0 / float(seconds / beats))
         return tempo
 
-    def GetInstrumentsFromScore(self):
+    def get_instruments(self):
         """
-        Extracts instruments from current score.
+        Extracts instruments from current score and saves them locally.
         """
         for part in self.score.parts:
             instr = part.getInstrument(returnDefault=False)     # extract instrument obj from part

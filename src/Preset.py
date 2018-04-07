@@ -10,7 +10,6 @@ class BasePreset:
     """
     This class is represents the basic preset class object that all
     presets inherit from. None of the methods are actually implemented in this class.
-
     """
 
     def __init__(self, viz_manager, name="", desc="A description goes here."):
@@ -27,7 +26,7 @@ class BasePreset:
         self.key = None
         self.num_tracks = 0
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         """
         Runs once to gather and store any information relative to the
         song before each frame of the visualization is made.
@@ -38,7 +37,7 @@ class BasePreset:
         """
         pass
 
-    def PerNoteOn(self, screen, message):
+    def per_note_on(self, screen, message):
         """
         Draws given message.
 
@@ -46,7 +45,7 @@ class BasePreset:
         """
         pass
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         """
         Event handler for note off event.
         :param screen: the screen to draw to
@@ -60,14 +59,14 @@ class PresetTest(BasePreset):
     """
     For testing purposes.
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
 
-    def PerNoteOn(self, screen, message):
+    def per_note_on(self, screen, message):
         pass
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         pass
 
 
@@ -87,10 +86,10 @@ class PresetSimpleColorCircleRelative(BasePreset):
         - radius of circle is determined by velocity
     """
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         color = util.SimpleNoteToColorTuple(viz_note)
@@ -101,7 +100,7 @@ class PresetSimpleColorCircleRelative(BasePreset):
         circle.y = y
         self.viz_manager.units.append(circle)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -114,7 +113,7 @@ class PresetSimpleColorCircleMaxPitch(BasePreset):
         - radius of circle is determined by the velocity
     """
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -126,7 +125,7 @@ class PresetSimpleColorCircleMaxPitch(BasePreset):
         circle.y = y
         self.viz_manager.units.append(circle)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -137,10 +136,10 @@ class PresetPianoRollFading(BasePreset):
     Notes with greater pitch go higher on the screen, lower notes go lower.
     """
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
         y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
@@ -159,10 +158,10 @@ class PresetPianoRoll(BasePreset):
     Notes with greater pitch go higher on the screen, lower notes go lower.
     """
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -173,7 +172,7 @@ class PresetPianoRoll(BasePreset):
         note_rect.y = y
         self.viz_manager.units.append(note_rect)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -182,11 +181,11 @@ class PresetMonochromePianoRoll(BasePreset):
     Similar to PianoRoll, but in black-white monochrome.
     """
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.viz_manager.screen.fill((0, 0, 255))
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -197,7 +196,7 @@ class PresetMonochromePianoRoll(BasePreset):
         note_rect.y = y
         self.viz_manager.units.append(note_rect)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -206,10 +205,10 @@ class PresetColorPianoRoll(BasePreset):
     This is a basic piano roll preset, except with color.
     """
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         viz_note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -219,7 +218,7 @@ class PresetColorPianoRoll(BasePreset):
         note_rect.y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(note_rect)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -229,7 +228,7 @@ class PresetStaticPianoRoll(BasePreset):
     This preset is good for looking at the whole song as a whole.
     """
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         # graph each note on the screen based off of pitch, offset, and length
         self.viz_manager.screen.fill((0, 0, 0))
         notes = []
@@ -261,10 +260,10 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
     Each note is drawn onto the screen in a piano roll fashion.
     Notes with greater pitch go higher on the screen, lower notes go lower.
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -292,7 +291,7 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
         line_unit = unit.LineUnit(screen_x // 2, 0, screen_x // 2, screen_y, (255, 255, 255), 1)
         self.viz_manager.units.append(line_unit)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -304,11 +303,11 @@ class PresetMultiTrackColorCircle(BasePreset):
         super().__init__(viz_manager, name, desc)
         self.num_tracks = 0
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -331,7 +330,7 @@ class PresetMultiTrackColorCircle(BasePreset):
         circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(circle_note)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -339,11 +338,11 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
     """
 
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -362,7 +361,7 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
 
         self.viz_manager.units.append(rect_note)
 
-    def PerNoteOff(self, screen, viz_note):
+    def per_note_off(self, screen, viz_note):
         self.viz_manager.remove_unit(viz_note.note, id(viz_note))
 
 
@@ -370,11 +369,11 @@ class PresetMultiTrackChords(BasePreset):
     """
 
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -422,7 +421,7 @@ class PresetMultiTrackChords(BasePreset):
 
             self.viz_manager.units.append(rect_chord)
 
-    def PerNoteOff(self, screen, viz_note):
+    def per_note_off(self, screen, viz_note):
         self.viz_manager.remove_unit(viz_note.note, id(viz_note))
 
 
@@ -436,7 +435,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
         self.circle_radius = 0
         self.current_chord_unit = None
 
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
         display_size = self.viz_manager.main_frame.display.size
@@ -469,9 +468,8 @@ class PresetMultiTrackChordsCircle(BasePreset):
             self.viz_manager.units.append(line_unit)
 
         self.viz_manager.sort_units()
-        pass
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -533,7 +531,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
             self.viz_manager.units.append(circle_chord)
             self.current_chord_unit = circle_chord
 
-    def PerNoteOff(self, screen, viz_note):
+    def per_note_off(self, screen, viz_note):
         self.viz_manager.remove_unit(viz_note.note, id(viz_note))
 
 
@@ -541,12 +539,12 @@ class PresetTensionCornell(BasePreset):
     """
 
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
         self.num_tracks = len(score.parts)
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         self.notes_played.append(viz_note)
         tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
         # print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
@@ -570,7 +568,7 @@ class PresetTensionCornell(BasePreset):
         circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(circle_note)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -579,10 +577,10 @@ class PresetChordRoot(BasePreset):
     This preset aims to detect chords being played and displays the root note of each chord.
     It also draws a piano roll visualization of the notes, just like normal piano roll.
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, message):
+    def per_note_on(self, screen, message):
         self.notes_played.append(message)
         recent_notes = util.GetRecentNotes(self.notes_played)
         chord = util.GetChord(recent_notes)
@@ -622,7 +620,7 @@ class PresetChordRoot(BasePreset):
             pass
             # util.PrintLineToPanel(dbg, "------")
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         pass
 
 
@@ -636,11 +634,11 @@ class PresetInstrumentGroups(BasePreset):
         Percussion - rhombus
         Other (i.e. sound effects) - circle (not filled)
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
         self.num_tracks = len(score.parts)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
@@ -688,7 +686,7 @@ class PresetInstrumentGroups(BasePreset):
         vn.x -= offset
         self.viz_manager.units.append(vn)
 
-    def PerNoteOff(self, screen, message):
+    def per_note_off(self, screen, message):
         self.viz_manager.remove_unit(message.note)
 
 
@@ -696,12 +694,12 @@ class PresetJulien(BasePreset):
     """
 
     """
-    def OnFirstLoad(self, score):
+    def first_load(self, score):
         self.key = score.analyze('key')                 # uses the Krumhansl-Schmuckler key determination algorithm
         self.num_tracks = len(score.parts)
         self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
 
-    def PerNoteOn(self, screen, viz_note):
+    def per_note_on(self, screen, viz_note):
         self.notes_played.append(viz_note)
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
@@ -709,15 +707,19 @@ class PresetJulien(BasePreset):
 
         # Create red rectangle of tension
         tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
-        print(tension)
-        alpha = tension + 10
-        if alpha > 245:
-            alpha = 245
-        s = pygame.Surface((screen_x // 3, screen_y // 3), pygame.SRCALPHA | pygame.HWSURFACE)
-        s.fill((255, 0, 0, alpha))
+        alpha = tension + 40
+        if alpha > 215:
+            alpha = 215
         mid_x = screen_x // 3
         mid_y = screen_y // 3
-        screen.blit(s, (mid_x, mid_y))
+        color = util.ChangeColorBrightness((30, 0, 0), tension)
+        rect = unit.RectNoteUnit(mid_x, mid_y, color, None, mid_x, mid_y)
+
+        # Adds tension rect to background (i.e. everything else is drawn on top)
+        rect.layer = 1
+        self.viz_manager.units.append(rect)
+        self.viz_manager.sort_units()
+        # self.notes_played.append(viz_note)
 
         # Add track divider lines
         col_wid = screen_x // self.num_tracks
@@ -725,39 +727,85 @@ class PresetJulien(BasePreset):
             line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
             self.viz_manager.units.append(line)
 
-        color = util.SimpleNoteToColorTuple(note)
-        color2 = util.ChangeColorBrightness(color, note.volume.velocity)
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
-        x_interval = col_wid * (viz_note.track - 1)
-        x = (x_interval * 2 + col_wid) // 2
+        # use note's dissonance to determine color brightness brightness
+        color2 = util.SimpleNoteToColorTuple(note)
+        dissonance = util.GetDissonanceOfNote(viz_note, self.viz_manager, self.notes_played)
+        color3 = util.ChangeColorBrightness(color2, -dissonance)
 
-        instr_midi = self.viz_manager.instrument_map[viz_note.track-1]
+        note_y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        x_interval = col_wid * (viz_note.track - 1)
+        note_x = (x_interval * 2 + col_wid) // 2
+
+        # List of instrument groups and instruments in them
         strings = list(range(25, 52, 1))
         brass = list(range(57, 64)) + [65, 66, 67, 68, 70]
         woodwind = list(range(73, 80)) + [69, 71, 72]
         keyboards = list(range(24))
         percussion = list(range(113, 120)) + [48]
 
-        # Determine shape
+        # Determine shape from instrument group
+        instr_midi = self.viz_manager.instrument_map[viz_note.track - 1]
         if instr_midi in strings:
             offset = 7
-            vn = unit.TriangleNoteUnit(x, y, color2, note, 30, 0)
+            vn = unit.TriangleNoteUnit(note_x, note_y, color3, note, 30, 0)
         elif instr_midi in brass:
             offset = 15
-            vn = unit.CircleNoteUnit(x, y, color2, note, 15)
+            vn = unit.CircleNoteUnit(note_x, note_y, color3, note, 15)
         elif instr_midi in woodwind:
             offset = 30
-            vn = unit.EllipseNoteUnit(x, y, color2, note, 60, 30, 0)
+            vn = unit.EllipseNoteUnit(note_x, note_y, color3, note, 60, 30, 0)
         elif instr_midi in keyboards:
             offset = 30
-            vn = unit.RectNoteUnit(x, y, color2, note, 30, 30)
+            vn = unit.RectNoteUnit(note_x, note_y, color3, note, 30, 30)
         elif instr_midi in percussion:
             offset = 60
-            vn = unit.DiamondNoteUnit(x, y, color2, note, 60, 0)
+            vn = unit.DiamondNoteUnit(note_x, note_y, color3, note, 60, 0)
         else:
             offset = 15
-            vn = unit.EllipseNoteUnit(x, y, color2, note, 30, 30, 1)
+            vn = unit.EllipseNoteUnit(note_x, note_y, color3, note, 30, 30, 1)
         vn.SetFade(True, 8, True)
 
         vn.x -= offset
         self.viz_manager.units.append(vn)
+
+        # draws rectangles on sides representing the root of the last chord played
+        self.notes_played.append(viz_note)
+        recent_notes = util.GetRecentNotes(self.notes_played)
+        chord = util.GetChord(recent_notes)
+        chord_name = chord.pitchedCommonName
+        s1 = str(chord_name)
+        s2 = ""
+        if isinstance(self.latest_chord, music21.chord.Chord):
+            s2 = str(self.latest_chord.pitchedCommonName)
+        if s1 != s2:
+            if self.latest_chord is None:
+                self.latest_chord = chord
+
+            root = self.latest_chord.root()
+            note = music21.note.Note(root)
+            self.viz_manager.remove_unit(note, id(note), type(unit.RectChordUnit))
+
+            self.latest_chord = chord
+            root = self.latest_chord.root()
+            note = music21.note.Note(root)
+
+            color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+            rect_chord = unit.RectChordUnit(0, 0, color, note, screen_x, screen_y, 20)
+            rect_chord.id = id(note)
+
+            self.viz_manager.units.append(rect_chord)
+
+
+class PresetParticles(BasePreset):
+    """
+
+    """
+    def first_load(self, score):
+        h, w = self.viz_manager.screen.get_size()
+        particles = unit.ParticleSpaceUnit(0, 0, h, w)
+        self.viz_manager.units.append(particles)
+
+    def per_note_on(self, screen, viz_note):
+        h, w = screen.get_size()
+        particles = unit.ParticleSpaceUnit(0, 0, h, w)
+        self.viz_manager.units.append(particles)

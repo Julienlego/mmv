@@ -28,13 +28,13 @@ class BaseUnit:
         self.x += x
         self.y += y
 
-    def Update(self):
+    def update(self):
         """
         Updates the object's internals.
         """
         pass
 
-    def Draw(self, screen):
+    def draw(self, screen):
         """
         Do any drawing related to the object.
         """
@@ -51,7 +51,7 @@ class LineUnit(BaseUnit):
         self.end_y = end_y
         self.width = width
 
-    def Draw(self, screen):
+    def draw(self, screen):
         """
         Do any drawing related to the object.
         """
@@ -67,8 +67,68 @@ class CircleUnit(BaseUnit):
         self.radius = radius
         self.width = width
 
-    def Draw(self, screen):
+    def draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.width)
+
+
+class ParticleSpaceUnit(BaseUnit):
+    """
+    Represents a space where particles are emitted.
+    """
+    def __init__(self, x=0, y=0, height=0, width=0, color=None, screen_height=0, screen_width=0):
+        super().__init__(x, y, color)
+        self.height = height
+        self.width = width
+        self.screen_height = screen_height
+        self.screen_width = screen_width
+        self.is_drawing = False
+
+    def draw(self, screen):
+        from lepton import Particle, ParticleGroup, default_system, domain
+        from lepton.pygame_renderer import FillRenderer
+        from lepton.emitter import StaticEmitter
+        from lepton.controller import Gravity, Lifetime, Movement, Fader, ColorBlender, Bounce, Collector
+
+        width = self.screen_width
+        height = self.screen_height
+
+        spout_radius = 10
+        spray = StaticEmitter(
+            rate=250,
+            template=Particle(
+                position=(width / 2, 0, 0),
+                velocity=(0, 0, 0)),
+            deviation=Particle(
+                velocity=(2, 15, 2),
+                color=(10, 10, 0)),
+            position=domain.AABox(
+                (width / 2 - spout_radius, 0, -spout_radius),
+                (width / 2 + spout_radius, 0, spout_radius)
+            ),
+            color=[(0, 0, 255), (0, 0, 150), (150, 150, 200), (100, 100, 150)],
+            size=[(1, 2, 0), (2, 2, 0), (2, 3, 0)],
+        )
+
+        radius = width / 3
+        sphere = domain.Sphere((width / 2, height, 0), radius)
+        screen_box = domain.AABox((0, 0, -width), (width, height, width))
+
+        water = ParticleGroup(controllers=[spray], renderer=FillRenderer(screen))
+
+        default_system.add_global_controller(
+            Gravity((0, 300, 0)),
+            Movement(),
+            Bounce(sphere, bounce=0.5, friction=0.02),
+            Collector(screen_box, collect_inside=False),
+        )
+        sphere_rect = (width / 2 - radius, height - radius, radius * 2, radius * 2)
+
+        # screen.fill((0, 0, 0))
+        pygame.draw.ellipse(screen, (15, 40, 40), sphere_rect)
+        default_system.draw()
+
+    def update(self):
+        pass
 
 
 class NoteUnit(BaseUnit):
@@ -84,7 +144,7 @@ class NoteUnit(BaseUnit):
         self.fade = fade
         self.delete_after_fade = delete_after_fade
 
-    def Update(self):
+    def update(self):
         if self.fade:
             r = self.color[0] - int(self.fade_speed)
             g = self.color[1] - int(self.fade_speed)
@@ -115,8 +175,11 @@ class CircleNoteUnit(NoteUnit):
         super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
         self.radius = radius
 
-    def Draw(self, screen):
+    def draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, 0)
+
+    def update(self):
+        pass
 
 
 class RectNoteUnit(NoteUnit):
@@ -128,7 +191,7 @@ class RectNoteUnit(NoteUnit):
         self.w = width
         self.h = height
 
-    def Draw(self, screen):
+    def draw(self, screen):
         r, g, b = self.color
         r -= self.dissonance * 10
         g -= self.dissonance * 10
@@ -143,6 +206,32 @@ class RectNoteUnit(NoteUnit):
         pygame.draw.rect(screen, new_color, pygame.Rect(self.x, self.y, self.w, self.h))
 
 
+class AlphaRectNoteUnit(RectNoteUnit):
+    """
+
+    """
+    def __init__(self, x, y, color, note, width=0, height=0, alpha=0, fade=False, fade_speed=5, delete_after_fade=False):
+        super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
+        self.w = width
+        self.h = height
+        self.alpha = alpha
+
+    def draw(self, screen):
+        r, g, b = self.color
+        r -= self.dissonance * 10
+        g -= self.dissonance * 10
+        g -= self.dissonance * 10
+        if r < 0:
+            r = 0
+        if g < 0:
+            g = 0
+        if b < 0:
+            b = 0
+        s = pygame.Surface((self.w, self.h), pygame.SRCALPHA | pygame.HWSURFACE)
+        s.fill((r, g, b, self.alpha))
+        screen.blit(s, (self.x, self.y))
+
+
 class EllipseNoteUnit(NoteUnit):
     """
     This object represents a single note as an ellipse (stretched out circle) on a screen.
@@ -153,7 +242,7 @@ class EllipseNoteUnit(NoteUnit):
         self.h = height
         self.line_width = line_width
 
-    def Draw(self, screen):
+    def draw(self, screen):
         pygame.draw.ellipse(screen, self.color, pygame.Rect(self.x, self.y, self.w, self.h), self.line_width)
 
 
@@ -166,7 +255,7 @@ class DiamondNoteUnit(NoteUnit):
         self.radius = radius
         self.thickness = line_thickness
 
-    def Draw(self, screen):
+    def draw(self, screen):
         points = [(self.x, self.y + self.radius + 1),
                   (self.x + self.radius, self.y),
                   (self.x, self.y - self.radius - 1),
@@ -183,7 +272,7 @@ class TriangleNoteUnit(NoteUnit):
         self.side_length = side_length
         self.thickness = thickness
 
-    def Draw(self, screen):
+    def draw(self, screen):
         points = [(self.x, self.y + int((sqrt(3)/3) * self.side_length)),
                   (self.x + int(self.side_length // 2), self.y - int((sqrt(3)/6) * self.side_length)),
                   (self.x - int(self.side_length // 2), self.y - int((sqrt(3)/6) * self.side_length))]
@@ -200,6 +289,6 @@ class RectChordUnit(NoteUnit):
         self.sw = sub_width
         self.h = height
 
-    def Draw(self, screen):
+    def draw(self, screen):
         pygame.draw.rect(screen, self.color, pygame.Rect(self.x, self.y, self.sw, self.h))
         pygame.draw.rect(screen, self.color, pygame.Rect((self.x + self.w) - self.sw, self.y, self.sw, self.h))
