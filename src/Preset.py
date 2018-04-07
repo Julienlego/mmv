@@ -499,13 +499,13 @@ class PresetMultiTrackChordsCircle(BasePreset):
         recent_notes = util.GetRecentNotes(self.notes_played)
         chord = util.GetChord(recent_notes)
 
-        # quarter-note chords override
+        # quarter-note chords
         # chord = viz_note.chord_in_beat
 
-        # half-bar chords override
+        # half-bar chords
         # chord = viz_note.chord_in_half_bar
 
-        # bar chords override
+        # bar chords
         # chord = viz_note.chord_in_bar
 
         chord_name = chord.pitchedCommonName
