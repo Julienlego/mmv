@@ -363,6 +363,22 @@ def GetVizNotes(score):
     # print(len(flat))
     flat.sort(key=lambda x: x.note.offset)
     # print(flat)
+
+    q_lengths = flat[-1].note.offset
+    q_lengths = int(q_lengths)
+
+    for i in range(0, q_lengths):
+        q_notes = []
+        q_vnotes = []
+        for note in flat:
+            if float(i) <= note.note.offset < float(i + 1):
+                q_notes.append(note.note)
+                q_vnotes.append(note)
+        chord = music21.chord.Chord(q_notes)
+
+        for note in q_vnotes:
+            note.chord_in_beat = chord
+
     return flat
 
 

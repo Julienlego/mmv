@@ -492,12 +492,16 @@ class PresetMultiTrackChordsCircle(BasePreset):
 
         # dissonance stuff
         dissonance = util.GetDissonanceOfNote(viz_note, self.viz_manager, self.notes_played)
-        print("dissonance: " + str(dissonance))
+        # print("dissonance: " + str(dissonance))
         rect_note.dissonance = dissonance
 
         # chord stuff
         recent_notes = util.GetRecentNotes(self.notes_played)
         chord = util.GetChord(recent_notes)
+
+        # quarter-note chords override
+        chord = viz_note.chord_in_beat
+
         chord_name = chord.pitchedCommonName
         s1 = str(chord_name)
         s2 = ""
