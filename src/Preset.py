@@ -500,7 +500,13 @@ class PresetMultiTrackChordsCircle(BasePreset):
         chord = util.GetChord(recent_notes)
 
         # quarter-note chords override
-        chord = viz_note.chord_in_beat
+        # chord = viz_note.chord_in_beat
+
+        # half-bar chords override
+        # chord = viz_note.chord_in_half_bar
+
+        # bar chords override
+        # chord = viz_note.chord_in_bar
 
         chord_name = chord.pitchedCommonName
         s1 = str(chord_name)

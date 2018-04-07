@@ -364,10 +364,14 @@ def GetVizNotes(score):
     flat.sort(key=lambda x: x.note.offset)
     # print(flat)
 
-    q_lengths = flat[-1].note.offset
-    q_lengths = int(q_lengths)
+    quarter_beats = flat[-1].note.offset
+    quarter_beats = int(quarter_beats)
 
-    for i in range(0, q_lengths):
+    bars = quarter_beats // 4
+    half_bars = bars * 2
+
+    # transcribing chords by quarter beat in song
+    for i in range(0, quarter_beats):
         q_notes = []
         q_vnotes = []
         for note in flat:
@@ -378,6 +382,32 @@ def GetVizNotes(score):
 
         for note in q_vnotes:
             note.chord_in_beat = chord
+
+    # transcribing chords by half-bar in song
+    for i in range(0, half_bars):
+        hb_notes = []
+        hb_vnotes = []
+        for note in flat:
+            if float(i * 2) <= note.note.offset < float((i + 1) * 2):
+                hb_notes.append(note.note)
+                hb_vnotes.append(note)
+        chord = music21.chord.Chord(hb_notes)
+
+        for note in hb_vnotes:
+            note.chord_in_half_bar = chord
+
+    # transcribing chords by bar in song
+    for i in range(0, bars):
+        b_notes = []
+        b_vnotes = []
+        for note in flat:
+            if float(i * 4) <= note.note.offset < float((i + 1) * 4):
+                b_notes.append(note.note)
+                b_vnotes.append(note)
+        chord = music21.chord.Chord(b_notes)
+
+        for note in b_vnotes:
+            note.chord_in_bar = chord
 
     return flat
 

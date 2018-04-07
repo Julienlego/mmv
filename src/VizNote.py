@@ -17,5 +17,6 @@ class VizNote:
         self.track = -1
 
         self.chord_in_beat = None
+        self.chord_in_half_bar = None
         self.chord_in_bar = None
 
