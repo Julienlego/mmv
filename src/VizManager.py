@@ -190,8 +190,8 @@ class VizManager:
         self.units.clear()
         self.tempo = self.parser.get_tempo()
         self.tempo = 100.0
-        self.notes = util.GetVizNotes(self.parser.score)
-        self.key = util.AnalyzeKey(self.parser.score)
+        self.notes = util.get_viz_notes(self.parser.score)
+        self.key = util.analyze_key(self.parser.score)
         self.main_frame.statusbar.SetStatusText("Key: " + str(self.key), 4)
 
         # Print track instruments to debugger
@@ -220,11 +220,11 @@ class VizManager:
             if n.note.offset == first_offset:
                 ticks = pygame.time.get_ticks()
                 new_next_note = [n]
-                # new_next_note.append(ticks + util.OffsetMS(n.offset, self.tempo))
+                # new_next_note.append(ticks + util.offet_ms(n.offset, self.tempo))
                 try:
                     mts = n.notes.midiTickStart
                 except AttributeError:
-                    mts = util.OffsetMS(n.note.offset, self.tempo)
+                    mts = util.offet_ms(n.note.offset, self.tempo)
                 try:
                     oq_error = n.note.editorial.offsetQuantizationError
                     mts += oq_error
@@ -239,7 +239,7 @@ class VizManager:
 
         self.preset_loaded = True
         print("Preset Loaded")
-        util.PrintLineToPanel(dbg, "\nPreset Loaded\n\n")
+        util.print_line_to_panel(dbg, "\nPreset Loaded\n\n")
 
     def pause(self):
         """
@@ -305,8 +305,8 @@ class VizManager:
                                     except AttributeError:
                                         pass
 
-                                    offset = util.OffsetMS((m.note.offset - current_offset), self.tempo) + \
-                                             util.OffsetMS(oq_error, self.tempo)
+                                    offset = util.offet_ms((m.note.offset - current_offset), self.tempo) + \
+                                             util.offet_ms(oq_error, self.tempo)
                                     new_next_note.append(ticks + offset)
                                     self.next_notes.append(new_next_note)
                             break
@@ -327,7 +327,7 @@ class VizManager:
                             qlq_error = n[0].note.editorial.quarterLengthQuantizationError
                         except AttributeError:
                             pass
-                        length_ms = util.OffsetMS(length, self.tempo) + util.OffsetMS(qlq_error, self.tempo)
+                        length_ms = util.offet_ms(length, self.tempo) + util.offet_ms(qlq_error, self.tempo)
                         n.append(ticks + length_ms)
                         track = n[0].track
                         # instrument = self.track_instrument_map[track - 1]
@@ -379,12 +379,12 @@ class VizManager:
         if self.notes:
 
             # Prints all notes/rests in part to debug panel
-            util.PrintLineToPanel(dbg, "\nNote/Rest\tOctave\tLen\tOffset\n")
+            util.print_line_to_panel(dbg, "\nNote/Rest\tOctave\tLen\tOffset\n")
             for n in self.notes:
-                util.PrintNoteToPanel(dbg, n.note)
-            util.PrintLineToPanel(dbg, "\n\n===============================")
+                util.print_note_to_panel(dbg, n.note)
+            util.print_line_to_panel(dbg, "\n\n===============================")
         else:
-            util.PrintLineToPanel(dbg, "\nNo song loaded!\n")
+            util.print_line_to_panel(dbg, "\nNo song loaded!\n")
 
     def get_next_id(self):
         id = self.next_id

@@ -11,23 +11,23 @@ import math
 #############################################################
 
 
-def PrintSongToPanel(dbg, score):
+def print_song_to_panel(dbg, score):
     notes = [i for i in score.flat.notesAndRests]
     # Iterates through all notes, rests, and chords
     for n in notes:
         if isinstance(n, music21.note.Note):
-            PrintNoteToPanel(dbg, n)
+            print_note_to_panel(dbg, n)
 
         elif isinstance(n, music21.note.Rest):
-            PrintRestToPanel(dbg, n)
+            print_rest_to_panel(dbg, n)
 
         elif isinstance(n, music21.chord.Chord):
-            PrintChordToPanel(dbg, n)
+            print_chord_to_panel(dbg, n)
 
-    PrintLineToPanel(dbg, "\n\n===============================")
+    print_line_to_panel(dbg, "\n\n===============================")
 
 
-def PrintLineToPanel(txt_panel, line):
+def print_line_to_panel(txt_panel, line):
     """
     Write line to TextCtrl (debug) panel
     """
@@ -35,7 +35,7 @@ def PrintLineToPanel(txt_panel, line):
         txt_panel.WriteText(line)
 
 
-def PrintNoteToPanel(panel, n):
+def print_note_to_panel(panel, n):
     """
     Prints note's name, octave, quarterLength, and offset to the (debug) panel
     """
@@ -44,10 +44,10 @@ def PrintNoteToPanel(panel, n):
                + str(n.pitch.octave) + "\t" \
                + str(n.duration.quarterLength) + "\t" \
                + str(n.offset) + "\n"
-        PrintLineToPanel(panel, line)
+        print_line_to_panel(panel, line)
 
 
-def PrintRestToPanel(panel, r):
+def print_rest_to_panel(panel, r):
     """
     Prints rest to the (debug) panel
     """
@@ -56,10 +56,10 @@ def PrintRestToPanel(panel, r):
             line = "Rest" + "\t" \
                    + str(r.duration.quarterLength) + "\t" \
                    + str(r.offset) + "\n"
-            PrintLineToPanel(panel, line)
+            print_line_to_panel(panel, line)
 
 
-def PrintChordToPanel(panel, n):
+def print_chord_to_panel(panel, n):
     """
     Prints chord, with all its notes, to the (debug) panel
     """
@@ -77,7 +77,7 @@ def PrintChordToPanel(panel, n):
                             + str(new_note.duration.quarterLength) + "\t" \
                             + str(new_note.offset) + "\n"
             line += "===============================\n"
-            PrintLineToPanel(panel, line)
+            print_line_to_panel(panel, line)
 
 
 #############################################################
@@ -87,7 +87,7 @@ def PrintChordToPanel(panel, n):
 #############################################################
 
 
-def SimpleNoteToColorTuple(viz_note, key=None):
+def simple_note_to_color_tuple(viz_note, key=None):
     """
     Converts music21 Note to an RGB color tuple (R, G, B) and returns the tuple.
     The colors are predetermined.
@@ -113,7 +113,7 @@ def SimpleNoteToColorTuple(viz_note, key=None):
         print("COULD NOT CONVERT NOTE TO RGB: {0}".format(type(note)))
         return None
 
-    # Remove unneccessary characters to get just the note name and # or -
+    # Remove unnecessary characters to get just the note name and # or -
     note_name = note_name.replace('~', '')
     note_name = note_name.replace('`', '')
 
@@ -144,8 +144,7 @@ def SimpleNoteToColorTuple(viz_note, key=None):
     return color
 
 
-def ScaleDegreeToColor(note, key=None):
-    sd = None
+def scale_degree_to_color(note, key=None):
     if isinstance(note, music21.note.Note):
         sd = note.pitch.midi
     else:
@@ -164,7 +163,7 @@ def ScaleDegreeToColor(note, key=None):
         return color
 
 
-def MidiToMonochrome(midi_note):
+def midi_to_monochrome(midi_note):
     """
     Returns a monochrome color using the midi note value.
     """
@@ -172,18 +171,18 @@ def MidiToMonochrome(midi_note):
     return (r, g, b)
 
 
-def ChangeColorBrightness(color=(0, 0, 0), val=0):
+def change_color_brightness(color=(0, 0, 0), val=0):
     """
     Changes the brightness of the RGB color by an integer -255 <= val <= 255 and returns the color.
     """
-    r = TruncateColorValue(int(color[0] + val))
-    g = TruncateColorValue(int(color[1] + val))
-    b = TruncateColorValue(int(color[2] + val))
+    r = truncate_color_value(int(color[0] + val))
+    g = truncate_color_value(int(color[1] + val))
+    b = truncate_color_value(int(color[2] + val))
     nc = (r, g, b)
     return nc
 
 
-def TruncateColorValue(val):
+def truncate_color_value(val):
     """
     Makes sure the new color value is with the valid range of 0 <= val <= 255.
     """
@@ -195,7 +194,7 @@ def TruncateColorValue(val):
         return val
 
 
-def GetRandColor():
+def get_rand_color():
     """
     Returns a random RGB color.
     """
@@ -210,7 +209,7 @@ def GetRandColor():
 #############################################################
 
 
-def OffsetMS(offset, tempo):
+def offet_ms(offset, tempo):
     """
 
     """
@@ -220,7 +219,7 @@ def OffsetMS(offset, tempo):
     return offset_ms
 
 
-def GraphNoteY(note, highest_note, lowest_note, screen_height, smart_crop=False):
+def graph_note_y(note, highest_note, lowest_note, screen_height, smart_crop=False):
     """
     Returns the height position of a note's pitch relative to the lowest and highest possible notes.
     """
@@ -237,7 +236,7 @@ def GraphNoteY(note, highest_note, lowest_note, screen_height, smart_crop=False)
     return y
 
 
-def CreateUnitInCenterOfQuadrant(note_unit=None, top_left_pos=(0, 0), bottom_right_pos=(0, 0)):
+def create_unit_in_center_of_quadrant(note_unit=None, top_left_pos=(0, 0), bottom_right_pos=(0, 0)):
     """
     Takes a NoteUnit and returns a new NoteUnit located in the center of the rectangle drawn with the
     top left and bottom right points. Each point is a tuple (x, y) of its position.
@@ -263,12 +262,12 @@ def CreateUnitInCenterOfQuadrant(note_unit=None, top_left_pos=(0, 0), bottom_rig
 #############################################################
 
 
-def CreateNoteRect(notes, the_note, dest):
+def create_note_rect(notes, the_note, dest):
     """
     Creates a note onto a destination rect. Used for the static piano roll preset.
 
-    :param score:   the score object of the song the note belongs to
-    :param notee:   the note that is being graphed
+    :param notes:   the score object of the song the note belongs to
+    :param the_note:   the note that is being graphed
     :param dest:    the destination rect to graph the note onto
     :return:        the rect that will represent the note within the destination rect
     """
@@ -298,7 +297,7 @@ def CreateNoteRect(notes, the_note, dest):
     return rect
 
 
-def GetEdgePitches(score):
+def get_edge_pitches(score):
     """
     Takes a score and returns the lowest and highest pitches in the song.
     """
@@ -321,7 +320,7 @@ def GetEdgePitches(score):
     return lowest, highest
 
 
-def GetVizNotes(score):
+def get_viz_notes(score):
     current_offset = 0.0
     last_offset = 0.0
     track_num = 0
@@ -412,7 +411,7 @@ def GetVizNotes(score):
     return flat
 
 
-def GetChord(notes):
+def get_chord(notes):
     note_names = []
     for note in notes:
         if isinstance(note, music21.note.Note):
@@ -426,13 +425,13 @@ def GetChord(notes):
     return None
 
 
-def GetRecentNotes(notes, num=5):
+def get_recent_notes(notes, num=5):
     index = abs(num) * -1
     previous_notes = notes[index:]
     return previous_notes
 
 
-def GetAverageNote(track):
+def get_average_note(track):
     """
     Returns average note in a given track. Track must be a part from a score.
     """
@@ -457,7 +456,7 @@ def GetAverageNote(track):
     return music21.note.Note(new_p)
 
 
-def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
+def get_pos_on_circle_of_fifths(note, origin, radius, key, quality=None):
 
     if isinstance(note, vn.VizNote):
         pitch = note.note.pitch.midi
@@ -472,7 +471,7 @@ def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
     if key is not None:
         tonic_pitch = key.tonic.pitchClass
         relative_pitch = (pitch - tonic_pitch) % 12
-        relative_position = ConvertPitchToCirclePosition(relative_pitch, quality)
+        relative_position = convert_pitch_to_circle_position(relative_pitch, quality)
 
         if quality == 'major':
             radius *= 0.82
@@ -510,7 +509,7 @@ def GetPosOnCircleOfFifths(note, origin, radius, key, quality=None):
 #                                                           #
 #############################################################
 
-def GetDiatonicCircleLevel(note=None):
+def get_diatonic_circle_level(note=None):
     """
     Returns the diatonic circle level of the given music21 note.
     """
@@ -542,7 +541,7 @@ def GetDiatonicCircleLevel(note=None):
     return val
 
 
-def ConvertPitchToCirclePosition(pitch, quality=None):
+def convert_pitch_to_circle_position(pitch, quality=None):
     """
     Converts a pitch (assumes already normalized to key) to a position on the circle of fifths.
     """
@@ -570,7 +569,7 @@ def ConvertPitchToCirclePosition(pitch, quality=None):
     return absolute_pitch
 
 
-def GetDissonanceOfNote(note, viz_manager, notes=None):
+def get_dissonance_of_note(note, viz_manager, notes=None):
     if isinstance(note, vn.VizNote):
         pitch = note.note.pitch.midi % 12
     elif isinstance(note, music21.note.Note):
@@ -580,24 +579,24 @@ def GetDissonanceOfNote(note, viz_manager, notes=None):
 
     key_num = viz_manager.key.tonic.pitchClass
 
-    distance_from_key = abs(ConvertPitchToCirclePosition(pitch) - ConvertPitchToCirclePosition(key_num))
+    distance_from_key = abs(convert_pitch_to_circle_position(pitch) - convert_pitch_to_circle_position(key_num))
     if distance_from_key > 6:
         distance_from_key = 12 - distance_from_key
 
-    recent_notes = GetRecentNotes(notes)
-    chord = GetChord(recent_notes)
+    recent_notes = get_recent_notes(notes)
+    chord = get_chord(recent_notes)
     root = chord.root()
     root_note = music21.note.Note(root)
     root_pitch = root_note.pitch.midi % 12
 
-    dissonance = (ConvertPitchToCirclePosition(pitch) - ConvertPitchToCirclePosition(root_pitch)) % 12
+    dissonance = (convert_pitch_to_circle_position(pitch) - convert_pitch_to_circle_position(root_pitch)) % 12
 
     return distance_from_key + dissonance
 
 
 
 
-def GetChromaticCircleLevel(note=None):
+def get_chromatic_circle_level(note=None):
     """
 
     """
@@ -629,29 +628,29 @@ def GetChromaticCircleLevel(note=None):
     return val
 
 
-def GetPitchDistance(pitch1=None, pitch2=None):
+def get_pitch_distance(pitch1=None, pitch2=None):
     """
     Sums up the number of moves on the diatonic and chromatic circle of fifths between the two music21 pitches.
     """
-    note1_dia_lvl = GetDiatonicCircleLevel(pitch1)
-    note2_dia_lvl = GetDiatonicCircleLevel(pitch2)
+    note1_dia_lvl = get_diatonic_circle_level(pitch1)
+    note2_dia_lvl = get_diatonic_circle_level(pitch2)
     dia_dist = abs(note1_dia_lvl - note2_dia_lvl)
 
-    note1_chr_lvl = GetChromaticCircleLevel(pitch1)
-    note2_chr_lvl = GetChromaticCircleLevel(pitch2)
+    note1_chr_lvl = get_chromatic_circle_level(pitch1)
+    note2_chr_lvl = get_chromatic_circle_level(pitch2)
     chr_dist = abs(note1_chr_lvl - note2_chr_lvl)
 
     return dia_dist + chr_dist
 
 
-def GetNoteDistance(note1=None, note2=None):
+def get_note_distance(note1=None, note2=None):
     """
     Calculates the distance between two notes.
     """
-    return GetPitchDistance(note1, note2)
+    return get_pitch_distance(note1, note2)
 
 
-def GetChordDistance(chord=None, chord2=None):
+def get_chord_distance(chord=None, chord2=None):
     """
     Attempted implementation of the chord distance rule from the Cornell paper.
 
@@ -666,7 +665,7 @@ def GetChordDistance(chord=None, chord2=None):
     root_chord2 = chord2.root()
 
     # Sum of moves on both circles
-    circle_sum = GetPitchDistance(root_chord1, root_chord2)
+    circle_sum = get_pitch_distance(root_chord1, root_chord2)
 
     # Count non-common pitch classes in both y and x
     num_noncom_pitch = 0
@@ -680,7 +679,7 @@ def GetChordDistance(chord=None, chord2=None):
     return circle_sum + (num_noncom_pitch // 2)
 
 
-def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
+def get_surface_tension(viz_note=None, prev_notes_played=None, scorekey=None):
     """
     Calculates the surface tension of a note using the Surface tension rule from the Cornell paper, which states:
 
@@ -693,7 +692,7 @@ def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
     Parts of the rule are improvised due to lack of musical and technical expertise.
     """
     # First, figure out if we're dealing with a chord
-    chord = FindChordFromVizNote(viz_note, prev_notes_played)
+    chord = find_chord_from_viznote(viz_note, prev_notes_played)
     scale = music21.scale.ConcreteScale(scorekey)   # scale the song is in
 
     score = 0
@@ -754,7 +753,7 @@ def GetSurfaceTension(viz_note=None, prev_notes_played=None, scorekey=None):
     return score
 
 
-def FindChordFromVizNote(viz_note, prev_notes_played):
+def find_chord_from_viznote(viz_note, prev_notes_played):
     """
     Sees if the note belongs to a chord by looking for other notes played that have
     the same offset and are from the same track.
@@ -776,7 +775,7 @@ def FindChordFromVizNote(viz_note, prev_notes_played):
         return music21.chord.Chord(notes)
 
 
-def GetMelodicAttraction(pitch1=None, pitch2=None):
+def get_melodic_attraction(pitch1=None, pitch2=None):
     """
     Attempted implementation of the melodic attraction rule from the Cornell paper.
 
@@ -801,9 +800,9 @@ def GetMelodicAttraction(pitch1=None, pitch2=None):
     return (p1 / p2) * (1 / n ^ 2)
 
 
-def GetHarmonicAttraction(pitch1=None, pitch2=None):
+def get_harmonic_attraction(pitch1=None, pitch2=None):
     """
-    Attempted implemntation of the harmonic attraction rule from the Cornell paper.
+    Attempted implementation of the harmonic attraction rule from the Cornell paper.
 
     F(p1, p2) = 10 x [a(p1, p2) / o(p1, p2)], where
         - a = sum of realized voice-leading attractions for all voices in p1
@@ -814,17 +813,17 @@ def GetHarmonicAttraction(pitch1=None, pitch2=None):
     for x in range(pitch1.midi, pitch2.midi, 1):
         a = music21.pitch.Pitch(x)
         b = music21.pitch.Pitch(x+1)
-        val = GetMelodicAttraction(a, b)
+        val = get_melodic_attraction(a, b)
         if val is not None:
             sum += val
 
     c = music21.note.Note(pitch1)
     d = music21.note.Note(pitch2)
-    result = sum / GetNoteDistance(c, d)
+    result = sum / get_note_distance(c, d)
     return 10 * result
 
 
-def GetLocalHierarchicalTension(viz_note=None, prev_notes_played=None):
+def get_local_hierarchical_tension(viz_note=None, prev_notes_played=None):
     """
     Calculates the local tension of the note hierrarchicaly using the hierarchical tension rule from the Cornell paper.
 
@@ -837,7 +836,7 @@ def GetLocalHierarchicalTension(viz_note=None, prev_notes_played=None):
     pass
 
 
-def GetGlobalHierarchicalTension(viz_note=None, prev_notes_played=None):
+def get_global_hierarchical_tension(viz_note=None, prev_notes_played=None):
     """
     Calculates the local tension of the note hierrarchicaly using the hierarchical tension rule from the Cornell paper.
 
@@ -850,7 +849,7 @@ def GetGlobalHierarchicalTension(viz_note=None, prev_notes_played=None):
     pass
 
 
-def GetSequentialTension(target_viz_note=None, prev_notes_played=None, key=None):
+def get_sequential_tension(target_viz_note=None, prev_notes_played=None, key=None):
     """
     Calculates the tension of a note sequentially using the sequential tension rule from the Cornell paper.
 
@@ -864,39 +863,40 @@ def GetSequentialTension(target_viz_note=None, prev_notes_played=None, key=None)
     with chords and our program iterates through a flat list of all the notes in the track, striped from their chord.
     If the target note doesn't belong to a chord at all, then we need to improvise so a note's pitch can be used.
     """
-    temp = FindChordFromVizNote(target_viz_note, prev_notes_played)
+    temp = find_chord_from_viznote(target_viz_note, prev_notes_played)
     dist = 0
     if temp is None:        # standalone note
         prec_note = prev_notes_played[:1]
-        dist = GetNoteDistance(prec_note.note, target_viz_note.note) + \
-               GetSurfaceTension(target_viz_note, prev_notes_played)
+        dist = get_note_distance(prec_note.note, target_viz_note.note) + \
+               get_surface_tension(target_viz_note, prev_notes_played)
         return dist
     else:                   # chord
         # get preceding note or chord
         i = 1
-        temp2 = FindChordFromVizNote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
+        temp2 = find_chord_from_viznote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
         while (temp == temp2) and (temp2 is not None):
-            temp2 = FindChordFromVizNote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
+            temp2 = find_chord_from_viznote(prev_notes_played[len(prev_notes_played) - i], prev_notes_played)
         if temp2 is None:       # what precedes the target is a note!
             prec_note = prev_notes_played[len(prev_notes_played) - i]
             pc = prec_note.pitchClass
             ideal_chord = music21.chord.Chord([pc, pc + 2, pc + 4])
-            return GetChordDistance(temp, ideal_chord) + GetSurfaceTension(target_viz_note, prev_notes_played, key)
+            return get_chord_distance(temp, ideal_chord) + get_surface_tension(target_viz_note, prev_notes_played, key)
         else:                   # what precedes the target is another chord!
-            return GetChordDistance(temp, temp2) + GetSurfaceTension(target_viz_note, prev_notes_played, key)
+            return get_chord_distance(temp, temp2) + get_surface_tension(target_viz_note, prev_notes_played, key)
 
 
-def CreateChordFromNote(root_note=None):
+def create_chord_from_note(root_note=None):
     """
     Creates and returns a normal chord with the given note as its root.
     """
     pass
 
 
-def AnalyzeKey(score):
+def analyze_key(score):
     if isinstance(score, music21.stream.Score):
         key = score.analyze('key')
         return key
+
 
 note_colors = {
     0: (255, 0, 0),

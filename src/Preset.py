@@ -87,16 +87,16 @@ class PresetSimpleColorCircleRelative(BasePreset):
     """
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(viz_note)
-        y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.simple_note_to_color_tuple(viz_note)
+        y = util.graph_note_y(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
         r = int(viz_note.note.volume.velocity) // 2
         circle = unit.CircleNoteUnit(screen_x // 2, 0, color, viz_note, r)
-        circle = util.CreateUnitInCenterOfQuadrant(circle, (0, 0), (screen_x, screen_y))
+        circle = util.create_unit_in_center_of_quadrant(circle, (0, 0), (screen_x, screen_y))
         circle.y = y
         self.viz_manager.units.append(circle)
 
@@ -117,11 +117,11 @@ class PresetSimpleColorCircleMaxPitch(BasePreset):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
-        y = util.GraphNoteY(viz_note, 255, 0, screen_y)
+        color = util.simple_note_to_color_tuple(note)
+        y = util.graph_note_y(viz_note, 255, 0, screen_y)
         r = int(note.volume.velocity) // 2
         circle = unit.CircleNoteUnit(screen_x // 2, 0, color, note, r)
-        circle = util.CreateUnitInCenterOfQuadrant(circle, (0, 0), (screen_x, screen_y))
+        circle = util.create_unit_in_center_of_quadrant(circle, (0, 0), (screen_x, screen_y))
         circle.y = y
         self.viz_manager.units.append(circle)
 
@@ -137,13 +137,13 @@ class PresetPianoRollFading(BasePreset):
     """
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
-        color = util.GetRandColor()
+        y = util.graph_note_y(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.get_rand_color()
         note_rect = unit.RectNoteUnit(screen_x // 2, y, color, viz_note, 200, 20)
         note_rect.x -= (note_rect.w // 2)  # subtracts half the width as the offset to make the unit center
         note_rect.fade = True
@@ -159,16 +159,16 @@ class PresetPianoRoll(BasePreset):
     """
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
-        color = util.GetRandColor()
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.get_rand_color()
         note_rect = unit.RectNoteUnit(screen_x // 2, y, color, note, 200, 20)
-        note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x, screen_y))
+        note_rect = util.create_unit_in_center_of_quadrant(note_rect, (0, 0), (screen_x, screen_y))
         note_rect.y = y
         self.viz_manager.units.append(note_rect)
 
@@ -182,17 +182,17 @@ class PresetMonochromePianoRoll(BasePreset):
     """
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
         self.viz_manager.screen.fill((0, 0, 255))
 
     def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
-        color = util.MidiToMonochrome(viz_note.note.pitch.midi)
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        color = util.midi_to_monochrome(viz_note.note.pitch.midi)
         note_rect = unit.RectNoteUnit(0, 0, color, note, 200, 20)
-        note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x, screen_y))
+        note_rect = util.create_unit_in_center_of_quadrant(note_rect, (0, 0), (screen_x, screen_y))
         note_rect.y = y
         self.viz_manager.units.append(note_rect)
 
@@ -206,16 +206,16 @@ class PresetColorPianoRoll(BasePreset):
     """
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         viz_note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(viz_note)
+        color = util.simple_note_to_color_tuple(viz_note)
         note_rect = unit.RectNoteUnit((screen_x // 2) - 100, 0, color, viz_note, 200, 20)
-        note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x, screen_y))
-        note_rect.y = util.GraphNoteY(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
+        note_rect = util.create_unit_in_center_of_quadrant(note_rect, (0, 0), (screen_x, screen_y))
+        note_rect.y = util.graph_note_y(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(note_rect)
 
     def per_note_off(self, screen, message):
@@ -248,8 +248,8 @@ class PresetStaticPianoRoll(BasePreset):
             if isinstance(note, music21.note.Note):
                 screen_x = self.viz_manager.main_frame.display.size.x
                 screen_y = self.viz_manager.main_frame.display.size.y
-                rect = util.CreateNoteRect(notes, note, pygame.Rect(0, 0, screen_x, screen_y))
-                color = util.GetRandColor()
+                rect = util.create_note_rect(notes, note, pygame.Rect(0, 0, screen_x, screen_y))
+                color = util.get_rand_color()
                 note_rect = unit.RectNoteUnit(rect.left, rect.top, color, note, rect.width, rect.height)
                 self.viz_manager.units.append(note_rect)
 
@@ -261,16 +261,16 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
     Notes with greater pitch go higher on the screen, lower notes go lower.
     """
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
+        color = util.simple_note_to_color_tuple(note)
 
         # variables for note_rect sizes and y position
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
         w = 180
         h = 15
 
@@ -278,12 +278,12 @@ class PresetTwoTrackColorPianoRoll(BasePreset):
         # print("Track: {0}".format(viz_note.track))
         if viz_note.track is 2:
             note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
-            note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (screen_x // 2, 0), (screen_x, screen_y))
+            note_rect = util.create_unit_in_center_of_quadrant(note_rect, (screen_x // 2, 0), (screen_x, screen_y))
             note_rect.y = y
             self.viz_manager.units.append(note_rect)
         elif viz_note.track is 1:
             note_rect = unit.RectNoteUnit(0, 0, color, note, w, h)
-            note_rect = util.CreateUnitInCenterOfQuadrant(note_rect, (0, 0), (screen_x // 2, screen_y))
+            note_rect = util.create_unit_in_center_of_quadrant(note_rect, (0, 0), (screen_x // 2, screen_y))
             note_rect.y = y
             self.viz_manager.units.append(note_rect)
 
@@ -304,14 +304,14 @@ class PresetMultiTrackColorCircle(BasePreset):
         self.num_tracks = 0
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
         self.num_tracks = len(score.parts)
 
     def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
+        color = util.simple_note_to_color_tuple(note)
         r = 15
         circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
 
@@ -324,10 +324,10 @@ class PresetMultiTrackColorCircle(BasePreset):
 
         x = interval * (viz_note.track - 1)
         # print("Printing note {0} in track {1} in interval {2}".format(note, viz_note.track, x))
-        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
+        circle_note = util.create_unit_in_center_of_quadrant(circle_note, (0, 0), ((x + interval), screen_y))
         # print("Circle note x={0}, y={1}".format(circle_note.x, circle_note.y))
         # circle_note.x += (self.num_tracks - 1) * interval
-        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        circle_note.y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(circle_note)
 
     def per_note_off(self, screen, message):
@@ -339,14 +339,14 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
 
     """
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
         self.num_tracks = len(score.parts)
 
     def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
+        color = util.simple_note_to_color_tuple(note)
         track_width = screen_x // self.num_tracks
 
         h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
@@ -354,9 +354,9 @@ class PresetMultiTrackColorPianoRoll(BasePreset):
         rect_note.id = id(viz_note)     # this is an important line!
 
         region_x = track_width * (viz_note.track - 1)
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
 
-        rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
+        rect_note = util.create_unit_in_center_of_quadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
         rect_note.y = y
 
         self.viz_manager.units.append(rect_note)
@@ -370,14 +370,14 @@ class PresetMultiTrackChords(BasePreset):
 
     """
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
         self.num_tracks = len(score.parts)
 
     def per_note_on(self, screen, viz_note):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+        color = util.scale_degree_to_color(note, self.viz_manager.key)
         track_width = screen_x // self.num_tracks
 
         h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
@@ -385,17 +385,17 @@ class PresetMultiTrackChords(BasePreset):
         rect_note.id = id(viz_note)
 
         region_x = track_width * (viz_note.track - 1)
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
 
-        rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
+        rect_note = util.create_unit_in_center_of_quadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
         rect_note.y = y
 
         self.viz_manager.units.append(rect_note)
 
         # chord stuff
         self.notes_played.append(viz_note)
-        recent_notes = util.GetRecentNotes(self.notes_played)
-        chord = util.GetChord(recent_notes)
+        recent_notes = util.get_recent_notes(self.notes_played)
+        chord = util.get_chord(recent_notes)
         chord_name = chord.pitchedCommonName
         s1 = str(chord_name)
         s2 = ""
@@ -415,7 +415,7 @@ class PresetMultiTrackChords(BasePreset):
             root = self.latest_chord.root()
             note = music21.note.Note(root)
 
-            color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+            color = util.scale_degree_to_color(note, self.viz_manager.key)
             rect_chord = unit.RectChordUnit(0, 0, color, note, screen_x, screen_y, 20)
             rect_chord.id = id(note)
 
@@ -436,7 +436,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
         self.current_chord_unit = None
 
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
         self.num_tracks = len(score.parts)
         display_size = self.viz_manager.main_frame.display.size
         x = display_size.x // 2
@@ -473,7 +473,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+        color = util.scale_degree_to_color(note, self.viz_manager.key)
         track_width = screen_x // self.num_tracks
 
         h = screen_y // (self.highest_pitch - (self.lowest_pitch - 1))
@@ -481,9 +481,9 @@ class PresetMultiTrackChordsCircle(BasePreset):
         rect_note.id = id(viz_note)
 
         region_x = track_width * (viz_note.track - 1)
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y, True)
 
-        rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
+        rect_note = util.create_unit_in_center_of_quadrant(rect_note, (region_x, 0), (region_x + track_width, screen_y))
         rect_note.y = y
 
         self.viz_manager.units.append(rect_note)
@@ -491,13 +491,13 @@ class PresetMultiTrackChordsCircle(BasePreset):
         self.notes_played.append(viz_note)
 
         # dissonance stuff
-        dissonance = util.GetDissonanceOfNote(viz_note, self.viz_manager, self.notes_played)
+        dissonance = util.get_dissonance_of_note(viz_note, self.viz_manager, self.notes_played)
         # print("dissonance: " + str(dissonance))
         rect_note.dissonance = dissonance
 
         # chord stuff
-        recent_notes = util.GetRecentNotes(self.notes_played)
-        chord = util.GetChord(recent_notes)
+        recent_notes = util.get_recent_notes(self.notes_played)
+        chord = util.get_chord(recent_notes)
 
         # quarter-note chords
         # chord = viz_note.chord_in_beat
@@ -528,8 +528,8 @@ class PresetMultiTrackChordsCircle(BasePreset):
             note = music21.note.Note(root)
             quality = self.latest_chord.quality
 
-            color = util.ScaleDegreeToColor(note, self.viz_manager.key)
-            x, y = util.GetPosOnCircleOfFifths(note, self.circle_origin, self.circle_radius, self.viz_manager.key, quality)
+            color = util.scale_degree_to_color(note, self.viz_manager.key)
+            x, y = util.get_pos_on_circle_of_fifths(note, self.circle_origin, self.circle_radius, self.viz_manager.key, quality)
             circle_chord = unit.CircleNoteUnit(x, y, color, note, 20)
             circle_chord.id = id(note)
 
@@ -552,17 +552,17 @@ class PresetTensionCornell(BasePreset):
     def first_load(self, score):
         self.key = score.analyze('key')         # uses the Krumhansl-Schmuckler key determination algorithm
         self.num_tracks = len(score.parts)
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         self.notes_played.append(viz_note)
-        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
+        tension = util.get_sequential_tension(viz_note, self.notes_played, self.key)
         # print("Tension: {0} from note {1} in track {2}".format(tension, viz_note.note.name, viz_note.track))
         screen.fill((tension, tension, tension))
         note = viz_note.note
         screen_x = self.viz_manager.main_frame.display.size.x
         screen_y = self.viz_manager.main_frame.display.size.y
-        color = util.SimpleNoteToColorTuple(note)
+        color = util.simple_note_to_color_tuple(note)
         r = 15
         circle_note = unit.CircleNoteUnit(0, 0, color, note, r)
 
@@ -574,8 +574,8 @@ class PresetTensionCornell(BasePreset):
             self.viz_manager.units.append(line)
 
         x = interval * (viz_note.track - 1)
-        circle_note = util.CreateUnitInCenterOfQuadrant(circle_note, (0, 0), ((x + interval), screen_y))
-        circle_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        circle_note = util.create_unit_in_center_of_quadrant(circle_note, (0, 0), ((x + interval), screen_y))
+        circle_note.y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
         self.viz_manager.units.append(circle_note)
 
     def per_note_off(self, screen, message):
@@ -588,12 +588,12 @@ class PresetChordRoot(BasePreset):
     It also draws a piano roll visualization of the notes, just like normal piano roll.
     """
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, message):
         self.notes_played.append(message)
-        recent_notes = util.GetRecentNotes(self.notes_played)
-        chord = util.GetChord(recent_notes)
+        recent_notes = util.get_recent_notes(self.notes_played)
+        chord = util.get_chord(recent_notes)
         chord_name = chord.pitchedCommonName
         # dbg = self.viz_manager.main_frame.debugger.textbox
         s1 = str(chord_name)
@@ -602,7 +602,7 @@ class PresetChordRoot(BasePreset):
             s2 = str(self.latest_chord.pitchedCommonName)
         if s1 != s2:
             print("new chord: " + str(chord_name))
-            # util.PrintLineToPanel(dbg, "new chord: " + str(chord_name) + "\n")
+            # util.print_line_to_panel(dbg, "new chord: " + str(chord_name) + "\n")
 
             screen_x = self.viz_manager.main_frame.display.size.x
             screen_y = self.viz_manager.main_frame.display.size.y
@@ -618,17 +618,17 @@ class PresetChordRoot(BasePreset):
             root = self.latest_chord.root()
             note = music21.note.Note(root)
 
-            color = util.SimpleNoteToColorTuple(note)
+            color = util.simple_note_to_color_tuple(note)
             rect_note = unit.RectNoteUnit(300, 0, color, note, 200, 60)
             rect_note.h = 60
-            rect_note = util.CreateUnitInCenterOfQuadrant(rect_note, (0, 0), (screen_x, screen_y))
-            rect_note.y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+            rect_note = util.create_unit_in_center_of_quadrant(rect_note, (0, 0), (screen_x, screen_y))
+            rect_note.y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
 
             self.viz_manager.units.append(rect_note)
 
         else:
             pass
-            # util.PrintLineToPanel(dbg, "------")
+            # util.print_line_to_panel(dbg, "------")
 
     def per_note_off(self, screen, message):
         pass
@@ -645,7 +645,7 @@ class PresetInstrumentGroups(BasePreset):
         Other (i.e. sound effects) - circle (not filled)
     """
     def first_load(self, score):
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
         self.num_tracks = len(score.parts)
 
     def per_note_on(self, screen, viz_note):
@@ -659,9 +659,9 @@ class PresetInstrumentGroups(BasePreset):
             line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
             self.viz_manager.units.append(line)
 
-        color = util.SimpleNoteToColorTuple(note)
+        color = util.simple_note_to_color_tuple(note)
         vn = None
-        y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
         x_interval = col_wid * (viz_note.track - 1)
         x = (x_interval * 2 + col_wid) // 2
         offset = 0
@@ -707,7 +707,7 @@ class PresetJulien(BasePreset):
     def first_load(self, score):
         self.key = score.analyze('key')                 # uses the Krumhansl-Schmuckler key determination algorithm
         self.num_tracks = len(score.parts)
-        self.lowest_pitch, self.highest_pitch = util.GetEdgePitches(score)
+        self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
     def per_note_on(self, screen, viz_note):
         self.notes_played.append(viz_note)
@@ -716,13 +716,13 @@ class PresetJulien(BasePreset):
         screen_y = self.viz_manager.main_frame.display.size.y
 
         # Create red rectangle of tension
-        tension = util.GetSequentialTension(viz_note, self.notes_played, self.key)
+        tension = util.get_sequential_tension(viz_note, self.notes_played, self.key)
         alpha = tension + 40
         if alpha > 215:
             alpha = 215
         mid_x = screen_x // 3
         mid_y = screen_y // 3
-        color = util.ChangeColorBrightness((30, 0, 0), tension)
+        color = util.change_color_brightness((30, 0, 0), tension)
         rect = unit.RectNoteUnit(mid_x, mid_y, color, None, mid_x, mid_y)
 
         # Adds tension rect to background (i.e. everything else is drawn on top)
@@ -738,11 +738,11 @@ class PresetJulien(BasePreset):
             self.viz_manager.units.append(line)
 
         # use note's dissonance to determine color brightness brightness
-        color2 = util.SimpleNoteToColorTuple(note)
-        dissonance = util.GetDissonanceOfNote(viz_note, self.viz_manager, self.notes_played)
-        color3 = util.ChangeColorBrightness(color2, -dissonance)
+        color2 = util.simple_note_to_color_tuple(note)
+        dissonance = util.get_dissonance_of_note(viz_note, self.viz_manager, self.notes_played)
+        color3 = util.change_color_brightness(color2, -dissonance)
 
-        note_y = util.GraphNoteY(note, self.highest_pitch, self.lowest_pitch, screen_y)
+        note_y = util.graph_note_y(note, self.highest_pitch, self.lowest_pitch, screen_y)
         x_interval = col_wid * (viz_note.track - 1)
         note_x = (x_interval * 2 + col_wid) // 2
 
@@ -780,8 +780,8 @@ class PresetJulien(BasePreset):
 
         # draws rectangles on sides representing the root of the last chord played
         self.notes_played.append(viz_note)
-        recent_notes = util.GetRecentNotes(self.notes_played)
-        chord = util.GetChord(recent_notes)
+        recent_notes = util.get_recent_notes(self.notes_played)
+        chord = util.get_chord(recent_notes)
         chord_name = chord.pitchedCommonName
         s1 = str(chord_name)
         s2 = ""
@@ -799,7 +799,7 @@ class PresetJulien(BasePreset):
             root = self.latest_chord.root()
             note = music21.note.Note(root)
 
-            color = util.ScaleDegreeToColor(note, self.viz_manager.key)
+            color = util.scale_degree_to_color(note, self.viz_manager.key)
             rect_chord = unit.RectChordUnit(0, 0, color, note, screen_x, screen_y, 20)
             rect_chord.id = id(note)
 
