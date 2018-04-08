@@ -189,7 +189,6 @@ class VizManager:
         self.instrument_map = self.parser.instruments
         self.units.clear()
         self.tempo = self.parser.get_tempo()
-        self.tempo = 100.0
         self.notes = util.get_viz_notes(self.parser.score)
         self.key = util.analyze_key(self.parser.score)
         self.main_frame.statusbar.SetStatusText("Key: " + str(self.key), 4)

@@ -501,13 +501,12 @@ def get_pos_on_circle_of_fifths(note, origin, radius, key, quality=None):
         return x, y
 
 
-
-
 #############################################################
 #                                                           #
 #         !!! FOR COMPUTATIONAL MUSIC ANALYSIS!!!           #
 #                                                           #
 #############################################################
+
 
 def get_diatonic_circle_level(note=None):
     """
@@ -592,8 +591,6 @@ def get_dissonance_of_note(note, viz_manager, notes=None):
     dissonance = (convert_pitch_to_circle_position(pitch) - convert_pitch_to_circle_position(root_pitch)) % 12
 
     return distance_from_key + dissonance
-
-
 
 
 def get_chromatic_circle_level(note=None):
@@ -734,11 +731,11 @@ def get_surface_tension(viz_note=None, prev_notes_played=None, scorekey=None):
         ideal_chord = music21.chord.Chord([root_pc, root_pc+2, root_pc+4])
         # Is any pitch class in the ideal
         for x in pc:
-            isNonChord = True
+            is_non_chord = True
             for y in ideal_chord.pitchClasses:
                 if x is y:
-                    isNonChord = False
-            if isNonChord is True:
+                    is_non_chord = False
+            if is_non_chord is True:
                 # Determine if non-chord pitch is diatonic or chromatic
                 index = pc.index(x)
                 pitch = chord.pitches[index]       # get pitch in chord from pitch class

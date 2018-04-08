@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import pygame
 from math import sqrt
+import lepton
 
 
 class BaseUnit:
