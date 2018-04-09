@@ -7,6 +7,7 @@ import src.Utilities as util
 import src.Player as play
 import src.Preset as pr
 import src.MidiParser as mp
+import random
 
 
 class VizManager:
@@ -72,6 +73,8 @@ class VizManager:
         self.last_offset = 0.
 
         self.initialize()
+
+        random.seed()
 
     def initialize(self):
         """

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import pygame
 from math import sqrt
-import lepton
+import src.pyignition.PyIgnition
+import src.pyignition.particles
+import random
 
 
 class BaseUnit:
@@ -76,7 +78,8 @@ class ParticleSpaceUnit(BaseUnit):
     """
     Represents a space where particles are emitted.
     """
-    def __init__(self, x=0, y=0, height=0, width=0, color=None, screen_height=0, screen_width=0):
+
+    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None, screen_width=0, screen_height=0):
         super().__init__(x, y, color)
         self.height = height
         self.width = width
@@ -84,52 +87,41 @@ class ParticleSpaceUnit(BaseUnit):
         self.screen_width = screen_width
         self.is_drawing = False
 
-    def draw(self, screen):
-        from lepton import Particle, ParticleGroup, default_system, domain
-        from lepton.pygame_renderer import FillRenderer
-        from lepton.emitter import StaticEmitter
-        from lepton.controller import Gravity, Lifetime, Movement, Fader, ColorBlender, Bounce, Collector
-
         width = self.screen_width
         height = self.screen_height
 
-        spout_radius = 10
-        spray = StaticEmitter(
-            rate=250,
-            template=Particle(
-                position=(width / 2, 0, 0),
-                velocity=(0, 0, 0)),
-            deviation=Particle(
-                velocity=(2, 15, 2),
-                color=(10, 10, 0)),
-            position=domain.AABox(
-                (width / 2 - spout_radius, 0, -spout_radius),
-                (width / 2 + spout_radius, 0, spout_radius)
-            ),
-            color=[(0, 0, 255), (0, 0, 150), (150, 150, 200), (100, 100, 150)],
-            size=[(1, 2, 0), (2, 2, 0), (2, 3, 0)],
-        )
+        # PyIgnition code for creating a particle effect
+        self.effect = src.pyignition.PyIgnition.ParticleEffect(screen, (x, y), (width, height))
+        self.source = self.effect.CreateSource(pos=(200, 200),
+                                               initspeed=0.2,
+                                               initdirection=0.0,
+                                               initspeedrandrange=0.1,
+                                               initdirectionrandrange=3.1415926,
+                                               particlesperframe=2,
+                                               particlelife=150,
+                                               genspacing=1,
+                                               drawtype=src.pyignition.PyIgnition.DRAWTYPE_CIRCLE,
+                                               colour=(100, 200, 200),
+                                               radius=2,
+                                               length=2,
+                                               imagepath=None)
 
-        radius = width / 3
-        sphere = domain.Sphere((width / 2, height, 0), radius)
-        screen_box = domain.AABox((0, 0, -width), (width, height, width))
 
-        water = ParticleGroup(controllers=[spray], renderer=FillRenderer(screen))
+    def draw(self, screen):
+        # update and redraw the PyIgnition particle effect
+        self.effect.Update()
+        self.effect.Redraw()
 
-        default_system.add_global_controller(
-            Gravity((0, 300, 0)),
-            Movement(),
-            Bounce(sphere, bounce=0.5, friction=0.02),
-            Collector(screen_box, collect_inside=False),
-        )
-        sphere_rect = (width / 2 - radius, height - radius, radius * 2, radius * 2)
-
-        # screen.fill((0, 0, 0))
-        pygame.draw.ellipse(screen, (15, 40, 40), sphere_rect)
-        default_system.draw()
+        if isinstance(self.source, src.pyignition.particles.ParticleSource):
+            self.source.Update()
 
     def update(self):
         pass
+
+
+    def get_color(self, r, g, b, a):
+        """ converts rgba values of 0 - 255 to the equivalent in 0 - 1"""
+        return (r / 255.0, g / 255.0, b / 255.0, a / 255.0)
 
 
 class NoteUnit(BaseUnit):

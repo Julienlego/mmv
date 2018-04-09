@@ -811,11 +811,11 @@ class PresetParticles(BasePreset):
 
     """
     def first_load(self, score):
-        h, w = self.viz_manager.screen.get_size()
-        particles = unit.ParticleSpaceUnit(0, 0, h, w)
+        w, h = self.viz_manager.main_frame.display.size
+        particles = unit.ParticleSpaceUnit(self.viz_manager.screen, 0, 0, w, h)
         self.viz_manager.units.append(particles)
 
     def per_note_on(self, screen, viz_note):
-        h, w = screen.get_size()
-        particles = unit.ParticleSpaceUnit(0, 0, h, w)
+        h, w = self.viz_manager.main_frame.display.size
+        particles = unit.ParticleSpaceUnit(self.viz_manager.screen, 0, 0, h, w)
         self.viz_manager.units.append(particles)
