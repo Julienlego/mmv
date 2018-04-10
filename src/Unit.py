@@ -79,20 +79,15 @@ class ParticleSpaceUnit(BaseUnit):
     Represents a space where particles are emitted.
     """
 
-    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None, screen_width=0, screen_height=0):
+    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None):
         super().__init__(x, y, color)
-        self.height = height
         self.width = width
-        self.screen_height = screen_height
-        self.screen_width = screen_width
+        self.height = height
         self.is_drawing = False
-
-        width = self.screen_width
-        height = self.screen_height
 
         # PyIgnition code for creating a particle effect
         self.effect = src.pyignition.PyIgnition.ParticleEffect(screen, (x, y), (width, height))
-        self.source = self.effect.CreateSource(pos=(200, 200),
+        self.source = self.effect.CreateSource(pos=(x, y),
                                                initspeed=0.2,
                                                initdirection=0.0,
                                                initspeedrandrange=0.1,
@@ -101,7 +96,7 @@ class ParticleSpaceUnit(BaseUnit):
                                                particlelife=150,
                                                genspacing=1,
                                                drawtype=src.pyignition.PyIgnition.DRAWTYPE_CIRCLE,
-                                               colour=(100, 200, 200),
+                                               colour=color,
                                                radius=2,
                                                length=2,
                                                imagepath=None)
@@ -109,8 +104,9 @@ class ParticleSpaceUnit(BaseUnit):
 
     def draw(self, screen):
         # update and redraw the PyIgnition particle effect
-        self.effect.Update()
-        self.effect.Redraw()
+        if self.effect is not None and self.source is not None:
+            self.effect.Update()
+            self.effect.Redraw()
 
         if isinstance(self.source, src.pyignition.particles.ParticleSource):
             self.source.Update()
@@ -118,6 +114,9 @@ class ParticleSpaceUnit(BaseUnit):
     def update(self):
         pass
 
+    def remove_particles(self):
+        self.effect = None
+        self.source = None
 
     def get_color(self, r, g, b, a):
         """ converts rgba values of 0 - 255 to the equivalent in 0 - 1"""

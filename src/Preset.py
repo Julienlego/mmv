@@ -530,16 +530,29 @@ class PresetMultiTrackChordsCircle(BasePreset):
 
             color = util.scale_degree_to_color(note, self.viz_manager.key)
             x, y = util.get_pos_on_circle_of_fifths(note, self.circle_origin, self.circle_radius, self.viz_manager.key, quality)
-            circle_chord = unit.CircleNoteUnit(x, y, color, note, 20)
-            circle_chord.id = id(note)
 
-            the_type = type(circle_chord)
+            particle_unit = unit.ParticleSpaceUnit(screen, x // 2, y // 2, screen_x, screen_y, color)
+            particle_unit.id = id(note)
+
+            the_type = type(particle_unit)
 
             if self.current_chord_unit is not None:
+                self.current_chord_unit.remove_particles()
                 self.viz_manager.remove_unit(note, self.current_chord_unit.id, the_type)
 
-            self.viz_manager.units.append(circle_chord)
-            self.current_chord_unit = circle_chord
+            self.viz_manager.units.append(particle_unit)
+            self.current_chord_unit = particle_unit
+
+            # circle_chord = unit.CircleNoteUnit(x, y, color, note, 20)
+            # circle_chord.id = id(note)
+#
+            # the_type = type(circle_chord)
+#
+            # if self.current_chord_unit is not None:
+            #     self.viz_manager.remove_unit(note, self.current_chord_unit.id, the_type)
+
+            # self.viz_manager.units.append(circle_chord)
+            # self.current_chord_unit = circle_chord
 
     def per_note_off(self, screen, viz_note):
         self.viz_manager.remove_unit(viz_note.note, id(viz_note))
