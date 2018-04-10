@@ -79,11 +79,15 @@ class ParticleSpaceUnit(BaseUnit):
     Represents a space where particles are emitted.
     """
 
-    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None):
+    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None, viz_manager=None):
         super().__init__(x, y, color)
         self.width = width
         self.height = height
         self.is_drawing = False
+        self.death = False
+        self.death_timer = 100
+        self.viz_manager = viz_manager
+        self.id = id(self)
 
         # PyIgnition code for creating a particle effect
         self.effect = src.pyignition.PyIgnition.ParticleEffect(screen, (x, y), (width, height))
@@ -93,14 +97,13 @@ class ParticleSpaceUnit(BaseUnit):
                                                initspeedrandrange=0.1,
                                                initdirectionrandrange=3.1415926,
                                                particlesperframe=2,
-                                               particlelife=150,
+                                               particlelife=100,
                                                genspacing=1,
                                                drawtype=src.pyignition.PyIgnition.DRAWTYPE_CIRCLE,
                                                colour=color,
                                                radius=2,
                                                length=2,
                                                imagepath=None)
-
 
     def draw(self, screen):
         # update and redraw the PyIgnition particle effect
@@ -112,11 +115,15 @@ class ParticleSpaceUnit(BaseUnit):
             self.source.Update()
 
     def update(self):
-        pass
+        if self.death is True:
+            if isinstance(self.source, src.pyignition.particles.ParticleSource):
+                self.source.emitting = False
+            self.death_timer -= 1
+            if self.death_timer <= 0:
+                self.viz_manager.remove_unit(id=id(self))
 
     def remove_particles(self):
-        self.effect = None
-        self.source = None
+        self.death = True
 
     def get_color(self, r, g, b, a):
         """ converts rgba values of 0 - 255 to the equivalent in 0 - 1"""

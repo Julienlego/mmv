@@ -72,6 +72,10 @@ class VizManager:
         # the offset of the last note in the song
         self.last_offset = 0.
 
+        # dictionary of active particle effects. this exists because deleting units with particle effects in them
+        # deletes the particles immediately, and sometimes we want a smooth ending to the effects
+        self.particle_effects = {}
+
         self.initialize()
 
         random.seed()
@@ -346,7 +350,7 @@ class VizManager:
 
                         self.preset.per_note_on(self.screen, n[0])
 
-    def remove_unit(self, note, id=None, the_type=None):
+    def remove_unit(self, note=None, id=None, the_type=None):
         """
         Removes whichever units in the units list that are associated with that note.
         :param note: the note with which to match to a unit
@@ -369,6 +373,9 @@ class VizManager:
                         if type(unit) == the_type:
                             self.units.remove(unit)
                     # print("unit removed. list size: " + str(len(self.units)))
+            elif isinstance(unit, Unit.ParticleSpaceUnit):
+                if unit.id == id:
+                    self.units.remove(unit)
 
     def sort_units(self):
         self.units.sort(key=lambda x: x.layer)

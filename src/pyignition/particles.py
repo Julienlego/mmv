@@ -15,7 +15,7 @@ class Particle:
         self.parent = parent
         self.pos = initpos
         self.velocity = velocity
-        self.life = life
+        self.life = int(life * (random.random() * 0.25 + 0.75))
         self.drawtype = drawtype
         self.colour = colour
         self.radius = radius
@@ -138,6 +138,8 @@ class ParticleSource:
         self.particlecache = []
         self.CreateParticleKeyframe(0, colour=self.colour, radius=self.radius, length=self.length)
         self.curframe = 0
+        # added by us
+        self.emitting = True
 
     def Update(self):
         newvars = interpolate.InterpolateKeyframes(self.curframe, {'pos_x': self.pos[0], 'pos_y': self.pos[1],
@@ -157,7 +159,7 @@ class ParticleSource:
 
         particlesperframe = self.particlesperframe
 
-        if (self.genspacing == 0) or ((self.curframe % self.genspacing) == 0):
+        if (self.genspacing == 0) or ((self.curframe % self.genspacing) == 0) and self.emitting is True:
             for i in range(0, int(particlesperframe)):
                 self.CreateParticle()
 
