@@ -395,6 +395,14 @@ class VizManager:
         else:
             util.print_line_to_panel(dbg, "\nNo song loaded!\n")
 
+    def notes_off(self):
+        for note in self.current_notes:
+            self.player.NoteOff(note[0].note.pitch.midi, note[0].note.volume.velocity)
+
+    def notes_on(self):
+        for note in self.current_notes:
+            self.player.NoteOn(note[0].note.pitch.midi, note[0].note.volume.velocity)
+
     def get_next_id(self):
         id = self.next_id
         self.next_id += 1

@@ -226,6 +226,7 @@ class MainFrame(wx.Frame):
         self.run_viz = filemenu.Append(wx.ID_ANY, 'Play Selected Preset\tCtrl+R', 'Play Viz')
         self.toggle_debug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
         self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Select Preset\tCtrl+P')
+        self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
         self.toggle_play = self.midimenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
         self.select_tracks = self.midimenu.Append(wx.ID_ANY, 'Track Select\tCtrl+T', 'Select instruments for each track')
         self.print_song = self.viewmenu.Append(wx.ID_ANY, 'Print Song', 'Print the currently loaded song to the debug panel')
@@ -249,6 +250,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggle_debug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
+        self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
         self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggle_play)
         self.Bind(wx.EVT_MENU, self.ShowInstrumentSelector, self.select_tracks)
         self.Bind(wx.EVT_MENU, self.PrintSong, self.print_song)
@@ -348,8 +350,10 @@ class MainFrame(wx.Frame):
         if self.vizmanager.preset_loaded:
             self.vizmanager.is_playing = not self.vizmanager.is_playing
             if not self.vizmanager.is_playing:
+                self.vizmanager.notes_off()
                 self.statusbar.SetStatusText(str(self.vizmanager.preset.name + " [PAUSED]"), 1)
             else:
+                self.vizmanager.notes_on()
                 self.statusbar.SetStatusText(str(self.vizmanager.preset.name), 1)
 
     def PrintSong(self, event):
