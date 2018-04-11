@@ -223,7 +223,7 @@ class MainFrame(wx.Frame):
 
         # Create menu items
         self.file_open = filemenu.Append(wx.ID_OPEN, 'Open File\tCtrl+O', 'Open a file')
-        self.run_viz = filemenu.Append(wx.ID_ANY, 'Play Selected Preset\tCtrl+R', 'Play Viz')
+        self.run_viz = filemenu.Append(wx.ID_ANY, 'Load Selected Preset\tCtrl+L', 'Play Viz')
         self.toggle_debug = self.viewmenu.AppendCheckItem(wx.ID_ANY, 'Show Debugger\tCtrl+B', 'Toggle showing the debug box')
         self.ldp = self.viewmenu.Append(wx.ID_ANY, 'Select Preset\tCtrl+P')
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
