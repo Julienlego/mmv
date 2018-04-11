@@ -79,25 +79,24 @@ class ParticleSpaceUnit(BaseUnit):
     Represents a space where particles are emitted.
     """
 
-    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None, viz_manager=None):
+    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None):
         super().__init__(x, y, color)
         self.width = width
         self.height = height
         self.is_drawing = False
         self.death = False
-        self.death_timer = 100
-        self.viz_manager = viz_manager
+        self.death_timer = 50
         self.id = id(self)
 
         # PyIgnition code for creating a particle effect
         self.effect = src.pyignition.PyIgnition.ParticleEffect(screen, (x, y), (width, height))
         self.source = self.effect.CreateSource(pos=(x, y),
-                                               initspeed=0.2,
+                                               initspeed=0.3,
                                                initdirection=0.0,
-                                               initspeedrandrange=0.1,
+                                               initspeedrandrange=0.2,
                                                initdirectionrandrange=3.1415926,
                                                particlesperframe=2,
-                                               particlelife=100,
+                                               particlelife=50,
                                                genspacing=1,
                                                drawtype=src.pyignition.PyIgnition.DRAWTYPE_CIRCLE,
                                                colour=color,
@@ -120,7 +119,7 @@ class ParticleSpaceUnit(BaseUnit):
                 self.source.emitting = False
             self.death_timer -= 1
             if self.death_timer <= 0:
-                self.viz_manager.remove_unit(id=id(self))
+                self.should_delete = True
 
     def remove_particles(self):
         self.death = True

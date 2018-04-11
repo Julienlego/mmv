@@ -520,10 +520,6 @@ class PresetMultiTrackChordsCircle(BasePreset):
             if self.latest_chord is None:
                 self.latest_chord = chord
 
-            root = self.latest_chord.root()
-            note = music21.note.Note(root)
-            # self.viz_manager.remove_unit(note, id(note))
-
             self.latest_chord = chord
             root = self.latest_chord.root()
             note = music21.note.Note(root)
@@ -532,9 +528,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
             color = util.scale_degree_to_color(note, self.viz_manager.key)
             x, y = util.get_pos_on_circle_of_fifths(note, self.circle_origin, self.circle_radius, self.viz_manager.key, quality)
 
-            particle_unit = unit.ParticleSpaceUnit(screen, x // 2, y // 2, screen_x, screen_y, color, self.viz_manager)
-
-            the_type = type(particle_unit)
+            particle_unit = unit.ParticleSpaceUnit(screen, x // 2, y // 2, screen_x, screen_y, color)
 
             if self.current_chord_unit is not None:
                 self.current_chord_unit.remove_particles()
