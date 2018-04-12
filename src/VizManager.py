@@ -147,10 +147,10 @@ class VizManager:
                "are are ellipses; Keyboards are square; Percussions are diamond. Anything else are unfilled circles."
         preset_instrumentgroup = pr.PresetInstrumentGroups(self, "Instrument Groups", text)
 
-        text = "Combines the presets Instrument Group and Tension. Notes fade after they play."
-        preset_complex = pr.PresetJulien(self, "Instruments and Tension", text)
+        text = "Combines the presets Instrument Group, Tension, and Chord Roots. Notes fade after they play."
+        preset_complex = pr.PresetJulien(self, "Instruments, Tension, and Chord Roots", text)
 
-        text = ""
+        text = "Currently tests particle generator within a preset."
         preset_particles = pr.PresetParticles(self, "Particles", text)
 
         # Add the preset to the dictionary!

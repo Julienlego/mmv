@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 import pygame
 from math import sqrt
-import src.pyignition.PyIgnition
-import src.pyignition.particles
-import random
+import pyignition.PyIgnition as ignition
+import pyignition.particles as particles
 
 
 class BaseUnit:
@@ -79,7 +78,7 @@ class ParticleSpaceUnit(BaseUnit):
     Represents a space where particles are emitted.
     """
 
-    def __init__(self, screen, x=0, y=0, width=0, height=0, color=None):
+    def __init__(self, screen, x=0, y=0, width=0, height=0, color=(255, 255, 255), viz_manager=None):
         super().__init__(x, y, color)
         self.width = width
         self.height = height
@@ -89,7 +88,7 @@ class ParticleSpaceUnit(BaseUnit):
         self.id = id(self)
 
         # PyIgnition code for creating a particle effect
-        self.effect = src.pyignition.PyIgnition.ParticleEffect(screen, (x, y), (width, height))
+        self.effect = ignition.ParticleEffect(screen, (x, y), (width, height))
         self.source = self.effect.CreateSource(pos=(x, y),
                                                initspeed=0.3,
                                                initdirection=0.0,
@@ -98,7 +97,7 @@ class ParticleSpaceUnit(BaseUnit):
                                                particlesperframe=2,
                                                particlelife=50,
                                                genspacing=1,
-                                               drawtype=src.pyignition.PyIgnition.DRAWTYPE_CIRCLE,
+                                               drawtype=ignition.DRAWTYPE_CIRCLE,
                                                colour=color,
                                                radius=2,
                                                length=2,
@@ -106,16 +105,16 @@ class ParticleSpaceUnit(BaseUnit):
 
     def draw(self, screen):
         # update and redraw the PyIgnition particle effect
-        if self.effect is not None and self.source is not None:
+        if (self.effect is not None) and (self.source is not None):
             self.effect.Update()
             self.effect.Redraw()
 
-        if isinstance(self.source, src.pyignition.particles.ParticleSource):
+        if isinstance(self.source, particles.ParticleSource):
             self.source.Update()
 
     def update(self):
         if self.death is True:
-            if isinstance(self.source, src.pyignition.particles.ParticleSource):
+            if isinstance(self.source, particles.ParticleSource):
                 self.source.emitting = False
             self.death_timer -= 1
             if self.death_timer <= 0:
@@ -206,7 +205,7 @@ class RectNoteUnit(NoteUnit):
 
 class AlphaRectNoteUnit(RectNoteUnit):
     """
-
+    WIP
     """
     def __init__(self, x, y, color, note, width=0, height=0, alpha=0, fade=False, fade_speed=5, delete_after_fade=False):
         super().__init__(x, y, color, note, fade, fade_speed, delete_after_fade)
