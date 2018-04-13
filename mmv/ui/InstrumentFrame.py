@@ -6,7 +6,7 @@ import wx
 from util.Constants import INSTRUMENTS
 
 
-class InstrumentFrame(wx.Frame):
+class InstrumentFrame(wx.Dialog):
     """
 
     """

@@ -100,7 +100,7 @@ class PresetSimpleColorCircleRelative(BasePreset):
         self.viz_manager.units.append(circle)
 
     def per_note_off(self, screen, message):
-        self.viz_manager.remove_unit(message.note)
+        self.viz_manager.remove_unit(message.note, id(message))
 
 
 class PresetSimpleColorCircleMaxPitch(BasePreset):
@@ -534,7 +534,7 @@ class PresetMultiTrackChordsCircle(BasePreset):
                 # self.viz_manager.remove_unit(note, self.current_chord_unit.id, the_type)
 
             self.viz_manager.units.append(particle_unit)
-            self.viz_manager.particle_effects.update({id(particle_unit): particle_unit.source})
+            self.viz_manager.particle_effects.Update({id(particle_unit): particle_unit.source})
 
             self.current_chord_unit = particle_unit
 

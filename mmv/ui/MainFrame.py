@@ -12,6 +12,7 @@ import mmv.ui.PygameDisplay as pyf
 import mmv.ui.PresetDialog as prf
 import mmv.core.VizManager as vm
 import mmv.ui.InstrumentFrame as isf
+import mmv.util.Utilities as util
 
 
 class MainFrame(wx.Frame):
@@ -41,7 +42,7 @@ class MainFrame(wx.Frame):
         self.fullscreen = self.viewmenu.Append(wx.ID_ANY, "Fullscreen\tCtrl+F", "Fullscreen")
         self.toggle_play = self.midimenu.Append(wx.ID_ANY, 'Play/Pause\tSpace', 'Play/Pause the visualization')
         self.select_tracks = self.midimenu.Append(wx.ID_ANY, 'Track Select\tCtrl+T', 'Select instruments for each track')
-        self.print_song = self.viewmenu.Append(wx.ID_ANY, 'Print Song', 'Print the currently loaded song to the debug panel')
+        self.print_songz = self.viewmenu.Append(wx.ID_ANY, 'Print Song', 'Print the currently loaded song to the debug panel')
 
         # Create status bar
         self.statusbar = self.CreateStatusBar()
@@ -56,16 +57,16 @@ class MainFrame(wx.Frame):
         menubar.Append(self.midimenu, '&MIDI')
 
         # Bind everything!
-        self.Bind(wx.EVT_MENU, self.OnQuit)
-        self.Bind(wx.EVT_MENU, self.OpenFile, self.file_open)
-        self.Bind(wx.EVT_MENU, self.PlayVisualization, self.run_viz)
-        self.Bind(wx.EVT_MENU, self.ToggleDebugBox, self.toggle_debug)
+        self.Bind(wx.EVT_MENU, self.on_quit)
+        self.Bind(wx.EVT_MENU, self.load_file, self.file_open)
+        self.Bind(wx.EVT_MENU, self.play_visualization, self.run_viz)
+        self.Bind(wx.EVT_MENU, self.toggle_debugbox, self.toggle_debug)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_MENU, self.LoadSelectedPreset, self.ldp)
-        self.Bind(wx.EVT_MENU, self.ToggleFullscreen, self.fullscreen)
-        self.Bind(wx.EVT_MENU, self.TogglePlay, self.toggle_play)
-        self.Bind(wx.EVT_MENU, self.ShowInstrumentSelector, self.select_tracks)
-        self.Bind(wx.EVT_MENU, self.PrintSong, self.print_song)
+        self.Bind(wx.EVT_MENU, self.load_selected_preset, self.ldp)
+        self.Bind(wx.EVT_MENU, self.toggle_fullscreen, self.fullscreen)
+        self.Bind(wx.EVT_MENU, self.toggle_playing, self.toggle_play)
+        self.Bind(wx.EVT_MENU, self.show_instrument_selector, self.select_tracks)
+        self.Bind(wx.EVT_MENU, self.print_song, self.print_songz)
 
         # Add panels to sizer and set to panel
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -78,7 +79,7 @@ class MainFrame(wx.Frame):
         self.Centre()
         self.Show(True)
 
-    def OnQuit(self, event):
+    def on_quit(self, event):
         """
         Called when the program exits.
         """
@@ -95,28 +96,30 @@ class MainFrame(wx.Frame):
         self.Layout()
         self.vizmanager.units.clear()
 
-    def OpenFile(self, event):
+    def load_file(self, event):
         """
-        Opens a file explorer to select a midi file and loads it
+        Opens a file explorer to select a midi file and loads it to the vizmanager
         """
         wildcard = "MIDI file (*.mid)|*.mid"  # only .mid files
         dialog = wx.FileDialog(None, "Choose a file", os.getcwd(), "", wildcard, wx.ID_OPEN)
 
         if dialog.ShowModal() == wx.ID_OK:
-            self.statusbar.SetStatusText(dialog.GetPath(), 0)
-            self.vizmanager.load_song_from_path(dialog.GetPath())
+            selection = dialog.GetPath()
+            self.statusbar.SetStatusText(selection, 0)
+            self.vizmanager.load_song_from_path(selection)
 
         dialog.Destroy()
 
-    def LoadSelectedPreset(self, event):
+    def load_selected_preset(self, event):
         """
-        Load selected preset from the submenu
+        Load selected preset from the preset dialog.
         """
         frame = prf.PresetDialog(self, "Select a preset to load", list(self.vizmanager.presets.keys()))
         frame.Show(True)
         frame.Centre()
+        self.clear_display()
 
-    def ToggleDebugBox(self, event):
+    def toggle_debugbox(self, event):
         """
         Shows/Hides the debug textbox
         """
@@ -136,7 +139,7 @@ class MainFrame(wx.Frame):
                 self.debugger.isEnabled = False
                 self.debugger.Hide()
 
-    def ShowInstrumentSelector(self, event):
+    def show_instrument_selector(self, event):
         """
         Open the track selector dialog box
         """
@@ -144,7 +147,7 @@ class MainFrame(wx.Frame):
         frame.Show(True)
         frame.Center()
 
-    def PlayVisualization(self, event):
+    def play_visualization(self, event):
         """
         Plays the whatever preset and song are currently loaded.
         """
@@ -155,7 +158,7 @@ class MainFrame(wx.Frame):
         else:
             self.vizmanager.play_preset()
 
-    def TogglePlay(self, event):
+    def toggle_playing(self, event):
         """
         Toggles the is_playing attribute of the VizManager
         """
@@ -168,20 +171,38 @@ class MainFrame(wx.Frame):
                 self.vizmanager.notes_on()
                 self.statusbar.SetStatusText(str(self.vizmanager.preset.name), 1)
 
-    def PrintSong(self, event):
+    def print_song(self, event):
         """
         Prints the song to the debug box through vizmanager
         """
-        self.vizmanager.print_song()
+        dbg = self.debugger.textbox
+        notes = self.vizmanager.notes
 
-    def PauseVisualization(self, event):
+        if notes:
+
+            # Prints all notes/rests in part to debug panel
+            util.print_line_to_panel(dbg, "\nNote/Rest\tOctave\tLen\tOffset\n")
+            for n in notes:
+                util.print_note_to_panel(dbg, n.note)
+            util.print_line_to_panel(dbg, "\n\n===============================")
+        else:
+            util.print_line_to_panel(dbg, "\nNo song loaded!\n")
+
+    def pause_viz(self, event):
         """
         Pauses whatever visualization is running, if any.
         """
         pass
 
-    def ToggleFullscreen(self, event):
+    def toggle_fullscreen(self, event):
         """
         Toggle fullscreen display
         """
-        self.display.ToggleFullscreen(event)
+        self.display.toggle_fullscreen(event)
+
+    def clear_display(self):
+        """
+        Clears the pygame display.
+        """
+        self.vizmanager.units.clear()
+        self.display.screen.fill((0, 0, 0))

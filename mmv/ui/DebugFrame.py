@@ -5,7 +5,7 @@
 import wx
 
 
-class DebugFrame(wx.Frame):
+class DebugFrame(wx.Dialog):
     """
     Debug frame with textbox to display info relevant to the preset.
     """

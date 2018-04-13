@@ -380,21 +380,6 @@ class VizManager:
     def sort_units(self):
         self.units.sort(key=lambda x: x.layer)
 
-    def print_song(self):
-
-        inst = self.player.instruments
-
-        dbg = self.main_frame.debugger.textbox
-        if self.notes:
-
-            # Prints all notes/rests in part to debug panel
-            util.print_line_to_panel(dbg, "\nNote/Rest\tOctave\tLen\tOffset\n")
-            for n in self.notes:
-                util.print_note_to_panel(dbg, n.note)
-            util.print_line_to_panel(dbg, "\n\n===============================")
-        else:
-            util.print_line_to_panel(dbg, "\nNo song loaded!\n")
-
     def notes_off(self):
         for note in self.current_notes:
             self.player.NoteOff(note[0].note.pitch.midi, note[0].note.volume.velocity)

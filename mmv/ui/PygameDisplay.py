@@ -21,9 +21,9 @@ class PygameDisplay(wx.Window):
         self.size = self.GetSize()
 
         self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_PAINT, self.on_paint)
         self.Bind(wx.EVT_TIMER, self.update, self.timer)
-        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_SIZE, self.on_size)
 
         self.viz_manager = None
 
@@ -57,23 +57,23 @@ class PygameDisplay(wx.Window):
 
         pygame.display.update()
 
-    def OnPaint(self, event):
+    def on_paint(self, event):
         self.redraw()
 
-    def OnSize(self, event):
+    def on_size(self, event):
         # self.screen.fill((0, 0, 0))
         self.size = self.GetSize()
 
-    def ToggleFullscreen(self, event):
+    def toggle_fullscreen(self, event):
         """
 
         """
         pass
 
-    def Kill(self, event):
+    def kill(self, event):
         # Make sure Pygame can't be asked to redraw /before/ quitting by unbinding all methods which
         # call the Redraw() method
         # (Otherwise wx seems to call Draw between quitting Pygame and destroying the frame)
-        self.Unbind(event=wx.EVT_PAINT, handler=self.OnPaint)
+        self.Unbind(event=wx.EVT_PAINT, handler=self.on_paint)
         self.Unbind(event=wx.EVT_TIMER, handler=self.update, source=self.timer)
         pygame.quit()
