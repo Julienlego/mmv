@@ -117,7 +117,6 @@ class MainFrame(wx.Frame):
         frame = prf.PresetDialog(self, "Select a preset to load", list(self.vizmanager.presets.keys()))
         frame.Show(True)
         frame.Centre()
-        self.clear_display()
 
     def toggle_debugbox(self, event):
         """
@@ -156,7 +155,7 @@ class MainFrame(wx.Frame):
         elif self.vizmanager.parser.is_empty() is True:
             wx.MessageBox("No midi file was selected", "Missing File!", wx.OK | wx.ICON_ERROR)
         else:
-            self.vizmanager.play_preset()
+            self.vizmanager.load_preset()
 
     def toggle_playing(self, event):
         """

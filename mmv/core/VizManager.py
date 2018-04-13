@@ -205,10 +205,14 @@ class VizManager:
         self.main_frame.statusbar.SetStatusText("Tempo: " + str(self.tempo) + " bpm", 2)
         bsy = None
 
-    def play_preset(self):
+    def load_preset(self):
         """
-        Starts playing the visualization from the beginning.
+        Loads the currently selected preset. Calls its on_first_load function.
         """
+        # clears all current units
+        self.units.clear()
+        self.screen.fill((0, 0, 0))
+
         bsy = wx.BusyInfo("Initial Loading...")
         self.preset.first_load(self.parser.score)
         bsy = None
