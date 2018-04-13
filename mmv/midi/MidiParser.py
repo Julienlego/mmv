@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import music21
-import src.Utilities as util
+from music21 import midi, exceptions21
+from util.Constants import INSTRUMENTS
 
 
 class MidiParser:
@@ -23,7 +23,7 @@ class MidiParser:
         Reads file at given path, if possible, and returns a music21 Score object.
         """
         self.path = path
-        self.score = music21.midi.translate.midiFilePathToStream(path)
+        self.score = midi.translate.midiFilePathToStream(path)
         self.get_instruments()
         return self.score
 
@@ -48,7 +48,7 @@ class MidiParser:
             if note.quarterLength > 0.0:
                 try:
                     seconds = note.seconds
-                except music21.exceptions21.Music21Exception:
+                except exceptions21.Music21Exception:
                     seconds = None
                 if seconds is not None:
                     quarter_length = note.quarterLength
@@ -86,8 +86,8 @@ class MidiParser:
             instr = part.getInstrument(returnDefault=False)     # extract instrument obj from part
             i = 0       # default instrument
             if instr is not None:
-                if instr.instrumentName in util.instruments:
-                    i = util.instruments[instr.instrumentName]      # get midi val of instrument
+                if instr.instrumentName in INSTRUMENTS:
+                    i = INSTRUMENTS[instr.instrumentName]      # get midi val of instrument
                 j = list(self.score.parts).index(part)       # track index
                 # print("Track {0} has midi instrument {1}".format(j, i))
                 self.instruments[j] = i

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import pygame
 import music21
-import src.Utilities as util
-import src.Unit as unit
+import util.Utilities as util
 import math
-
+import mmv.core.Unit as unit
 
 class BasePreset:
     """

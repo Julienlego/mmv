@@ -2,11 +2,11 @@
 import wx
 import pygame
 import pygame.midi
-import src.Unit as Unit
-import src.Utilities as util
-import src.Player as play
-import src.Preset as pr
-import src.MidiParser as mp
+import mmv.core.Unit as Unit
+import util.Utilities as util
+import mmv.midi.Player as play
+import mmv.core.Preset as pr
+import mmv.midi.MidiParser as mp
 import random
 
 
