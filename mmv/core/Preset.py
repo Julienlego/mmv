@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pygame
 import music21
-import util.Utilities as util
+import mmv.util.Utilities as util
 import math
 import mmv.core.Unit as unit
 
@@ -95,12 +95,13 @@ class PresetSimpleColorCircleRelative(BasePreset):
         y = util.graph_note_y(viz_note, self.highest_pitch, self.lowest_pitch, screen_y)
         r = int(viz_note.note.volume.velocity) // 2
         circle = unit.CircleNoteUnit(screen_x // 2, 0, color, viz_note, r)
+        circle.id = id(viz_note)
         circle = util.create_unit_in_center_of_quadrant(circle, (0, 0), (screen_x, screen_y))
         circle.y = y
         self.viz_manager.units.append(circle)
 
-    def per_note_off(self, screen, message):
-        self.viz_manager.remove_unit(message.note, id(message))
+    def per_note_off(self, screen, viz_note):
+        self.viz_manager.remove_unit(viz_note.note, id(viz_note))
 
 
 class PresetSimpleColorCircleMaxPitch(BasePreset):
@@ -534,7 +535,6 @@ class PresetMultiTrackChordsCircle(BasePreset):
                 # self.viz_manager.remove_unit(note, self.current_chord_unit.id, the_type)
 
             self.viz_manager.units.append(particle_unit)
-            self.viz_manager.particle_effects.Update({id(particle_unit): particle_unit.source})
 
             self.current_chord_unit = particle_unit
 
