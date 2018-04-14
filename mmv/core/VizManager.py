@@ -279,7 +279,7 @@ class VizManager:
                     self.preset.per_note_off(self.screen, n[0])
                     self.current_notes.remove(n)
 
-        if self.next_notes is not None:
+        if self.next_notes is not None and len(self.next_notes) > 0:
             if ticks >= self.next_notes[0][1]:
                 # move next_notes to current_notes
                 for n in self.next_notes:

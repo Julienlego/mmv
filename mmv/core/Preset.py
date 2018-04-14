@@ -717,6 +717,14 @@ class PresetJulien(BasePreset):
         self.num_tracks = len(score.parts)
         self.lowest_pitch, self.highest_pitch = util.get_edge_pitches(score)
 
+        # Add track divider lines
+        screen_x = self.viz_manager.main_frame.display.size.x
+        screen_y = self.viz_manager.main_frame.display.size.y
+        col_wid = screen_x // self.num_tracks
+        for i in range(0, screen_x, col_wid):
+            line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
+            self.viz_manager.units.append(line)
+
     def per_note_on(self, screen, viz_note):
         self.notes_played.append(viz_note)
         note = viz_note.note
@@ -739,11 +747,7 @@ class PresetJulien(BasePreset):
         self.viz_manager.sort_units()
         # self.notes_played.append(viz_note)
 
-        # Add track divider lines
         col_wid = screen_x // self.num_tracks
-        for i in range(0, screen_x, col_wid):
-            line = unit.LineUnit(i, 0, i, screen_y, (255, 255, 255), 1)
-            self.viz_manager.units.append(line)
 
         # use note's dissonance to determine color brightness brightness
         color2 = util.simple_note_to_color_tuple(note)
