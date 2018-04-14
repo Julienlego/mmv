@@ -1,14 +1,13 @@
 #!/usr/bin/env python
+"""
+This class is responsible for reading a given compatible MIDI file and
+storing it in memory as a MidiBlock object.
+"""
 from music21 import midi, exceptions21
 from util.Constants import INSTRUMENTS
 
 
 class MidiParser:
-    """
-    This class is responsible for reading a given compatible MIDI file and
-    storing it in memory as a MidiBlock object.
-
-    """
 
     def __init__(self):
         # Path of the song loaded, default is empty string.

@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-import music21, time, pygame, pygame.midi
+"""
+
+"""
+import pygame.midi
 
 
 class Player:
-    """
 
-    """
     def __init__(self):
         pygame.midi.init()
         self.__player = pygame.midi.Output(0)
@@ -19,7 +20,7 @@ class Player:
         self.__player.close()
         pygame.midi.quit()
 
-    def SetInstrument(self, instrument_id=0, channel=0):
+    def set_instrument(self, instrument_id=0, channel=0):
         self.__player.set_instrument(instrument_id, channel)
 
     def NoteOn(self, midi_note=0, velocity=0, channel=0):

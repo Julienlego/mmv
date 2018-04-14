@@ -7,9 +7,7 @@ from util.Constants import INSTRUMENTS
 
 
 class InstrumentFrame(wx.Dialog):
-    """
 
-    """
     def __init__(self, parent, title):
         super().__init__(parent, title=title, size=(500, 300))
         self.parent = parent

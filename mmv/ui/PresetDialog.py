@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 """
-
+Dialog to browse and select a preset to load to the system.
 """
 import wx
 
 
 class PresetDialog(wx.Frame):
-    """
-    Dialog to browse and select a preset to load to the system.
-    """
+
     def __init__(self, parent, title, presets):
         super().__init__(parent, title=title, size=(600, 250))
         self.lst_presets = presets

@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""
+This class manages the entire visualization system, including
+midi parsing and all the presets.
+"""
 import wx
 import pygame
 import pygame.midi
@@ -8,13 +12,10 @@ import mmv.midi.Player as play
 import mmv.core.Preset as pr
 import mmv.midi.MidiParser as mp
 import random
+import mmv.util.MusicComp as muse
 
 
 class VizManager:
-    """
-    This class manages the entire visualization system, including
-    midi parsing and all the presets.
-    """
 
     def __init__(self, main_frame, screen):
         # Preset that is currently loaded
@@ -197,7 +198,7 @@ class VizManager:
         self.units.clear()
         self.tempo = self.parser.get_tempo()
         self.notes = util.get_viz_notes(self.parser.score)
-        self.key = util.analyze_key(self.parser.score)
+        self.key = muse.analyze_key(self.parser.score)
         self.main_frame.statusbar.SetStatusText("Key: " + str(self.key), 4)
 
         # Print track instruments to debugger
@@ -344,12 +345,12 @@ class VizManager:
                         instrument = self.instrument_map[track - 1]
                         if instrument < 130:
                             if instrument > 0:
-                                self.player.SetInstrument(instrument - 1)
+                                self.player.set_instrument(instrument - 1)
                             else:
-                                self.player.SetInstrument(instrument)
+                                self.player.set_instrument(instrument)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity)
                         else:       # if instrument is not 1-129
-                            self.player.SetInstrument(20, 10)
+                            self.player.set_instrument(20, 10)
                             self.player.NoteOn(n[0].note.pitch.midi, n[0].note.volume.velocity, channel=10)
 
                         self.preset.per_note_on(self.screen, n[0])

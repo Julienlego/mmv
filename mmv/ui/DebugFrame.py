@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 """
-
+    Debug frame with textbox to display info relevant to the preset.
 """
 import wx
 
 
 class DebugFrame(wx.Dialog):
-    """
-    Debug frame with textbox to display info relevant to the preset.
-    """
+
     def __init__(self, parent, title):
         super().__init__(parent, title=title, size=(300, 400))
         self.parent = parent

@@ -2,7 +2,10 @@
 """
 
 """
-import wx, pygame, os, sys
+import wx
+import pygame
+import os
+import sys
 
 
 class PygameDisplay(wx.Window):

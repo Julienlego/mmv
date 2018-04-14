@@ -1,4 +1,6 @@
+"""
 
+"""
 
 INSTRUMENTS = {
     "Piano": 1,

@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+This is the base representation of a graphical object in a visualization preset. This could be a line, a shaded box,
+or something that represents a note being played.
+
+Some objects are just wrappers for pygame.draw functions that are used in a preset.
+Some objects represent a note as some sort of shape (e.x a colored rectangle).
+
+Every object/unit MUST be added to vizmanager so it can actually be drawn on the pygame screen.
+"""
 import pygame
 from math import sqrt
 import pyignition.PyIgnition as ignition
@@ -6,15 +15,7 @@ import pyignition.particles as particles
 
 
 class BaseUnit:
-    """
-    This is the base representation of a graphical object in a visualization preset. This could be a line, a shaded box,
-    or something that represents a note being played.
 
-    Some objects are just wrappers for pygame.draw functions that are used in a preset.
-    Some objects represent a note as some sort of shape (e.x a colored rectangle).
-
-    Every object/unit MUST be added to vizmanager so it can actually be drawn on the pygame screen.
-    """
     def __init__(self, x=0, y=0, color=None):
         self.x = x
         self.y = y

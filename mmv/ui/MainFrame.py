@@ -83,7 +83,7 @@ class MainFrame(wx.Frame):
         """
         Called when the program exits.
         """
-        self.display.Kill(event)
+        self.display.kill(event)
         self.Close()
         self.Destroy()
         pygame.quit()
