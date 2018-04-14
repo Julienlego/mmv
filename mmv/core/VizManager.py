@@ -323,7 +323,7 @@ class VizManager:
 
                 # if we have reached the last note(s), set next_notes to none so we know not to keep checking for more
                 else:
-                    self.next_notes = None
+                    self.next_notes.clear()
 
                 # set the ticks length of each current note and
                 # play the note and draw it to the screen (via preset)
