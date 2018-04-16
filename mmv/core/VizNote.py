@@ -9,14 +9,14 @@ import music21
 class VizNote:
 
     def __init__(self, note):
+        self.chord_in_beat = None
+        self.chord_in_half_bar = None
+        self.chord_in_bar = None
+
         if isinstance(note, music21.note.Note):
             self.note = note
         else:
             self.note = None
 
         self.track = -1
-
-        self.chord_in_beat = None
-        self.chord_in_half_bar = None
-        self.chord_in_bar = None
 

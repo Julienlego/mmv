@@ -20,14 +20,13 @@ class DebugFrame(wx.Dialog):
         sizer.Add(self.textbox, proportion=1, flag=wx.EXPAND, border=2)
         panel.SetSizer(sizer)
 
-    def WriteLine(self, line):
+    def write_lane(self, line):
         """
         Writes line to the text-box.
         """
         self.textbox.AppendText(str(line))
 
-    def OnClose(self):
+    def on_close(self):
         self.parent.viewmenu.Check(self.parent.toggledebug.GetId(), False)
         self.Close()
         self.Destroy()
-
